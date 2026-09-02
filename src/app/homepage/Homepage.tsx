@@ -3,10 +3,10 @@ import { MOCK_PROPERTIES } from "@/data/properties";
 import PropertyCard from "@/components/PropertyCard";
 import { CATEGORIES } from "@/data/categories";
 import Link from "next/link";
-import { Home, Building, Building2, MapPin, Briefcase, Warehouse, Trees } from "lucide-react";
+import { HomeIcon, Building, Building2, MapPin, Briefcase, Warehouse, Trees } from "lucide-react";
 
 const icons: Record<string, React.ElementType> = {
-  houses: Home,
+  houses: HomeIcon, // <-- Make sure this says HomeIcon, NOT Home
   apartments: Building,
   villas: Building2,
   plots: MapPin,
