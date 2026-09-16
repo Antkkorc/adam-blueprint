@@ -3,9 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { User as SupabaseUser } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabase/client";
 import { BRAND } from "@/lib/brand";
+import { supabase } from "@/lib/supabase/client";
 import {
   Menu as MenuIcon,
   X,
@@ -17,13 +16,13 @@ import {
   Info,
   LogIn,
   Heart,
+  Settings,
   LogOut,
-  Shield,
 } from "lucide-react";
 
-export default function Header() {
+export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [user, setUser] = useState<SupabaseUser | null | undefined>(undefined);
+  const [user, setUser] = useState<any>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -47,8 +46,11 @@ export default function Header() {
     router.refresh();
   };
 
+  const whatsappNumber = BRAND.phone?.replace(/[^0-9]/g, "") || "26770000000";
+
   return (
     <>
+      {/* Navigation Header Bar */}
       <header className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-[#070b15]">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -58,22 +60,17 @@ export default function Header() {
               aria-label="Open menu"
             >
               <MenuIcon className="w-5 h-5" />
-              <span className="text-[8px] font-extrabold tracking-wider uppercase mt-0.5">
-                Menu
-              </span>
+              <span className="text-[8px] font-extrabold tracking-wider uppercase mt-0.5">MENU</span>
             </button>
 
-            <Link
-              href="/"
-              className="font-extrabold text-xl text-cyan-400 tracking-wider uppercase"
-            >
+            <Link href="/" className="font-extrabold text-xl text-cyan-400 tracking-wider uppercase">
               {BRAND.name}
             </Link>
           </div>
 
           <div className="flex items-center gap-3">
             <a
-              href={`https://wa.me/${BRAND.whatsapp}`}
+              href={`https://wa.me/${whatsappNumber}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-slate-950 transition-all text-xs font-semibold"
@@ -83,9 +80,8 @@ export default function Header() {
             </a>
 
             <Link
-              href={user ? "/saved" : "/login"}
+              href={user ? "/admin" : "/login"}
               className="p-2 rounded-full border border-cyan-500/40 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500 hover:text-slate-950 transition-all flex items-center justify-center"
-              aria-label={user ? "Saved properties" : "Login"}
             >
               <User className="w-5 h-5" />
             </Link>
@@ -93,6 +89,7 @@ export default function Header() {
         </div>
       </header>
 
+      {/* Dark Overlay Backdrop */}
       {isMenuOpen && (
         <div
           className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 transition-opacity"
@@ -100,134 +97,128 @@ export default function Header() {
         />
       )}
 
+      {/* Sideways Drawer Panel */}
       <aside
         style={{
           position: "fixed",
           top: 0,
           left: 0,
           bottom: 0,
-          width: "300px",
+          width: "320px",
           maxWidth: "85vw",
-          backgroundColor: "#050811",
+          backgroundColor: "#070b15",
           zIndex: 60,
           transform: isMenuOpen ? "translateX(0)" : "translateX(-100%)",
           transition: "transform 300ms cubic-bezier(0.4, 0, 0.2, 1)",
-          boxShadow: "10px 0 25px rgba(0,0,0,0.6)",
+          boxShadow: "10px 0 25px rgba(0,0,0,0.5)",
         }}
-        className="border-r border-slate-800/80 flex flex-col p-6 overflow-hidden"
+        className="border-r border-slate-800 flex flex-col p-6 overflow-hidden"
       >
         <div className="flex items-center justify-between pb-6 mb-2 border-b border-slate-800/80">
-          <Link
-            href="/"
-            onClick={() => setIsMenuOpen(false)}
-            className="font-extrabold text-2xl text-cyan-400 tracking-wider"
-          >
+          <Link href="/" onClick={() => setIsMenuOpen(false)} className="font-extrabold text-xl text-cyan-400 tracking-wider">
             {BRAND.name}
           </Link>
-
           <button
             onClick={() => setIsMenuOpen(false)}
-            className="p-2 rounded-full bg-slate-900/80 border border-slate-800 text-slate-400 hover:text-white transition-colors"
-            aria-label="Close menu"
+            className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <nav className="grow overflow-y-auto space-y-2 py-4">
+        <nav className="flex-grow overflow-y-auto space-y-1 py-4">
           <Link
             href="/"
             onClick={() => setIsMenuOpen(false)}
-            className="flex items-center gap-4 px-3 py-2.5 rounded-xl text-slate-100 hover:text-cyan-400 hover:bg-slate-900/60 transition-all text-base font-semibold"
+            className="flex items-center gap-4 px-3 py-3 rounded-xl text-slate-200 hover:text-cyan-400 hover:bg-slate-900 transition-all text-sm font-medium"
           >
-            <Home className="w-5 h-5 text-cyan-400 shrink-0" />
+            <Home className="w-5 h-5 text-cyan-400" />
             Home
           </Link>
 
           <Link
             href="/buy"
             onClick={() => setIsMenuOpen(false)}
-            className="flex items-center gap-4 px-3 py-2.5 rounded-xl text-slate-100 hover:text-cyan-400 hover:bg-slate-900/60 transition-all text-base font-semibold"
+            className="flex items-center gap-4 px-3 py-3 rounded-xl text-slate-200 hover:text-cyan-400 hover:bg-slate-900 transition-all text-sm font-medium"
           >
-            <Building className="w-5 h-5 text-cyan-400 shrink-0" />
+            <Home className="w-5 h-5 text-cyan-400" />
             Buy Property
           </Link>
 
           <Link
             href="/rent"
             onClick={() => setIsMenuOpen(false)}
-            className="flex items-center gap-4 px-3 py-2.5 rounded-xl text-slate-100 hover:text-cyan-400 hover:bg-slate-900/60 transition-all text-base font-semibold"
+            className="flex items-center gap-4 px-3 py-3 rounded-xl text-slate-200 hover:text-cyan-400 hover:bg-slate-900 transition-all text-sm font-medium"
           >
-            <Building className="w-5 h-5 text-cyan-400 shrink-0" />
+            <Home className="w-5 h-5 text-cyan-400" />
             Rent Property
           </Link>
 
           <Link
             href="/sell"
             onClick={() => setIsMenuOpen(false)}
-            className="flex items-center gap-4 px-3 py-2.5 rounded-xl text-slate-100 hover:text-cyan-400 hover:bg-slate-900/60 transition-all text-base font-semibold"
+            className="flex items-center gap-4 px-3 py-3 rounded-xl text-slate-200 hover:text-cyan-400 hover:bg-slate-900 transition-all text-sm font-medium"
           >
-            <Tag className="w-5 h-5 text-cyan-400 shrink-0" />
+            <Home className="w-5 h-5 text-cyan-400" />
             Sell / Valuation
           </Link>
 
           <Link
             href="/about"
             onClick={() => setIsMenuOpen(false)}
-            className="flex items-center gap-4 px-3 py-2.5 rounded-xl text-slate-100 hover:text-cyan-400 hover:bg-slate-900/60 transition-all text-base font-semibold"
+            className="flex items-center gap-4 px-3 py-3 rounded-xl text-slate-200 hover:text-cyan-400 hover:bg-slate-900 transition-all text-sm font-medium"
           >
-            <Info className="w-5 h-5 text-cyan-400 shrink-0" />
+            <Home className="w-5 h-5 text-cyan-400" />
             About Us
           </Link>
 
           <Link
             href="/contact"
             onClick={() => setIsMenuOpen(false)}
-            className="flex items-center gap-4 px-3 py-2.5 rounded-xl text-slate-100 hover:text-cyan-400 hover:bg-slate-900/60 transition-all text-base font-semibold"
+            className="flex items-center gap-4 px-3 py-3 rounded-xl text-slate-200 hover:text-cyan-400 hover:bg-slate-900 transition-all text-sm font-medium"
           >
-            <PhoneCall className="w-5 h-5 text-cyan-400 shrink-0" />
+            <Home className="w-5 h-5 text-cyan-400" />
             Contact
           </Link>
 
-          {user && (
+          {/* Dynamic Menu Auth Items */}
+          {!user ? (
+            <Link
+              href="/login"
+              onClick={() => setIsMenuOpen(false)}
+              className="flex items-center gap-4 px-3 py-3 rounded-xl text-slate-200 hover:text-cyan-400 hover:bg-slate-900 transition-all text-sm font-medium"
+            >
+              <LogIn className="w-5 h-5 text-cyan-400" />
+              Login / Sign Up
+            </Link>
+          ) : (
             <>
               <Link
                 href="/saved"
                 onClick={() => setIsMenuOpen(false)}
-                className="flex items-center gap-4 px-3 py-2.5 rounded-xl text-slate-100 hover:text-cyan-400 hover:bg-slate-900/60 transition-all text-base font-semibold"
+                className="flex items-center gap-4 px-3 py-3 rounded-xl text-slate-200 hover:text-cyan-400 hover:bg-slate-900 transition-all text-sm font-medium"
               >
-                <Heart className="w-5 h-5 text-cyan-400 shrink-0" />
+                <Heart className="w-5 h-5 text-cyan-400" />
                 Saved Properties
               </Link>
 
               <Link
                 href="/admin"
                 onClick={() => setIsMenuOpen(false)}
-                className="flex items-center gap-4 px-3 py-2.5 rounded-xl text-slate-100 hover:text-cyan-400 hover:bg-slate-900/60 transition-all text-base font-semibold"
+                className="flex items-center gap-4 px-3 py-3 rounded-xl text-slate-200 hover:text-cyan-400 hover:bg-slate-900 transition-all text-sm font-medium"
               >
-                <Shield className="w-5 h-5 text-cyan-400 shrink-0" />
-                Admin
+                <Settings className="w-5 h-5 text-cyan-400" />
+                Settings
               </Link>
 
               <button
                 onClick={handleSignOut}
-                className="w-full text-left flex items-center gap-4 px-3 py-2.5 rounded-xl text-slate-100 hover:text-red-400 hover:bg-red-500/10 transition-all text-base font-semibold"
+                className="w-full text-left flex items-center gap-4 px-3 py-3 rounded-xl text-slate-200 hover:text-red-400 hover:bg-red-500/10 transition-all text-sm font-medium"
               >
-                <LogOut className="w-5 h-5 text-cyan-400 shrink-0" />
+                <LogOut className="w-5 h-5 text-cyan-400" />
                 Logout
               </button>
             </>
-          )}
-
-          {user === null && (
-            <Link
-              href="/login"
-              onClick={() => setIsMenuOpen(false)}
-              className="flex items-center gap-4 px-3 py-2.5 rounded-xl text-slate-100 hover:text-cyan-400 hover:bg-slate-900/60 transition-all text-base font-semibold"
-            >
-              <LogIn className="w-5 h-5 text-cyan-400 shrink-0" />
-              Login / Sign Up
-            </Link>
           )}
         </nav>
       </aside>

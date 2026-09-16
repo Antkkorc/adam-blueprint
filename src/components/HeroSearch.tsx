@@ -1,21 +1,47 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Search, MapPin, Home, ChevronRight } from "lucide-react";
+import { Search, MapPin } from "lucide-react";
 import { BOTSWANA_LOCATIONS } from "@/data/locations";
 import { BRAND } from "@/lib/brand";
+import { supabase } from "@/lib/supabase/client";
 
 export default function HeroSearch() {
   const router = useRouter();
   const [location, setLocation] = useState("");
-  const [intent, setIntent] = useState<"buy" | "rent">("buy");
+  const [intent, setIntent] = useState<"buy" | "rent" | "sell">("buy");
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => authListener.subscription.unsubscribe();
+  }, []);
 
   const handleSearch = () => {
+    if (intent === "sell") {
+      router.push("/sell");
+      return;
+    }
     const q = location ? `?location=${encodeURIComponent(location)}` : "";
     router.push(`/${intent}${q}`);
   };
+
+  const getUserFirstName = () => {
+    if (!user) return "";
+    const metaName = user.user_metadata?.full_name || user.user_metadata?.name;
+    if (metaName) return metaName.split(" ")[0];
+    if (user.email) return user.email.split("@")[0];
+    return "";
+  };
+
+  const firstName = getUserFirstName();
 
   return (
     <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
@@ -39,10 +65,21 @@ export default function HeroSearch() {
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
             {BRAND.tagline}
           </div>
+
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-[1.1] tracking-tight">
-            Find Your Perfect <br />
-            <span className="text-gradient">Property in Botswana</span>
+            {user ? (
+              <>
+                Hello, <span className="text-gradient">{firstName}</span> 👋 <br />
+                Find Your Next Home
+              </>
+            ) : (
+              <>
+                Find Your Perfect <br />
+                <span className="text-gradient">Property in Botswana</span>
+              </>
+            )}
           </h1>
+
           <p className="text-slate-400 text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
             Premium homes, plots, and commercial spaces in Gaborone, Maun, Francistown & beyond. Verified listings by Segolame Adam.
           </p>
@@ -54,18 +91,19 @@ export default function HeroSearch() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="glass rounded-3xl p-2 max-w-3xl mx-auto shadow-2xl"
         >
+          {/* 3-Way Selector Row */}
           <div className="flex p-1 gap-1 mb-3 justify-center">
-            {(["buy", "rent"] as const).map((t) => (
+            {(["buy", "rent", "sell"] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setIntent(t)}
-                className={`px-8 py-2 rounded-2xl text-xs font-bold transition-all btn-pop ${
+                className={`px-8 py-2 rounded-2xl text-xs font-bold transition-all btn-pop capitalize ${
                   intent === t
                     ? "bg-cyan-400 text-slate-950 neon-glow"
                     : "text-slate-400 hover:text-white hover:bg-white/5"
                 }`}
               >
-                {t === "buy" ? "Buy" : "Rent"}
+                {t}
               </button>
             ))}
           </div>
@@ -90,7 +128,7 @@ export default function HeroSearch() {
               className="px-8 py-3 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-sm flex items-center justify-center gap-2 transition-all btn-pop neon-glow-hover"
             >
               <Search className="w-4 h-4" />
-              Search
+              {intent === "sell" ? "Valuate / Sell" : "Search"}
             </button>
           </div>
         </motion.div>

@@ -1,25 +1,25 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import WhatsAppButton from "@/components/WhatsAppButton";
-
-const inter = Inter({ subsets: ["latin"] });
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Adam Blueprint | Botswana Real Estate",
-  description: "Premium property listings across Botswana. Buy, rent, and sell with Segolame Adam.",
+  title: "Adam Blueprint Real Estate",
+  description:
+    "Trusted property experts in Botswana. Buy, rent, sell and discover verified properties across Gaborone, Maun, Francistown and beyond.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en">
-      <body className={`${inter.className} min-h-screen bg-slate-950`}>
+    <html lang="en" suppressHydrationWarning>
+      <body className="bg-[#070b15] text-white antialiased" suppressHydrationWarning>
         <Header />
-        <main className="relative">{children}</main>
+        <div className="min-h-screen">{children}</div>
         <Footer />
-        <WhatsAppButton />
       </body>
     </html>
   );

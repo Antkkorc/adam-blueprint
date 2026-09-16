@@ -1,157 +1,172 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import HeroSearch from "@/components/HeroSearch";
-import { Property } from "@/types/property";
-import PropertyCard from "@/components/PropertyCard";
-import { CATEGORIES } from "@/data/categories";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import {
-  Home as HomeIcon,
-  Building,
-  Building2,
-  MapPin,
-  Briefcase,
-  Warehouse,
-  TreePine,
-  ArrowRight,
-  ChevronLeft,
-  ChevronRight,
-  TrendingUp,
-  Shield,
-  MessageCircle,
-} from "lucide-react";
-
-const icons: Record<string, React.ElementType> = {
-  houses: HomeIcon,
-  apartments: Building,
-  villas: Building2,
-  plots: MapPin,
-  commercial: Briefcase,
-  warehouses: Warehouse,
-  offices: Building2,
-  land: TreePine,
-};
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase/client";
+import PropertyCard from "@/components/PropertyCard";
+import LocationPicker from "@/components/LocationPicker";
+import { Search, ShieldCheck, Award, MessageSquare } from "lucide-react";
 
 export default function HomePage() {
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [showLeft, setShowLeft] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const [properties, setProperties] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [location, setLocation] = useState("");
+  const [activeTab, setActiveTab] = useState<"buy" | "rent" | "sell">("buy");
 
   useEffect(() => {
-    setIsMounted(true);
-    fetch("/api/properties")
-      .then((res) => res.json())
-      .then((data) => setProperties(data))
-      .catch((err) => console.error("Failed to load properties:", err));
+    async function loadFeaturedProperties() {
+      try {
+        const { data, error } = await supabase
+          .from("properties")
+          .select("*")
+          .order("id", { ascending: false })
+          .limit(6);
+
+        if (error) {
+          console.error("Error fetching properties:", error.message);
+        } else {
+          setProperties(data || []);
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadFeaturedProperties();
   }, []);
 
-  const featured = properties.filter((p) => p.featured);
-
-  const scroll = (dir: "left" | "right") => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: dir === "right" ? 250 : -250, behavior: "smooth" });
+  const handleSearch = () => {
+    if (activeTab === "sell") {
+      router.push("/sell");
+      return;
     }
-  };
-
-  const handleScroll = () => {
-    if (scrollRef.current) {
-      setShowLeft(scrollRef.current.scrollLeft > 20);
-    }
+    const q = location ? `?location=${encodeURIComponent(location)}` : "";
+    router.push(`/${activeTab}${q}`);
   };
 
   return (
-    <div suppressHydrationWarning>
-      <HeroSearch />
-
-      <section className="max-w-7xl mx-auto px-4 md:px-8 py-12">
-        <div className="mb-6">
-          <h2 className="text-lg font-bold text-white">Browse by Category</h2>
-          <p className="text-xs text-slate-400">Find exactly what you are looking for</p>
+    <main className="min-h-screen bg-[#070b15] text-white">
+      {/* Hero Section */}
+      <section className="relative py-20 px-4 max-w-7xl mx-auto text-center space-y-8">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 text-xs font-semibold">
+          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+          TRUSTED PROPERTY EXPERTS IN BOTSWANA
         </div>
 
-        <div className="relative flex items-center">
-          {isMounted && showLeft && (
-            <button
-              onClick={() => scroll("left")}
-              className="absolute left-0 z-10 w-10 h-10 rounded-full glass flex items-center justify-center text-cyan-400 hover:text-white hover:border-cyan-400/50 transition-all btn-pop shadow-xl"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-          )}
+        <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">
+          Find Your Perfect <br />
+          <span className="text-cyan-400">Property in Botswana</span>
+        </h1>
 
-          <div
-            ref={scrollRef}
-            onScroll={handleScroll}
-            className="flex gap-3 overflow-x-auto pb-4 pt-2 w-full scroll-smooth scrollbar-none"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-          >
-            {CATEGORIES.map((cat) => {
-              const Icon = icons[cat.id] || HomeIcon;
-              return (
-                <Link
-                  key={cat.id}
-                  href={`/buy?type=${cat.id}`}
-                  className="flex items-center gap-2.5 px-5 py-3 rounded-2xl glass text-xs font-bold text-slate-300 hover:text-cyan-300 hover:border-cyan-500/30 transition-all btn-pop shrink-0"
-                >
-                  <Icon className="w-4 h-4 text-cyan-400" />
-                  {cat.label}
-                </Link>
-              );
-            })}
-          </div>
+        <p className="text-slate-400 text-sm md:text-base max-w-2xl mx-auto">
+          Premium homes, plots, and commercial spaces in Gaborone, Maun,
+          Francistown & beyond. Verified listings by Segolame Adam.
+        </p>
 
-          <button
-            onClick={() => scroll("right")}
-            className="absolute right-0 z-10 w-10 h-10 rounded-full glass flex items-center justify-center text-cyan-400 hover:text-white hover:border-cyan-400/50 transition-all btn-pop shadow-xl"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
-      </section>
-
-      <section className="max-w-7xl mx-auto px-4 md:px-8 pb-12">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-xl font-bold text-white">
-              Featured <span className="text-gradient">Properties</span>
-            </h2>
-            <p className="text-xs text-slate-400 mt-1">Handpicked premium listings</p>
-          </div>
-          <Link
-            href="/buy"
-            className="text-xs font-bold text-cyan-400 hover:text-cyan-300 flex items-center gap-1 transition-all hover:gap-2"
-          >
-            View All <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {featured.map((p) => (
-            <PropertyCard key={p.id} property={p} />
-          ))}
-        </div>
-      </section>
-
-      <section className="border-y border-white/5 bg-white/[0.02]">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { icon: Shield, title: "Verified Listings", desc: "Every property checked for title deeds and ownership." },
-              { icon: TrendingUp, title: "Market Expertise", desc: "Deep knowledge of Botswana land tenure and valuations." },
-              { icon: MessageCircle, title: "WhatsApp First", desc: "Instant enquiries via WhatsApp with Segolame Adam." },
-            ].map((item) => (
-              <div key={item.title} className="glass rounded-2xl p-6 space-y-3 hover:border-cyan-500/20 transition-colors">
-                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center">
-                  <item.icon className="w-5 h-5 text-cyan-400" />
-                </div>
-                <h3 className="font-bold text-sm text-white">{item.title}</h3>
-                <p className="text-xs text-slate-400 leading-relaxed">{item.desc}</p>
-              </div>
+        {/* Search Widget */}
+        <div className="max-w-3xl mx-auto bg-slate-900/90 border border-slate-800 p-4 rounded-2xl shadow-2xl space-y-4">
+          <div className="flex items-center justify-center gap-6 pb-2">
+            {(["buy", "rent", "sell"] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-6 py-2 rounded-full text-xs font-bold transition-all capitalize ${
+                  activeTab === tab
+                    ? "bg-cyan-400 text-slate-950 shadow-[0_0_15px_rgba(34,211,238,0.4)]"
+                    : "text-slate-300 hover:text-white"
+                }`}
+              >
+                {tab}
+              </button>
             ))}
           </div>
+
+          <div className="flex flex-col md:flex-row gap-3">
+            <LocationPicker value={location} onChange={setLocation} />
+
+            <button
+              onClick={handleSearch}
+              className="flex items-center justify-center gap-2 bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold px-8 py-2.5 rounded-xl text-xs transition-all"
+            >
+              <Search className="w-4 h-4" />
+              {activeTab === "sell" ? "Valuate / Sell" : "Search"}
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-center gap-6 text-xs text-slate-400 font-medium">
+          <span className="flex items-center gap-1.5">
+            <span className="text-cyan-400">•</span> Verified Listings
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="text-cyan-400">•</span> Title Deed Ready
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="text-cyan-400">•</span> Instant WhatsApp
+          </span>
         </div>
       </section>
-    </div>
+
+      {/* Featured Properties */}
+      <section className="max-w-7xl mx-auto px-4 py-12 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-white">Featured Properties</h2>
+            <p className="text-slate-400 text-xs">
+              Handpicked premium listings across Botswana
+            </p>
+          </div>
+          <Link href="/buy" className="text-xs font-semibold text-cyan-400 hover:underline">
+            View All &rarr;
+          </Link>
+        </div>
+
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-72 bg-slate-900/60 border border-slate-800 rounded-2xl animate-pulse" />
+            ))}
+          </div>
+        ) : properties.length === 0 ? (
+          <div className="text-center py-12 bg-slate-900/50 border border-slate-800 rounded-2xl">
+            <p className="text-slate-400 text-sm">No properties available yet.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {properties.map((property) => (
+              <PropertyCard key={property.id} property={property} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Value Props */}
+      <section className="max-w-7xl mx-auto px-4 py-16 border-t border-slate-800/60 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl space-y-3">
+          <ShieldCheck className="w-8 h-8 text-cyan-400" />
+          <h3 className="font-bold text-base text-white">Verified Listings</h3>
+          <p className="text-slate-400 text-xs leading-relaxed">
+            Every property checked for title deeds and legal ownership verification.
+          </p>
+        </div>
+        <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl space-y-3">
+          <Award className="w-8 h-8 text-cyan-400" />
+          <h3 className="font-bold text-base text-white">Market Expertise</h3>
+          <p className="text-slate-400 text-xs leading-relaxed">
+            Deep knowledge of Botswana land tenure, valuations, and commercial spaces.
+          </p>
+        </div>
+        <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl space-y-3">
+          <MessageSquare className="w-8 h-8 text-cyan-400" />
+          <h3 className="font-bold text-base text-white">WhatsApp First</h3>
+          <p className="text-slate-400 text-xs leading-relaxed">
+            Instant inquiries and instant response direct via WhatsApp.
+          </p>
+        </div>
+      </section>
+    </main>
   );
 }

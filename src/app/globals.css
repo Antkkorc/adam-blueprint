@@ -1,64 +1,58 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
-body {
-  color: #f8fafc;
-  background: #020617;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+:root {
+  font-family: "Plus Jakarta Sans", sans-serif;
 }
 
-/* Custom reusable classes (plain CSS — works in Tailwind v4) */
+body {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  background-color: #070b15;
+  color: #ffffff;
+}
+
 .glass {
-  background-color: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
-.glass-strong {
-  background-color: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(32px);
-  -webkit-backdrop-filter: blur(32px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
+
 .text-gradient {
-  background-image: linear-gradient(to right, #22d3ee, #5eead4, #3b82f6);
+  background: linear-gradient(90deg, #22d3ee, #38bdf8, #34d399);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
+
 .neon-glow {
-  box-shadow: 0 0 20px rgba(34, 211, 238, 0.15), 0 0 40px rgba(34, 211, 238, 0.1);
-}
-.neon-glow-hover:hover {
-  box-shadow: 0 0 10px rgba(34, 211, 238, 0.3), 0 0 20px rgba(34, 211, 238, 0.2), 0 0 40px rgba(34, 211, 238, 0.1);
-}
-.card-lift {
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.card-lift:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 30px rgba(34, 211, 238, 0.08);
-}
-.btn-pop {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.btn-pop:hover {
-  transform: scale(1.05);
-}
-.btn-pop:active {
-  transform: scale(0.95);
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.25);
 }
 
-::-webkit-scrollbar {
-  width: 6px;
+.neon-glow-hover:hover {
+  box-shadow: 0 0 30px rgba(34, 211, 238, 0.45);
 }
-::-webkit-scrollbar-track {
-  background: #020617;
+
+.btn-pop {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
 }
-::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 3px;
+
+.btn-pop:active {
+  transform: scale(0.97);
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+
+select option {
+  background-color: #0f172a;
+  color: #ffffff;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }

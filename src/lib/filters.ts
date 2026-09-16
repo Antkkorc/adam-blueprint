@@ -1,69 +1,88 @@
-import { Property } from "@/types/property";
+export const AMENITY_OPTIONS = [
+  "Swimming Pool",
+  "Fibre WiFi",
+  "Router WiFi",
+  "Garage",
+  "Borehole",
+  "Solar Backup",
+  "Electric Fence / Security",
+  "Boundary Wall",
+  "Gated Community",
+  "Air Conditioning",
+];
 
-export interface FilterState {
-  locationQuery: string;
-  selectedType: string;
-  keywordQuery: string;
-  selectedBeds: string;
-  selectedBaths: string;
+export const PROPERTY_TYPES = [
+  "All Types",
+  "House",
+  "Apartment",
+  "Land",
+  "Office",
+  "Commercial",
+  "Warehouse",
+];
+
+export interface PropertyFiltersState {
+  location: string;
   minPrice: number;
   maxPrice: number;
-  selectedAmenities: string[];
+  type: string;
+  amenities: string[];
 }
 
-export const filterProperties = (
-  properties: Property[],
-  intent: "buy" | "rent",
-  filters: FilterState
-): Property[] => {
-  return properties.filter((property) => {
-    const matchesIntent = property.intent === intent;
+function firstParam(value: string | string[] | undefined): string {
+  if (Array.isArray(value)) return value[0] ?? "";
+  return value ?? "";
+}
 
-    const matchesLocation =
-      !filters.locationQuery ||
-      filters.locationQuery === "All Locations" ||
-      property.location
-        .toLowerCase()
-        .includes(filters.locationQuery.toLowerCase());
+export function sanitizeLike(value: string): string {
+  return value.replace(/[%_,()"'\\]/g, " ").trim();
+}
 
-    const matchesType =
-      filters.selectedType === "All Types" ||
-      property.type.toLowerCase() === filters.selectedType.toLowerCase();
+export function parseFilters(
+  searchParams: Record<string, string | string[] | undefined>
+): PropertyFiltersState {
+  const rawAmenities = searchParams.amenity;
 
-    const matchesKeyword =
-      !filters.keywordQuery ||
-      property.title.toLowerCase().includes(filters.keywordQuery.toLowerCase()) ||
-      property.description
-        .toLowerCase()
-        .includes(filters.keywordQuery.toLowerCase()) ||
-      property.amenities.some((amenity) =>
-        amenity.toLowerCase().includes(filters.keywordQuery.toLowerCase())
-      );
+  const amenities = Array.isArray(rawAmenities)
+    ? rawAmenities
+    : rawAmenities
+      ? [rawAmenities]
+      : [];
 
-    const matchesBeds =
-      filters.selectedBeds === "Any" ||
-      property.beds >= Number(filters.selectedBeds.replace("+", ""));
+  return {
+    location: firstParam(searchParams.location),
+    minPrice: Math.max(0, Number(firstParam(searchParams.minPrice)) || 0),
+    maxPrice: Math.max(0, Number(firstParam(searchParams.maxPrice)) || 0),
+    type: firstParam(searchParams.type) || "All Types",
+    amenities: amenities.filter((amenity) =>
+      AMENITY_OPTIONS.includes(amenity)
+    ),
+  };
+}
 
-    const matchesBaths =
-      filters.selectedBaths === "Any" ||
-      property.baths >= Number(filters.selectedBaths.replace("+", ""));
+export function buildFilterQuery(filters: PropertyFiltersState): string {
+  const params = new URLSearchParams();
 
-    const matchesPrice =
-      property.price >= filters.minPrice && property.price <= filters.maxPrice;
+  if (filters.location) {
+    params.set("location", filters.location);
+  }
 
-    const matchesAmenities = filters.selectedAmenities.every((amenity) =>
-      property.amenities.includes(amenity)
-    );
+  if (filters.minPrice > 0) {
+    params.set("minPrice", String(filters.minPrice));
+  }
 
-    return (
-      matchesIntent &&
-      matchesLocation &&
-      matchesType &&
-      matchesKeyword &&
-      matchesBeds &&
-      matchesBaths &&
-      matchesPrice &&
-      matchesAmenities
-    );
+  if (filters.maxPrice > 0) {
+    params.set("maxPrice", String(filters.maxPrice));
+  }
+
+  if (filters.type && filters.type !== "All Types") {
+    params.set("type", filters.type);
+  }
+
+  filters.amenities.forEach((amenity) => {
+    params.append("amenity", amenity);
   });
-};
+
+  const query = params.toString();
+  return query ? `?${query}` : "";
+}

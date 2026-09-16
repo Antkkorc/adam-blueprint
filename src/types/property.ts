@@ -1,27 +1,30 @@
+export type PropertyIntent = "buy" | "rent";
+
 export interface Property {
   id: number;
+  created_at?: string;
   title: string;
   description: string;
   type: string;
   category: string;
-  intent: "buy" | "rent";
+  intent: PropertyIntent;
   status: string;
   verified: boolean;
   featured: boolean;
   price: number;
-  priceUnit: "total" | "month";
+  price_unit: "total" | "month";
   location: string;
   city: string;
   suburb: string;
   tenure: string;
-  titleDeed: boolean;
+  title_deed: boolean;
   beds: number;
   baths: number;
   parking: number;
-  plotSize: number;
-  yearBuilt: number;
+  plot_size: number;
+  year_built: number | null;
   images: string[];
   agent: string;
-  agentPhone: string;
+  agent_phone: string;
   amenities: string[];
 }
