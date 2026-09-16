@@ -84,20 +84,25 @@ export default function AuthPage() {
   };
 
   const handleSendPhoneOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    const cleanPhone = formatPhoneForSupabase(phone);
-    const { error } = await supabase.auth.signInWithOtp({ phone: cleanPhone });
-
-    setLoading(false);
-    if (error) {
-      setError(error.message);
-    } else {
-      setPhoneStep("otp");
-    }
-  };
+  e.preventDefault();
+  setLoading(true);
+  setError(null);
+  
+  const cleanPhone = formatPhoneForSupabase(phone);
+  
+  // Removed the invalid 'redirectTo' options block for phone OTP
+  const { error } = await supabase.auth.signInWithOtp({ 
+    phone: cleanPhone 
+  });
+  
+  setLoading(false);
+  
+  if (error) {
+    setError(error.message);
+  } else {
+    setPhoneStep("otp");
+  }
+};
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
