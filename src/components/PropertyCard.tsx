@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Heart, MapPin, Bed, Bath, Car, MessageCircle } from "lucide-react";
-import { supabase } from "@/lib/supabase/client";
+import Link from "next/link";
+import { MapPin, Bed, Bath, Car, MessageCircle, Ruler } from "lucide-react";
 import { BRAND } from "@/lib/brand";
+import SavePropertyButton from "@/components/SavePropertyButton";
 import type { Property } from "@/types/property";
 
 interface Props {
@@ -30,10 +29,6 @@ function toStringArray(value: any): string[] {
 }
 
 export default function PropertyCard({ property, initialSaved = false }: Props) {
-  const router = useRouter();
-  const [saved, setSaved] = useState(initialSaved);
-  const [saving, setSaving] = useState(false);
-
   const images = toStringArray((property as any).images);
   const amenities = toStringArray((property as any).amenities);
 
@@ -49,6 +44,8 @@ export default function PropertyCard({ property, initialSaved = false }: Props) 
 
   const priceUnit = (property as any).price_unit ?? (property as any).priceUnit;
   const agentPhone = (property as any).agent_phone ?? (property as any).agentPhone;
+  const buildingSqm = (property as any).building_sqm;
+  const landSqm = (property as any).land_sqm ?? (property as any).plot_size;
 
   const whatsappPhone = (agentPhone || BRAND.phone).replace(/\D/g, "");
   const whatsappMessage = encodeURIComponent(
@@ -57,70 +54,18 @@ export default function PropertyCard({ property, initialSaved = false }: Props) 
     }. Please send me more details.`
   );
 
-  async function toggleSaved() {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (!session) {
-      router.push("/login");
-      return;
-    }
-
-    setSaving(true);
-
-    try {
-      if (saved) {
-        await supabase
-          .from("saved_properties")
-          .delete()
-          .eq("user_id", session.user.id)
-          .eq("property_id", property.id);
-
-        setSaved(false);
-      } else {
-        await supabase.from("saved_properties").upsert(
-          {
-            user_id: session.user.id,
-            property_id: property.id,
-          },
-          { onConflict: "user_id,property_id" }
-        );
-
-        setSaved(true);
-      }
-
-      // Refresh server data so lists (like /saved) update instantly
-      router.refresh();
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setSaving(false);
-    }
-  }
-
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden hover:border-cyan-500/40 transition-all group">
       <div className="relative h-52">
-        <img
-          src={image}
-          alt={property.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-        />
+        <Link href={`/property/${property.id}`}>
+          <img
+            src={image}
+            alt={property.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+        </Link>
 
-        <button
-          type="button"
-          onClick={toggleSaved}
-          disabled={saving}
-          className={`absolute top-3 right-3 p-2 rounded-full border backdrop-blur-md transition-all ${
-            saved
-              ? "bg-cyan-400 text-slate-950 border-cyan-300"
-              : "bg-slate-950/70 text-white border-white/20 hover:border-cyan-300 hover:text-cyan-300"
-          }`}
-          aria-label={saved ? "Remove from saved properties" : "Save property"}
-        >
-          <Heart className={`w-4 h-4 ${saved ? "fill-current" : ""}`} />
-        </button>
+        <SavePropertyButton propertyId={property.id} initialSaved={initialSaved} />
 
         {property.featured && (
           <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-cyan-400 text-slate-950 text-[10px] font-extrabold uppercase">
@@ -131,7 +76,11 @@ export default function PropertyCard({ property, initialSaved = false }: Props) 
 
       <div className="p-4 space-y-3">
         <div>
-          <h3 className="text-white font-bold text-sm line-clamp-1">{property.title}</h3>
+          <Link href={`/property/${property.id}`}>
+            <h3 className="text-white font-bold text-sm line-clamp-1 hover:text-cyan-400 transition-colors">
+              {property.title}
+            </h3>
+          </Link>
           <p className="text-slate-400 text-xs flex items-center gap-1 mt-1">
             <MapPin className="w-3 h-3 text-cyan-400" />
             {property.location || property.city || "Botswana"}
@@ -168,6 +117,15 @@ export default function PropertyCard({ property, initialSaved = false }: Props) 
           </div>
         </div>
 
+        {(buildingSqm || landSqm) && (
+          <p className="text-[10px] text-slate-500 flex items-center gap-1">
+            <Ruler className="w-3 h-3 text-cyan-400" />
+            {buildingSqm ? `Building ${buildingSqm} m²` : ""}
+            {buildingSqm && landSqm ? " • " : ""}
+            {landSqm ? `Land ${landSqm} m²` : ""}
+          </p>
+        )}
+
         <p className="text-slate-400 text-xs line-clamp-2">{property.description}</p>
 
         {amenities.length > 0 && (
@@ -199,18 +157,12 @@ export default function PropertyCard({ property, initialSaved = false }: Props) 
             WhatsApp
           </a>
 
-          <button
-            type="button"
-            onClick={toggleSaved}
-            disabled={saving}
-            className={`px-4 py-2 rounded-xl border text-xs font-bold transition-colors ${
-              saved
-                ? "bg-cyan-500/20 border-cyan-400 text-cyan-300"
-                : "bg-slate-950 border-slate-800 text-slate-300 hover:border-cyan-400 hover:text-cyan-300"
-            }`}
+          <Link
+            href={`/property/${property.id}`}
+            className="px-4 py-2 rounded-xl border border-slate-800 bg-slate-950 text-slate-300 hover:border-cyan-400 hover:text-cyan-300 text-xs font-bold transition-colors"
           >
-            {saved ? "Saved" : "Save"}
-          </button>
+            Details
+          </Link>
         </div>
       </div>
     </div>
