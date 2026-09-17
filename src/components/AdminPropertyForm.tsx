@@ -2,9 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Upload, X } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { BRAND } from "@/lib/brand";
 import { AMENITY_OPTIONS, PROPERTY_TYPES } from "@/lib/filters";
+import { PHOTO_CATEGORIES } from "@/lib/photos";
+
+interface PhotoItem {
+  id: string;
+  file: File;
+  preview: string;
+  label: string;
+}
 
 export default function AdminPropertyForm() {
   const router = useRouter();
@@ -38,7 +47,7 @@ export default function AdminPropertyForm() {
   const [verified, setVerified] = useState(true);
   const [titleDeed, setTitleDeed] = useState(false);
   const [amenities, setAmenities] = useState<string[]>([]);
-  const [files, setFiles] = useState<FileList | null>(null);
+  const [photos, setPhotos] = useState<PhotoItem[]>([]);
   const [sketchFiles, setSketchFiles] = useState<FileList | null>(null);
 
   const types = PROPERTY_TYPES.filter((item) => item !== "All Types");
@@ -51,10 +60,26 @@ export default function AdminPropertyForm() {
     );
   };
 
-  const uploadFiles = async (
-    list: FileList,
-    folder: string
-  ): Promise<string[]> => {
+  const addPhotos = (list: FileList | null) => {
+    if (!list) return;
+    const next: PhotoItem[] = Array.from(list).map((file, i) => ({
+      id: `${Date.now()}-${i}-${file.name}`,
+      file,
+      preview: URL.createObjectURL(file),
+      label: PHOTO_CATEGORIES[0],
+    }));
+    setPhotos((prev) => [...prev, ...next]);
+  };
+
+  const updatePhotoLabel = (id: string, label: string) => {
+    setPhotos((prev) => prev.map((p) => (p.id === id ? { ...p, label } : p)));
+  };
+
+  const removePhoto = (id: string) => {
+    setPhotos((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const uploadFiles = async (list: FileList, folder: string): Promise<string[]> => {
     const urls: string[] = [];
     for (let i = 0; i < list.length; i++) {
       const file = list[i];
@@ -79,8 +104,8 @@ export default function AdminPropertyForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!files || files.length === 0) {
-      alert("Please select at least one property image.");
+    if (photos.length === 0) {
+      alert("Please add at least one property photo.");
       return;
     }
 
@@ -97,7 +122,29 @@ export default function AdminPropertyForm() {
     setLoading(true);
 
     try {
-      const imageUrls = await uploadFiles(files, "properties");
+      // Upload each photo and keep its category label
+      const imageUrls: string[] = [];
+      const imageLabels: string[] = [];
+
+      for (let i = 0; i < photos.length; i++) {
+        const photo = photos[i];
+        const safeName = photo.file.name.replace(/[^a-zA-Z0-9.]/g, "_");
+        const filePath = `properties/${Date.now()}-${i}-${safeName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("property-images")
+          .upload(filePath, photo.file);
+
+        if (uploadError) throw uploadError;
+
+        const { data } = supabase.storage
+          .from("property-images")
+          .getPublicUrl(filePath);
+
+        imageUrls.push(data.publicUrl);
+        imageLabels.push(photo.label);
+      }
+
       const sketchUrls =
         sketchFiles && sketchFiles.length > 0
           ? await uploadFiles(sketchFiles, "sketches")
@@ -134,6 +181,7 @@ export default function AdminPropertyForm() {
           title_deed: titleDeed,
           amenities,
           images: imageUrls,
+          image_labels: imageLabels,
           sketch_plan: sketchUrls,
           status: "Available",
           agent: agentName || BRAND.owner,
@@ -161,7 +209,7 @@ export default function AdminPropertyForm() {
       setLatitude("");
       setLongitude("");
       setAmenities([]);
-      setFiles(null);
+      setPhotos([]);
       setSketchFiles(null);
       router.refresh();
     } catch (error: any) {
@@ -182,7 +230,71 @@ export default function AdminPropertyForm() {
     >
       <h2 className="text-xl font-bold">Add Official Property</h2>
 
-      {/* Basics */}
+      {/* ===== EASY PHOTO UPLOADER ===== */}
+      <div className="space-y-3">
+        <p className="text-xs text-slate-400 font-bold">
+          Property Photos * — pick many at once, then tag each photo below
+        </p>
+
+        <label className="flex flex-col items-center gap-2 py-6 border-2 border-dashed border-cyan-500/40 hover:border-cyan-400 rounded-xl cursor-pointer bg-slate-950 transition-colors">
+          <Upload className="w-6 h-6 text-cyan-400" />
+          <span className="text-sm font-bold text-cyan-300">
+            Click to add photos
+          </span>
+          <span className="text-[10px] text-slate-500 text-center px-4">
+            Kitchen, bathroom, garage, front of yard, back of yard... select them
+            all at once, then choose a category for each photo
+          </span>
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              addPhotos(e.target.files);
+              e.target.value = "";
+            }}
+          />
+        </label>
+
+        {photos.length > 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {photos.map((photo) => (
+              <div
+                key={photo.id}
+                className="relative bg-slate-950 border border-slate-800 rounded-xl overflow-hidden p-2 space-y-2"
+              >
+                <img
+                  src={photo.preview}
+                  alt="preview"
+                  className="w-full h-28 object-cover rounded-lg"
+                />
+                <select
+                  value={photo.label}
+                  onChange={(e) => updatePhotoLabel(photo.id, e.target.value)}
+                  className="w-full text-[10px] bg-slate-800 rounded-lg px-2 py-1.5 outline-none focus:ring-1 focus:ring-cyan-500"
+                >
+                  {PHOTO_CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => removePhoto(photo.id)}
+                  className="absolute top-1.5 right-1.5 p-1 rounded-full bg-red-500/90 hover:bg-red-500 text-white"
+                  aria-label="Remove photo"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ===== BASICS ===== */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input type="text" placeholder="Property Title *" required className={inputClass} value={title} onChange={(e) => setTitle(e.target.value)} />
         <select value={intent} onChange={(e) => setIntent(e.target.value as "buy" | "rent")} className={inputClass}>
@@ -203,7 +315,7 @@ export default function AdminPropertyForm() {
         </select>
       </div>
 
-      {/* Location */}
+      {/* ===== LOCATION ===== */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input type="text" placeholder="Location (e.g. Phakalane, Gaborone) *" required className={inputClass} value={location} onChange={(e) => setLocation(e.target.value)} />
         <input type="text" placeholder="Plot Number (e.g. Plot 4521)" className={inputClass} value={plotNumber} onChange={(e) => setPlotNumber(e.target.value)} />
@@ -213,10 +325,11 @@ export default function AdminPropertyForm() {
         <input type="text" placeholder="Longitude (e.g. 25.9231)" className={inputClass} value={longitude} onChange={(e) => setLongitude(e.target.value)} />
       </div>
       <p className="text-[10px] text-slate-500 -mt-2">
-        💡 Pinned location: open Google Maps → right-click the plot → copy the two numbers (latitude, longitude).
+        💡 Pinned location: open Google Maps → right-click the plot → copy the two
+        numbers (latitude, longitude).
       </p>
 
-      {/* Price + sizes */}
+      {/* ===== PRICE + SIZES ===== */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input type="number" placeholder="Price (BWP) *" required className={inputClass} value={price} onChange={(e) => setPrice(e.target.value)} />
         {intent === "buy" && (
@@ -233,13 +346,13 @@ export default function AdminPropertyForm() {
         <input type="number" placeholder="Year Built (optional)" className={inputClass} value={yearBuilt} onChange={(e) => setYearBuilt(e.target.value)} />
       </div>
 
-      {/* Text sections */}
+      {/* ===== TEXT SECTIONS ===== */}
       <textarea placeholder="Short description (shown on cards) *" required rows={2} className={inputClass} value={description} onChange={(e) => setDescription(e.target.value)} />
       <textarea placeholder="Overview / Summary of the property (detail page)" rows={3} className={inputClass} value={overview} onChange={(e) => setOverview(e.target.value)} />
       <textarea placeholder="INSIDE features — e.g. open-plan kitchen, tiled floors, built-in cupboards, main en-suite..." rows={3} className={inputClass} value={insideFeatures} onChange={(e) => setInsideFeatures(e.target.value)} />
       <textarea placeholder="OUTSIDE features — e.g. double garage, paved yard, borehole, electric fence, mature garden..." rows={3} className={inputClass} value={outsideFeatures} onChange={(e) => setOutsideFeatures(e.target.value)} />
 
-      {/* Amenities */}
+      {/* ===== AMENITIES ===== */}
       <div>
         <p className="text-xs text-slate-400 mb-2">Amenities</p>
         <div className="flex flex-wrap gap-2">
@@ -263,7 +376,7 @@ export default function AdminPropertyForm() {
         </div>
       </div>
 
-      {/* Flags */}
+      {/* ===== FLAGS ===== */}
       <div className="flex flex-wrap gap-4 text-sm">
         <label className="flex items-center gap-2">
           <input type="checkbox" checked={featured} onChange={(e) => setFeatured(e.target.checked)} />
@@ -279,20 +392,22 @@ export default function AdminPropertyForm() {
         </label>
       </div>
 
-      {/* Agent / owner */}
+      {/* ===== AGENT / OWNER ===== */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input type="text" placeholder="Agent / Owner Name" className={inputClass} value={agentName} onChange={(e) => setAgentName(e.target.value)} />
         <input type="text" placeholder="Agent / Owner Phone" className={inputClass} value={agentPhone} onChange={(e) => setAgentPhone(e.target.value)} />
       </div>
 
-      {/* Uploads */}
-      <div className="space-y-2">
-        <p className="text-xs text-slate-400">Property Photos * (multiple)</p>
-        <input type="file" multiple accept="image/*" required onChange={(e) => setFiles(e.target.files)} className="text-sm text-slate-400" />
-      </div>
+      {/* ===== SKETCH PLAN ===== */}
       <div className="space-y-2">
         <p className="text-xs text-slate-400">Sketch Plan / Floor Plan (optional, multiple)</p>
-        <input type="file" multiple accept="image/*" onChange={(e) => setSketchFiles(e.target.files)} className="text-sm text-slate-400" />
+        <input
+          type="file"
+          multiple
+          accept="image/*"
+          onChange={(e) => setSketchFiles(e.target.files)}
+          className="text-sm text-slate-400"
+        />
       </div>
 
       <button

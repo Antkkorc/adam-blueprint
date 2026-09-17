@@ -4,20 +4,21 @@ import { redirect } from "next/navigation";
 export async function requireAdmin() {
   const supabase = await createClient();
 
+  // FIXED: Use getUser() instead of getSession() for security
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (!user) {
     redirect("/login");
   }
 
   const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase().trim();
-  const userEmail = session.user.email?.toLowerCase().trim();
+  const userEmail = user.email?.toLowerCase().trim();
 
   if (adminEmail && userEmail !== adminEmail) {
     redirect("/");
   }
 
-  return session.user;
+  return user;
 }

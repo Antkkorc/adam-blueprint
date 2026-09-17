@@ -8,18 +8,19 @@ export const revalidate = 0;
 export default async function SavedPropertiesPage() {
   const supabase = await createClient();
 
+  // FIXED: Use getUser() instead of getSession()
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (!user) {
     redirect("/login");
   }
 
   const { data: savedItems } = await supabase
     .from("saved_properties")
     .select("property_id, properties(*)")
-    .eq("user_id", session.user.id);
+    .eq("user_id", user.id); // FIXED: changed session.user.id to user.id
 
   const savedProperties = (savedItems ?? [])
     .flatMap((item: any) =>

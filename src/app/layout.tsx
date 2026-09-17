@@ -5,8 +5,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Adam Blueprint Real Estate",
-  description:
-    "Trusted property experts in Botswana. Buy, rent, sell and discover verified properties across Gaborone, Maun, Francistown and beyond.",
+  description: "Trusted property experts in Botswana.",
 };
 
 export default function RootLayout({
@@ -15,6 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
+    // suppressHydrationWarning stops extensions from causing red boxes
     <html lang="en" suppressHydrationWarning>
       <body className="bg-[#070b15] text-white antialiased" suppressHydrationWarning>
         <Header />

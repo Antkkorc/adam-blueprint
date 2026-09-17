@@ -57,7 +57,6 @@ export default function FilterPanel({ basePath, initialFilters }: Props) {
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-      {/* Toggle bar */}
       <button
         type="button"
         onClick={() => setOpen(!open)}

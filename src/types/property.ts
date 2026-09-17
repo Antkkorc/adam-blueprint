@@ -28,6 +28,7 @@ export interface Property {
   land_sqm?: number | null;
   year_built: number | null;
   images: string[];
+  image_labels?: string[] | null;
   sketch_plan?: string[] | null;
   latitude?: number | null;
   longitude?: number | null;
