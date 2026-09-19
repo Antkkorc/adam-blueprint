@@ -5,15 +5,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BRAND } from "@/lib/brand";
 import { supabase } from "@/lib/supabase/client";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 import {
   Menu as MenuIcon,
   X,
   PhoneCall,
   User,
   Home,
-  Building,
-  Tag,
-  Info,
   LogIn,
   Heart,
   Settings,
@@ -22,7 +20,7 @@ import {
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const router = useRouter();
 
   useEffect(() => {

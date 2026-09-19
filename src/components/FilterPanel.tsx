@@ -25,9 +25,17 @@ export default function FilterPanel({ basePath, initialFilters }: Props) {
     (filters.minPrice > 0 ? 1 : 0) +
     (filters.maxPrice > 0 ? 1 : 0) +
     (filters.type !== "All Types" ? 1 : 0) +
+    (filters.minBeds > 0 ? 1 : 0) +
+    (filters.minBaths > 0 ? 1 : 0) +
+    (filters.minParking > 0 ? 1 : 0) +
+    (filters.minBuildingSqm > 0 ? 1 : 0) +
+    (filters.minLandSqm > 0 ? 1 : 0) +
     filters.amenities.length;
 
-  const update = (key: keyof PropertyFiltersState, value: any) => {
+  const update = <K extends keyof PropertyFiltersState>(
+    key: K,
+    value: PropertyFiltersState[K]
+  ) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -50,6 +58,11 @@ export default function FilterPanel({ basePath, initialFilters }: Props) {
       minPrice: 0,
       maxPrice: 0,
       type: "All Types",
+      minBeds: 0,
+      minBaths: 0,
+      minParking: 0,
+      minBuildingSqm: 0,
+      minLandSqm: 0,
       amenities: [],
     });
     router.push(basePath);

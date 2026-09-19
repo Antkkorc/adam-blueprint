@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft, MapPin, Bed, Bath, Car, Ruler, Hash, Calendar, FileBadge,
@@ -13,7 +14,7 @@ export const dynamic = "force-dynamic";
 
 interface PageProps { params: Promise<{ id: string }> }
 
-function toStringArray(value: any): string[] {
+function toStringArray(value: unknown): string[] {
   if (Array.isArray(value)) return value.filter(Boolean).map(String);
   if (typeof value === "string") {
     const cleaned = value.replace(/^\{/, "").replace(/\}$/, "").replace(/^\[/, "").replace(/\]$/, "");
@@ -109,10 +110,10 @@ export default async function PropertyDetailPage({ params }: PageProps) {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {stats.map((stat) => (
-                <div key={stat.label} className="bg-slate-900 border border-slate-800 rounded-xl p-3 space-y-1">
-                  <stat.icon className="w-4 h-4 text-cyan-400" />
-                  <p className="text-white text-sm font-bold">{stat.value}</p>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider">{stat.label}</p>
+                <div key={stat.label} className="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-2">
+                  <stat.icon className="w-5 h-5 text-cyan-400" />
+                  <p className="text-white text-lg font-bold leading-tight">{stat.value}</p>
+                  <p className="text-xs text-slate-400 uppercase tracking-wider">{stat.label}</p>
                 </div>
               ))}
             </div>
@@ -156,7 +157,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                 <h2 className="text-lg font-bold flex items-center gap-2"><DraftingCompass className="w-5 h-5 text-cyan-400" /> Sketch Plan / Floor Plan</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {sketchPlan.map((img, i) => (
-                    <img key={i} src={img} alt={`Sketch plan ${i + 1}`} className="w-full h-64 object-contain bg-white rounded-xl border border-slate-800 p-2" />
+                    <Image key={i} src={img} alt={`Sketch plan ${i + 1}`} width={900} height={600} className="w-full h-64 object-contain bg-white rounded-xl border border-slate-800 p-2" />
                   ))}
                 </div>
               </section>

@@ -108,6 +108,9 @@ export default function ContactPage() {
               <input
                 type="text"
                 required
+                minLength={2}
+                maxLength={80}
+                aria-label="Your name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Your Name"
@@ -116,6 +119,8 @@ export default function ContactPage() {
               <input
                 type="email"
                 required
+                maxLength={160}
+                aria-label="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Email Address"
@@ -124,6 +129,9 @@ export default function ContactPage() {
               <textarea
                 rows={4}
                 required
+                minLength={10}
+                maxLength={2000}
+                aria-label="Your message"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Your Message"

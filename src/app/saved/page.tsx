@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import PropertyCard from "@/components/PropertyCard";
 import Link from "next/link";
+import type { Property } from "@/types/property";
 import { redirect } from "next/navigation";
 
 export const revalidate = 0;
@@ -23,7 +24,7 @@ export default async function SavedPropertiesPage() {
     .eq("user_id", user.id); // FIXED: changed session.user.id to user.id
 
   const savedProperties = (savedItems ?? [])
-    .flatMap((item: any) =>
+    .flatMap((item: { properties: Property | Property[] | null }) =>
       Array.isArray(item.properties) ? item.properties : item.properties ? [item.properties] : []
     )
     .filter(Boolean);
@@ -47,7 +48,7 @@ export default async function SavedPropertiesPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {savedProperties.map((property: any) => (
+            {savedProperties.map((property: Property) => (
               <PropertyCard
                 key={property.id}
                 property={property}

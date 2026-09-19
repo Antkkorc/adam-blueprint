@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
 import { BRAND } from "@/lib/brand";
+import { useTheme, type Theme } from "@/context/ThemeContext";
 import {
-  Menu as MenuIcon, X, PhoneCall, User, Home, Building, Tag, Info, LogIn, Heart, LogOut, Shield,
+  Menu as MenuIcon, X, PhoneCall, User, Home, Building, Tag, Info, LogIn, Heart, LogOut, Shield, Settings, Sun, Moon, Sparkles,
 } from "lucide-react";
 
 export default function Header() {
@@ -14,6 +15,7 @@ export default function Header() {
   const [user, setUser] = useState<SupabaseUser | null | undefined>(undefined);
   const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     let mounted = true;
@@ -109,6 +111,7 @@ export default function Header() {
           boxShadow: "10px 0 25px rgba(0,0,0,0.6)",
         }}
         className="border-r border-slate-800/80 flex flex-col p-6 overflow-hidden"
+        aria-label="Main navigation"
       >
         <div className="flex items-center justify-between pb-6 mb-2 border-b border-slate-800/80">
           <Link href="/" onClick={() => setIsMenuOpen(false)} className="font-extrabold text-2xl text-cyan-400 tracking-wider">
@@ -157,6 +160,33 @@ export default function Header() {
               </button>
             </>
           )}
+
+          <div className="mt-4 border-t border-slate-800/80 pt-4">
+            <div className="mb-2 flex items-center gap-2 px-3 text-xs font-bold uppercase tracking-wider text-slate-500">
+              <Settings className="h-4 w-4" /> Display
+            </div>
+            <div className="grid grid-cols-3 gap-1 rounded-xl bg-slate-900/70 p-1">
+              {([
+                ["neon", "Neon", Sparkles],
+                ["light", "Light", Sun],
+                ["dark", "Dark", Moon],
+              ] as const).map(([value, label, Icon]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setTheme(value as Theme)}
+                  aria-pressed={theme === value}
+                  className={`flex flex-col items-center gap-1 rounded-lg px-2 py-2 text-[10px] font-bold transition-colors ${
+                    theme === value ? "bg-cyan-400 text-slate-950" : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {label}
+                </button>
+              ))}
+            </div>
+            <p className="px-3 pt-2 text-[10px] text-slate-500">Neon is the default theme.</p>
+          </div>
 
           {user === null && (
             <Link href="/login" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-4 px-3 py-2.5 rounded-xl text-slate-100 hover:text-cyan-400 hover:bg-slate-900/60 transition-all text-base font-semibold">

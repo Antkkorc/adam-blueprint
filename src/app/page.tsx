@@ -7,10 +7,11 @@ import { supabase } from "@/lib/supabase/client";
 import PropertyCard from "@/components/PropertyCard";
 import LocationPicker from "@/components/LocationPicker";
 import { Search, ShieldCheck, Award, MessageSquare } from "lucide-react";
+import type { Property } from "@/types/property";
 
 export default function HomePage() {
   const router = useRouter();
-  const [properties, setProperties] = useState<any[]>([]);
+  const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [location, setLocation] = useState("");
   const [activeTab, setActiveTab] = useState<"buy" | "rent" | "sell">("buy");
@@ -66,7 +67,7 @@ export default function HomePage() {
           Francistown & beyond. Verified listings by Segolame Adam.
         </p>
 
-        {/* Search Widget */}
+        {/* Location search widget */}
         <div className="max-w-3xl mx-auto bg-slate-900/90 border border-slate-800 p-4 rounded-2xl shadow-2xl space-y-4">
           <div className="flex items-center justify-center gap-6 pb-2">
             {(["buy", "rent", "sell"] as const).map((tab) => (

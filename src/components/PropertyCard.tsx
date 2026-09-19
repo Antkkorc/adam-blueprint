@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { MapPin, Bed, Bath, Car, MessageCircle, Ruler } from "lucide-react";
 import { BRAND } from "@/lib/brand";
 import SavePropertyButton from "@/components/SavePropertyButton";
@@ -11,7 +12,7 @@ interface Props {
   initialSaved?: boolean;
 }
 
-function toStringArray(value: any): string[] {
+function toStringArray(value: unknown): string[] {
   if (Array.isArray(value)) return value.filter(Boolean).map(String);
   if (typeof value === "string") {
     const cleaned = value
@@ -29,8 +30,8 @@ function toStringArray(value: any): string[] {
 }
 
 export default function PropertyCard({ property, initialSaved = false }: Props) {
-  const images = toStringArray((property as any).images);
-  const amenities = toStringArray((property as any).amenities);
+  const images = toStringArray(property.images);
+  const amenities = toStringArray(property.amenities);
 
   const image =
     images[0] ||
@@ -42,10 +43,10 @@ export default function PropertyCard({ property, initialSaved = false }: Props) 
     maximumFractionDigits: 0,
   }).format(Number(property.price || 0));
 
-  const priceUnit = (property as any).price_unit ?? (property as any).priceUnit;
-  const agentPhone = (property as any).agent_phone ?? (property as any).agentPhone;
-  const buildingSqm = (property as any).building_sqm;
-  const landSqm = (property as any).land_sqm ?? (property as any).plot_size;
+  const priceUnit = property.price_unit;
+  const agentPhone = property.agent_phone;
+  const buildingSqm = property.building_sqm;
+  const landSqm = property.land_sqm ?? property.plot_size;
 
   const whatsappPhone = (agentPhone || BRAND.phone).replace(/\D/g, "");
   const whatsappMessage = encodeURIComponent(
@@ -58,9 +59,11 @@ export default function PropertyCard({ property, initialSaved = false }: Props) 
     <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden hover:border-cyan-500/40 transition-all group">
       <div className="relative h-52">
         <Link href={`/property/${property.id}`}>
-          <img
+          <Image
             src={image}
             alt={property.title}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         </Link>

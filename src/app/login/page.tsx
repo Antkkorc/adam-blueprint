@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BRAND } from "@/lib/brand";
 import { Mail, Phone, Lock, ArrowRight, ChevronLeft, Shield, KeyRound, Loader2 } from "lucide-react";
@@ -11,7 +11,7 @@ type AuthTab = "login" | "register" | "phone" | "forgot";
 
 export default function AuthPage() {
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
+  const [mounted] = useState(true);
   const [tab, setTab] = useState<AuthTab>("login");
 
   const [email, setEmail] = useState("");
@@ -23,10 +23,6 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const formatPhoneForSupabase = (rawPhone: string) => rawPhone.replace(/\D/g, "");
 

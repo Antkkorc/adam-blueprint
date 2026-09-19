@@ -97,6 +97,9 @@ export default function SellPage() {
               <input
                 type="text"
                 required
+                minLength={2}
+                maxLength={80}
+                aria-label="Your name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Your Name"
@@ -105,6 +108,8 @@ export default function SellPage() {
               <input
                 type="tel"
                 required
+                maxLength={30}
+                aria-label="Phone number"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="Phone Number"
@@ -114,6 +119,8 @@ export default function SellPage() {
             <input
               type="email"
               required
+              maxLength={160}
+              aria-label="Email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email Address"
@@ -130,6 +137,9 @@ export default function SellPage() {
             <textarea
               rows={4}
               required
+              minLength={10}
+              maxLength={2000}
+              aria-label="Property description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Tell us about your property (location, features, desired price)..."

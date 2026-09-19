@@ -11,9 +11,13 @@ export async function GET() {
   } = await supabase.auth.getUser();
 
   const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase().trim();
+  const adminUserId = process.env.ADMIN_USER_ID?.trim();
   const userEmail = user?.email?.toLowerCase().trim();
 
-  const isAdmin = !!user && !!adminEmail && userEmail === adminEmail;
+  const isAdmin = !!user && (
+    (!!adminEmail && userEmail === adminEmail) ||
+    (!!adminUserId && user.id === adminUserId)
+  );
 
   return NextResponse.json({ isAdmin });
 }

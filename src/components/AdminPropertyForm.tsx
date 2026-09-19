@@ -1,17 +1,39 @@
 "use client";
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Upload, X } from "lucide-react";
+import { Upload, X, MapPin, Search } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { BRAND } from "@/lib/brand";
 import { AMENITY_OPTIONS, PROPERTY_TYPES } from "@/lib/filters";
-import { PHOTO_CATEGORIES } from "@/lib/photos";
+import { formatPhotoLabel, PHOTO_CATEGORIES } from "@/lib/photos";
 
 interface PhotoItem {
   id: string;
   file: File;
   preview: string;
   label: string;
+  description: string;
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "object" && error !== null) {
+    const value = error as {
+      message?: unknown;
+      error_description?: unknown;
+      details?: unknown;
+      hint?: unknown;
+      code?: unknown;
+    };
+    const parts = [value.message, value.error_description, value.details, value.hint]
+      .filter((part): part is string => typeof part === "string" && part.length > 0);
+    const code = typeof value.code === "string" ? ` (code: ${value.code})` : "";
+    if (parts.length > 0) return `${parts.join(" ")}${code}`;
+    const fallback = String(error);
+    return `${fallback === "[object Object]" ? "Supabase returned an unknown error object." : fallback}${code}`;
+  }
+  return "Unknown error";
 }
 
 export default function AdminPropertyForm() {
@@ -47,6 +69,8 @@ export default function AdminPropertyForm() {
   const [amenities, setAmenities] = useState<string[]>([]);
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
   const [sketchFiles, setSketchFiles] = useState<FileList | null>(null);
+  const [mapLoading, setMapLoading] = useState(false);
+  const [mapMessage, setMapMessage] = useState("");
 
   const types = PROPERTY_TYPES.filter((item) => item !== "All Types");
 
@@ -63,6 +87,7 @@ export default function AdminPropertyForm() {
       file,
       preview: URL.createObjectURL(file),
       label: PHOTO_CATEGORIES[0],
+      description: "",
     }));
     setPhotos((prev) => [...prev, ...next]);
   };
@@ -71,8 +96,40 @@ export default function AdminPropertyForm() {
     setPhotos((prev) => prev.map((p) => (p.id === id ? { ...p, label } : p)));
   };
 
+  const updatePhotoDescription = (id: string, description: string) => {
+    setPhotos((prev) => prev.map((p) => (p.id === id ? { ...p, description } : p)));
+  };
+
   const removePhoto = (id: string) => {
     setPhotos((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const findCoordinates = async () => {
+    const query = [location, suburb, city].filter(Boolean).join(", ");
+    if (!query) {
+      setMapMessage("Enter a location, city, or suburb first.");
+      return;
+    }
+    setMapLoading(true);
+    setMapMessage("");
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=bw&q=${encodeURIComponent(`${query}, Botswana`)}`
+      );
+      if (!response.ok) throw new Error("Location lookup failed.");
+      const results = (await response.json()) as Array<{ lat: string; lon: string; display_name: string }>;
+      if (!results[0]) {
+        setMapMessage("No matching Botswana location found. Try a nearby city or suburb.");
+      } else {
+        setLatitude(results[0].lat);
+        setLongitude(results[0].lon);
+        setMapMessage(`Pinned: ${results[0].display_name}`);
+      }
+    } catch (error) {
+      setMapMessage(error instanceof Error ? error.message : "Location lookup failed.");
+    } finally {
+      setMapLoading(false);
+    }
   };
 
   const uploadFiles = async (list: FileList, folder: string): Promise<string[]> => {
@@ -102,6 +159,7 @@ export default function AdminPropertyForm() {
       return;
     }
     setLoading(true);
+    const uploadedPaths: string[] = [];
     try {
       const imageUrls: string[] = [];
       const imageLabels: string[] = [];
@@ -113,7 +171,8 @@ export default function AdminPropertyForm() {
         if (uploadError) throw uploadError;
         const { data } = supabase.storage.from("property-images").getPublicUrl(filePath);
         imageUrls.push(data.publicUrl);
-        imageLabels.push(photo.label);
+        uploadedPaths.push(filePath);
+        imageLabels.push(formatPhotoLabel(photo.label, photo.description));
       }
       const sketchUrls = sketchFiles && sketchFiles.length > 0 ? await uploadFiles(sketchFiles, "sketches") : [];
       
@@ -146,9 +205,19 @@ export default function AdminPropertyForm() {
       setBuildingSqm(""); setLandSqm(""); setYearBuilt(""); setLatitude(""); setLongitude("");
       setAmenities([]); setPhotos([]); setSketchFiles(null);
       router.refresh();
-    } catch (error: any) {
-      alert("Error adding property:\n" + (error?.message || "Unknown error"));
-      console.error(error);
+    } catch (error) {
+      const message = getErrorMessage(error);
+      if (uploadedPaths.length > 0) {
+        await supabase.storage.from("property-images").remove(uploadedPaths);
+      }
+      alert("Error adding property:\n" + message);
+      console.error("Property submission failed:", {
+        message,
+        error,
+        code: typeof error === "object" && error !== null && "code" in error
+          ? error.code
+          : undefined,
+      });
     } finally {
       setLoading(false);
     }
@@ -171,10 +240,19 @@ export default function AdminPropertyForm() {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {photos.map((photo) => (
               <div key={photo.id} className="relative bg-slate-950 border border-slate-800 rounded-xl overflow-hidden p-2 space-y-2">
-                <img src={photo.preview} alt="preview" className="w-full h-28 object-cover rounded-lg" />
-                <select value={photo.label} onChange={(e) => updatePhotoLabel(photo.id, e.target.value)} className="w-full text-[10px] bg-slate-800 rounded-lg px-2 py-1.5 outline-none focus:ring-1 focus:ring-cyan-500">
+                <Image src={photo.preview} alt="preview" width={320} height={112} unoptimized className="w-full h-28 object-cover rounded-lg" />
+                <select value={photo.label} onChange={(e) => updatePhotoLabel(photo.id, e.target.value)} aria-label={`Photo ${photo.id} category`} className="w-full text-[10px] bg-slate-800 rounded-lg px-2 py-1.5 outline-none focus:ring-1 focus:ring-cyan-500">
                   {PHOTO_CATEGORIES.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
                 </select>
+                <input
+                  type="text"
+                  value={photo.description}
+                  onChange={(e) => updatePhotoDescription(photo.id, e.target.value)}
+                  maxLength={120}
+                  placeholder="Short description, e.g. Main entrance"
+                  aria-label={`Photo ${photo.id} description`}
+                  className="w-full text-[10px] bg-slate-800 rounded-lg px-2 py-1.5 outline-none focus:ring-1 focus:ring-cyan-500"
+                />
                 <button type="button" onClick={() => removePhoto(photo.id)} className="absolute top-1.5 right-1.5 p-1 rounded-full bg-red-500/90 hover:bg-red-500 text-white"><X className="w-3 h-3" /></button>
               </div>
             ))}
@@ -192,8 +270,17 @@ export default function AdminPropertyForm() {
         <input type="text" placeholder="Plot Number" className={inputClass} value={plotNumber} onChange={(e) => setPlotNumber(e.target.value)} />
         <input type="text" placeholder="City" className={inputClass} value={city} onChange={(e) => setCity(e.target.value)} />
         <input type="text" placeholder="Suburb / Ward" className={inputClass} value={suburb} onChange={(e) => setSuburb(e.target.value)} />
-        <input type="text" placeholder="Latitude" className={inputClass} value={latitude} onChange={(e) => setLatitude(e.target.value)} />
-        <input type="text" placeholder="Longitude" className={inputClass} value={longitude} onChange={(e) => setLongitude(e.target.value)} />
+        <div className="md:col-span-2 space-y-2">
+          <div className="flex gap-2">
+            <input type="text" placeholder="Latitude" aria-label="Latitude" className={inputClass} value={latitude} onChange={(e) => setLatitude(e.target.value)} />
+            <input type="text" placeholder="Longitude" aria-label="Longitude" className={inputClass} value={longitude} onChange={(e) => setLongitude(e.target.value)} />
+          </div>
+          <button type="button" onClick={findCoordinates} disabled={mapLoading} className="inline-flex items-center gap-2 rounded-xl border border-cyan-500/40 px-3 py-2 text-xs font-bold text-cyan-300 hover:bg-cyan-500/10 disabled:opacity-50">
+            {mapLoading ? <Search className="h-3.5 w-3.5 animate-pulse" /> : <MapPin className="h-3.5 w-3.5" />}
+            {mapLoading ? "Finding location..." : "Find pin from address"}
+          </button>
+          {mapMessage && <p className="text-[11px] text-slate-400">{mapMessage}</p>}
+        </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input type="number" placeholder="Price (BWP) *" required className={inputClass} value={price} onChange={(e) => setPrice(e.target.value)} />

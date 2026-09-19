@@ -11,6 +11,64 @@ body {
   color: #ffffff;
 }
 
+html[data-theme="light"] body {
+  background: #f4f8fb;
+  color: #102033;
+}
+
+html[data-theme="light"] .bg-slate-950,
+html[data-theme="light"] .bg-\[\#070b15\] {
+  background-color: #f4f8fb !important;
+}
+
+html[data-theme="light"] .bg-slate-900,
+html[data-theme="light"] .bg-slate-900\/90,
+html[data-theme="light"] .bg-slate-900\/50,
+html[data-theme="light"] .bg-slate-900\/60 {
+  background-color: #ffffff !important;
+}
+
+html[data-theme="light"] .text-white,
+html[data-theme="light"] .text-slate-100,
+html[data-theme="light"] .text-slate-200 {
+  color: #102033 !important;
+}
+
+html[data-theme="light"] .text-slate-300,
+html[data-theme="light"] .text-slate-400 {
+  color: #526477 !important;
+}
+
+html[data-theme="light"] .text-slate-500,
+html[data-theme="light"] .text-slate-600 {
+  color: #687b8f !important;
+}
+
+html[data-theme="light"] [class*="border-slate-"] {
+  border-color: #d7e2eb !important;
+}
+
+html[data-theme="dark"] body {
+  background: #000000;
+  color: #f8fafc;
+}
+
+html[data-theme="dark"] .bg-\[\#070b15\],
+html[data-theme="dark"] .bg-slate-950 {
+  background-color: #000000 !important;
+}
+
+html[data-theme="dark"] .bg-slate-900,
+html[data-theme="dark"] .bg-slate-900\/90,
+html[data-theme="dark"] .bg-slate-900\/60,
+html[data-theme="dark"] .bg-slate-900\/50 {
+  background-color: #050505 !important;
+}
+
+html[data-theme="dark"] aside {
+  background-color: #000000 !important;
+}
+
 .glass {
   background: rgba(15, 23, 42, 0.55);
   backdrop-filter: blur(14px);
@@ -55,4 +113,13 @@ input[type="number"]::-webkit-inner-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
   appearance: textfield;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #22d3ee;
+  outline-offset: 2px;
 }
