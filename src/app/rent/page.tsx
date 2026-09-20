@@ -7,15 +7,29 @@ import { getLocationSearch } from "@/lib/filters";
 export const revalidate = 0; // Ensures fresh data on every request
 
 interface RentPageProps {
-  searchParams: Promise<{ location?: string }>;
+  searchParams: Promise<{
+    location?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    minBeds?: string;
+    minBaths?: string;
+  }>;
 }
 
 export default async function RentPage({ searchParams }: RentPageProps) {
   const params = await searchParams;
   const location = getLocationSearch(params.location || "");
+  const minPrice = Math.max(0, Number(params.minPrice) || 0);
+  const maxPrice = Math.max(0, Number(params.maxPrice) || 0);
+  const minBeds = Math.max(0, Number(params.minBeds) || 0);
+  const minBaths = Math.max(0, Number(params.minBaths) || 0);
   const supabase = await createClient();
   let query = supabase.from("tenant_rentals").select("*");
   if (location) query = query.ilike("location", `%${location}%`);
+  if (minPrice > 0) query = query.gte("price", minPrice);
+  if (maxPrice > 0) query = query.lte("price", maxPrice);
+  if (minBeds > 0) query = query.gte("bedrooms", minBeds);
+  if (minBaths > 0) query = query.gte("bathrooms", minBaths);
   const { data: rentals, error } = await query.order("created_at", { ascending: false });
 
   if (error) {
@@ -34,13 +48,38 @@ export default async function RentPage({ searchParams }: RentPageProps) {
             </p>
           </div>
 
-          <form className="flex flex-col sm:flex-row gap-3" role="search">
+          <form className="grid w-full gap-3 sm:grid-cols-2 lg:grid-cols-5" role="search">
             <label htmlFor="rental-location" className="sr-only">Search rental location</label>
             <input id="rental-location" name="location" defaultValue={location} type="search"
-              placeholder="Search by location, e.g. Gaborone"
-              className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan-500" />
-            <button type="submit" className="rounded-xl bg-slate-800 px-5 py-3 text-sm font-bold hover:bg-slate-700">Search rentals</button>
-            {location && <Link href="/rent" className="rounded-xl px-4 py-3 text-sm text-slate-400 hover:text-white">Clear</Link>}
+              placeholder="Location, e.g. Gaborone"
+              className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan-500 lg:col-span-2" />
+            <label htmlFor="rental-min-price" className="sr-only">Minimum monthly price</label>
+            <input id="rental-min-price" name="minPrice" defaultValue={minPrice || ""} type="number" min="0"
+              placeholder="Min price"
+              className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan-500" />
+            <label htmlFor="rental-max-price" className="sr-only">Maximum monthly price</label>
+            <input id="rental-max-price" name="maxPrice" defaultValue={maxPrice || ""} type="number" min="0"
+              placeholder="Max price"
+              className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan-500" />
+            <select name="minBeds" defaultValue={minBeds || ""} aria-label="Minimum bedrooms"
+              className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan-500">
+              <option value="">Any bedrooms</option>
+              <option value="1">1+ bedroom</option>
+              <option value="2">2+ bedrooms</option>
+              <option value="3">3+ bedrooms</option>
+              <option value="4">4+ bedrooms</option>
+            </select>
+            <select name="minBaths" defaultValue={minBaths || ""} aria-label="Minimum bathrooms"
+              className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan-500">
+              <option value="">Any bathrooms</option>
+              <option value="1">1+ bathroom</option>
+              <option value="2">2+ bathrooms</option>
+              <option value="3">3+ bathrooms</option>
+            </select>
+            <div className="flex gap-2 sm:col-span-2 lg:col-span-5">
+              <button type="submit" className="rounded-xl bg-slate-800 px-5 py-3 text-sm font-bold hover:bg-slate-700">Search rentals</button>
+              {(location || minPrice || maxPrice || minBeds || minBaths) ? <Link href="/rent" className="rounded-xl px-4 py-3 text-sm text-slate-400 hover:text-white">Clear filters</Link> : null}
+            </div>
           </form>
           <Link
             href="/list-my-rental"

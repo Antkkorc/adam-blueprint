@@ -1,4 +1,4 @@
-import { MapPin, MessageCircle } from "lucide-react";
+import { Eye, MapPin, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -80,6 +80,14 @@ export default function TenantRentalCard({ rental }: { rental: TenantRental }) {
         <p className="text-slate-400 text-xs line-clamp-2">
           {rental.description || rental.info}
         </p>
+
+        <Link
+          href={`/rental/${rental.id}`}
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-cyan-500/40 py-2 text-xs font-bold text-cyan-300 transition-colors hover:bg-cyan-500/10 hover:text-cyan-200"
+        >
+          <Eye className="h-3.5 w-3.5" />
+          Details
+        </Link>
 
         {phone && (
           <a
