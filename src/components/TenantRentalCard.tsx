@@ -1,5 +1,6 @@
 import { MapPin, MessageCircle } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 export interface TenantRental {
   id: string;
@@ -36,13 +37,15 @@ export default function TenantRentalCard({ rental }: { rental: TenantRental }) {
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden hover:border-cyan-500/40 transition-all group">
       <div className="relative h-52">
-        <Image
-          src={image}
-          alt={rental.title}
-          fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-        />
+        <Link href={`/rental/${rental.id}`} aria-label={`View details for ${rental.title}`}>
+          <Image
+            src={image}
+            alt={rental.title}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+        </Link>
         <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-emerald-400 text-slate-950 text-[10px] font-extrabold uppercase">
           Community Listing
         </div>
@@ -51,7 +54,9 @@ export default function TenantRentalCard({ rental }: { rental: TenantRental }) {
       <div className="p-4 space-y-3">
         <div>
           <h3 className="text-white font-bold text-sm line-clamp-1">
-            {rental.title}
+            <Link href={`/rental/${rental.id}`} className="hover:text-cyan-400 transition-colors">
+              {rental.title}
+            </Link>
           </h3>
           <p className="text-slate-400 text-xs flex items-center gap-1 mt-1">
             <MapPin className="w-3 h-3 text-cyan-400" />

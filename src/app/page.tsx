@@ -116,7 +116,10 @@ export default function HomePage() {
             {(["buy", "rent", "sell"] as const).map((tab) => (
               <button
                 key={tab}
-                onClick={() => setActiveTab(tab)}
+                onClick={() => {
+                  setActiveTab(tab);
+                  if (tab === "rent") router.push("/rent");
+                }}
                 className={`px-6 py-2 rounded-full text-xs font-bold transition-all capitalize ${
                   activeTab === tab
                     ? "bg-cyan-400 text-slate-950 shadow-[0_0_15px_rgba(34,211,238,0.4)]"
