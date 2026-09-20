@@ -2,20 +2,20 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
 import { BRAND } from "@/lib/brand";
 import { useTheme, type Theme } from "@/context/ThemeContext";
+import { useAuth } from "@/context/AuthContext";
 import {
   Menu as MenuIcon, X, PhoneCall, User, Home, Building, Tag, Info, LogIn, Heart, LogOut, Shield, Settings, Sun, Moon, Sparkles,
 } from "lucide-react";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [user, setUser] = useState<SupabaseUser | null | undefined>(undefined);
   const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
   const { theme, setTheme } = useTheme();
+  const { user } = useAuth();
 
   useEffect(() => {
     let mounted = true;
@@ -29,29 +29,15 @@ export default function Header() {
       }
     };
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      setUser(session?.user ?? null);
-      if (session) checkAdmin();
-      else setIsAdmin(false);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!mounted) return;
-      setUser(session?.user ?? null);
-      if (session) checkAdmin();
-      else setIsAdmin(false);
-    });
+    if (user) checkAdmin();
 
     return () => {
       mounted = false;
-      subscription.unsubscribe();
     };
-  }, []);
+  }, [user]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    setUser(null);
     setIsAdmin(false);
     setIsMenuOpen(false);
     router.refresh();
