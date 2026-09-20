@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -29,9 +30,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className="bg-[#070b15] text-white antialiased" suppressHydrationWarning>
         <ThemeProvider>
-          <Header />
-          <div className="min-h-screen">{children}</div>
-          <Footer />
+          <AuthProvider>
+            <Header />
+            <div className="min-h-screen">{children}</div>
+            <Footer />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
