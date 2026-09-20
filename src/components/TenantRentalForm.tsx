@@ -94,6 +94,7 @@ export default function TenantRentalForm() {
           bedrooms: Number(bedrooms),
           bathrooms: Number(bathrooms),
           description,
+          info: description,
           tenant_name: contactName,
           contact_number: contactPhone,
           images: imageUrls,
