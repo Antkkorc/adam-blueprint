@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(request: Request) {
+  const user = await requireAdmin();
   try {
-    const user = await requireAdmin();
     const listing = await request.json();
-    const { createClient } = await import("@/lib/supabase/server");
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     const { error } = await supabase.from("tenant_rentals").insert([{
       ...listing,
       user_id: listing.user_id || user.id,
