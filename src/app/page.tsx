@@ -16,7 +16,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [location, setLocation] = useState("");
   const [activeTab, setActiveTab] = useState<"buy" | "rent" | "sell">("buy");
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isReturningUser, setIsReturningUser] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
@@ -90,7 +90,9 @@ export default function HomePage() {
         </div>
 
         <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">
-          {user && authChecked ? (
+          {authLoading ? (
+            <span className="text-slate-400">Loading your account...</span>
+          ) : user && authChecked ? (
             <>
               {isAdmin ? "Welcome Back Admin" : isReturningUser ? "Welcome back" : "Welcome to Adam Blueprint"}<br />
               <span className="text-cyan-400">{isAdmin ? "" : firstName}</span>
