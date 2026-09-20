@@ -26,17 +26,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
     const { data: authListener } = supabase.auth.onAuthStateChange((_, session) => {
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
+    let cancelled = false;
+    const loadSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (cancelled) return;
+      if (session) {
+        setUser(session.user);
+        setLoading(false);
+        return;
+      }
+
+      // OAuth redirects can finish writing browser storage just after the
+      // first session read on slower mobile browsers.
+      window.setTimeout(async () => {
+        if (cancelled) return;
+        const { data: { session: retriedSession } } = await supabase.auth.getSession();
+        if (!cancelled) {
+          setUser(retriedSession?.user ?? null);
+          setLoading(false);
+        }
+      }, 300);
+    };
+
+    void loadSession();
+
     return () => {
+      cancelled = true;
       authListener.subscription.unsubscribe();
     };
   }, []);

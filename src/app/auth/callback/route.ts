@@ -24,11 +24,15 @@ export async function GET(request: Request) {
         );
       }
 
-      // Successful authentication — redirect user to their destination or homepage
-      return NextResponse.redirect(`${origin}${next}`);
+      // Successful authentication — redirect user to their destination or homepage.
+      const response = NextResponse.redirect(new URL(next, origin));
+      response.headers.set("Cache-Control", "no-store");
+      return response;
     }
   }
 
   // If there's an error or missing code, redirect to an error page or login with a feedback query
-  return NextResponse.redirect(`${origin}/login?error=Could not authenticate user`);
+  const response = NextResponse.redirect(`${origin}/login?error=Could not authenticate user`);
+  response.headers.set("Cache-Control", "no-store");
+  return response;
 }
