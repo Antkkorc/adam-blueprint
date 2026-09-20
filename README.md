@@ -34,6 +34,7 @@ If an existing `tenant_rentals` table was created with only some rental fields, 
 
 Run `supabase/migrations/20260920170000_add_rental_review_workflow.sql` after that schema migration. Authenticated users submit rental details and photos into `rental_submissions` for review; those submissions do not appear on `/rent`. Only an administrator can publish a verified listing through `/admin/add-rental`, which inserts the final record into `tenant_rentals`.
 Pending submissions can be reviewed at `/admin/rentals`; approval publishes the listing and records review metadata, while rejection only records the review decision.
+Administrators can manage published properties and tenant rentals at `/admin/listings`. Properties support `Available`, `Sold`, and `Rented`; tenant rentals support `Available` and `Rented`. Apply `20260920180000_add_rental_listing_status.sql` to add the rental status column and prevent regular users from mutating published rentals.
 
 Public property results are expected to use `intent = 'buy'` or `intent = 'rent'` and `status = 'active'`. Review existing records before enabling the production site so older status values are migrated if necessary.
 
@@ -61,3 +62,4 @@ npm run build
 - `/contact` - general contact form
 - `/saved` - authenticated saved properties
 - `/admin` - admin-only property management
+- `/admin/listings` - admin-only listing status and deletion management

@@ -16,6 +16,7 @@ export interface TenantRental {
   info?: string;
   images: string[];
   user_id?: string;
+  status?: string;
 }
 
 export default function TenantRentalCard({ rental }: { rental: TenantRental }) {
