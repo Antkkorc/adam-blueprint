@@ -91,7 +91,7 @@ export default function TenantRentalForm() {
           price: Number(price),
           description,
           tenant_name: contactName,
-          tenant_phone: contactPhone,
+          contact_number: contactPhone,
           images: imageUrls,
           user_id: session.user.id,
         },

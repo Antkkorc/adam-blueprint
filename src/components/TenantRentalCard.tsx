@@ -9,7 +9,7 @@ export interface TenantRental {
   location: string;
   price: number;
   tenant_name: string;
-  tenant_phone: string;
+  contact_number: string;
   images: string[];
   user_id?: string;
 }
@@ -25,7 +25,7 @@ export default function TenantRentalCard({ rental }: { rental: TenantRental }) {
     maximumFractionDigits: 0,
   }).format(Number(rental.price || 0));
 
-  const phone = (rental.tenant_phone || "").replace(/\D/g, "");
+  const phone = (rental.contact_number || "").replace(/\D/g, "");
   const message = encodeURIComponent(
     `Hello, I am interested in your rental listing "${rental.title}" in ${rental.location}. Is it still available?`
   );
