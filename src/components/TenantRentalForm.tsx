@@ -4,6 +4,25 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "object" && error !== null) {
+    const value = error as {
+      message?: unknown;
+      error_description?: unknown;
+      details?: unknown;
+      hint?: unknown;
+      code?: unknown;
+    };
+    const message = [value.message, value.error_description, value.details, value.hint]
+      .filter((part): part is string => typeof part === "string" && part.trim().length > 0)
+      .join(" ");
+    const code = typeof value.code === "string" ? ` (code: ${value.code})` : "";
+    if (message) return `${message}${code}`;
+  }
+  return "Unable to submit rental listing. Please try again.";
+}
+
 export default function TenantRentalForm() {
   const router = useRouter();
 
@@ -33,6 +52,7 @@ export default function TenantRentalForm() {
     }
 
     setLoading(true);
+    const uploadedPaths: string[] = [];
 
     try {
       const imageUrls: string[] = [];
@@ -54,6 +74,7 @@ export default function TenantRentalForm() {
           if (uploadError) {
             throw uploadError;
           }
+          uploadedPaths.push(filePath);
 
           const { data } = supabase.storage
             .from("rental-images")
@@ -84,8 +105,15 @@ export default function TenantRentalForm() {
       router.push("/rent");
       router.refresh();
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unable to submit rental listing.";
-      setError(message);
+      if (uploadedPaths.length > 0) {
+        const { error: cleanupError } = await supabase.storage
+          .from("rental-images")
+          .remove(uploadedPaths);
+        if (cleanupError) {
+          console.error("Unable to clean up rental uploads after submission failure:", cleanupError);
+        }
+      }
+      setError(getErrorMessage(error));
       console.error(error);
     } finally {
       setLoading(false);
