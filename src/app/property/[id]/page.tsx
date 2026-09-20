@@ -54,6 +54,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
   const hasCoords = property.latitude != null && property.longitude != null;
   let mapEmbed = "";
   let mapLink = "";
+  let satelliteLink = "";
   
   if (hasCoords) {
     const lat = property.latitude;
@@ -62,6 +63,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
     const bbox = `${lon - 0.003},${lat - 0.003},${lon + 0.003},${lat + 0.003}`;
     mapEmbed = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lon}`;
     mapLink = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=17/${lat}/${lon}`;
+    satelliteLink = `https://www.google.com/maps/@?api=1&map_action=map&center=${lat},${lon}&zoom=18&basemap=satellite`;
   } else {
     const query = `${property.location || property.city || "Gaborone"}, Botswana`;
     mapLink = `https://www.openstreetmap.org/search?query=${encodeURIComponent(query)}`;
@@ -168,9 +170,16 @@ export default async function PropertyDetailPage({ params }: PageProps) {
               <div className="flex items-center justify-between gap-3 flex-wrap">
                 <h2 className="text-lg font-bold flex items-center gap-2"><MapPin className="w-5 h-5 text-cyan-400" /> Pinned Location</h2>
                 {mapLink && (
-                  <a href={mapLink} target="_blank" rel="noopener noreferrer" className="text-xs text-cyan-400 hover:underline font-semibold">
-                    Open in Full Map →
-                  </a>
+                  <div className="flex flex-wrap gap-3">
+                    <a href={mapLink} target="_blank" rel="noopener noreferrer" className="text-xs text-cyan-400 hover:underline font-semibold">
+                      Open street map →
+                    </a>
+                    {satelliteLink && (
+                      <a href={satelliteLink} target="_blank" rel="noopener noreferrer" className="text-xs text-emerald-400 hover:underline font-semibold">
+                        Open satellite view →
+                      </a>
+                    )}
+                  </div>
                 )}
               </div>
               

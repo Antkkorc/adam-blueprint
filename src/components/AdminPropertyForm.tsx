@@ -26,6 +26,7 @@ function getErrorMessage(error: unknown): string {
       hint?: unknown;
       code?: unknown;
     };
+
     const parts = [value.message, value.error_description, value.details, value.hint]
       .filter((part): part is string => typeof part === "string" && part.length > 0);
     const code = typeof value.code === "string" ? ` (code: ${value.code})` : "";
@@ -130,6 +131,30 @@ export default function AdminPropertyForm() {
     } finally {
       setMapLoading(false);
     }
+  };
+
+  const useCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setMapMessage("Your browser does not support location sharing.");
+      return;
+    }
+    setMapLoading(true);
+    setMapMessage("Requesting your device location...");
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setLatitude(coords.latitude.toFixed(7));
+        setLongitude(coords.longitude.toFixed(7));
+        setMapMessage("Exact device location selected. Confirm the pin before publishing.");
+        setMapLoading(false);
+      },
+      (error) => {
+        setMapMessage(error.code === error.PERMISSION_DENIED
+          ? "Location permission was denied. Enable it in your browser and try again."
+          : "Could not read your current location.");
+        setMapLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
   };
 
   const uploadFiles = async (list: FileList, folder: string): Promise<string[]> => {
@@ -279,6 +304,10 @@ export default function AdminPropertyForm() {
             {mapLoading ? <Search className="h-3.5 w-3.5 animate-pulse" /> : <MapPin className="h-3.5 w-3.5" />}
             {mapLoading ? "Finding location..." : "Find pin from address"}
           </button>
+          <button type="button" onClick={useCurrentLocation} disabled={mapLoading} className="ml-2 inline-flex items-center gap-2 rounded-xl border border-emerald-500/40 px-3 py-2 text-xs font-bold text-emerald-300 hover:bg-emerald-500/10 disabled:opacity-50">
+            <MapPin className="h-3.5 w-3.5" />
+            Use my current location
+          </button>
           {mapMessage && <p className="text-[11px] text-slate-400">{mapMessage}</p>}
         </div>
       </div>
@@ -287,9 +316,9 @@ export default function AdminPropertyForm() {
         {intent === "buy" && <select value={priceUnit} onChange={(e) => setPriceUnit(e.target.value as "total" | "month")} className={inputClass}><option value="total">Total Price</option><option value="month">Per Month</option></select>}
         <input type="number" placeholder="Building Size (m²)" className={inputClass} value={buildingSqm} onChange={(e) => setBuildingSqm(e.target.value)} />
         <input type="number" placeholder="Land Size (m²)" className={inputClass} value={landSqm} onChange={(e) => setLandSqm(e.target.value)} />
-        <input type="number" placeholder="Beds" className={inputClass} value={beds} onChange={(e) => setBeds(e.target.value)} />
-        <input type="number" placeholder="Baths" className={inputClass} value={baths} onChange={(e) => setBaths(e.target.value)} />
-        <input type="number" placeholder="Parking" className={inputClass} value={parking} onChange={(e) => setParking(e.target.value)} />
+        <label className="space-y-1 text-xs font-semibold text-slate-300">Bedrooms<input type="number" min="0" placeholder="Number of bedrooms" className={inputClass} value={beds} onChange={(e) => setBeds(e.target.value)} /></label>
+        <label className="space-y-1 text-xs font-semibold text-slate-300">Bathrooms<input type="number" min="0" placeholder="Number of bathrooms" className={inputClass} value={baths} onChange={(e) => setBaths(e.target.value)} /></label>
+        <label className="space-y-1 text-xs font-semibold text-slate-300">Parking / Garage<input type="number" min="0" placeholder="Parking spaces" className={inputClass} value={parking} onChange={(e) => setParking(e.target.value)} /></label>
         <input type="number" placeholder="Year Built" className={inputClass} value={yearBuilt} onChange={(e) => setYearBuilt(e.target.value)} />
       </div>
       <textarea placeholder="Short description *" required rows={2} className={inputClass} value={description} onChange={(e) => setDescription(e.target.value)} />

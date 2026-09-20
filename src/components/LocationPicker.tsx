@@ -30,26 +30,28 @@ export default function LocationPicker({ value, onChange }: Props) {
   return (
     <div className="relative flex-1" ref={ref}>
       <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 border border-white/5 focus-within:border-cyan-500/50 transition-colors">
+        <button
+          type="button"
+          onClick={() => setOpen(!open)}
+          aria-label="Browse Botswana locations"
+          className="shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-2.5 py-2 text-[10px] font-extrabold uppercase tracking-wide text-cyan-300 hover:bg-cyan-500/20"
+        >
+          <ListFilter className="h-4 w-4" />
+          <span className="hidden sm:inline">All locations</span>
+        </button>
         <MapPin className="h-6 w-6 text-cyan-400 shrink-0" aria-hidden="true" />
         <span className="hidden text-[10px] font-extrabold uppercase tracking-wider text-cyan-300 sm:inline">Location</span>
         <input
           value={value}
           onChange={(event) => {
             onChange(event.target.value);
-            setOpen(false);
+            setOpen(true);
           }}
+          onFocus={() => setOpen(true)}
           placeholder="Search by city or suburb, e.g. Gaborone"
           aria-label="Search by city or suburb"
           className="min-w-0 flex-1 bg-transparent text-sm text-white placeholder:text-slate-400 outline-none"
         />
-        <button
-          type="button"
-          onClick={() => setOpen(!open)}
-          aria-label="Browse Botswana locations"
-          className="shrink-0 rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-cyan-300"
-        >
-          <ListFilter className="h-4 w-4" />
-        </button>
       </div>
 
       {open && (
@@ -58,6 +60,7 @@ export default function LocationPicker({ value, onChange }: Props) {
             type="button"
             onClick={() => {
               onChange("");
+              setActiveCity(null);
               setOpen(false);
             }}
             className="w-full px-4 py-2.5 text-left text-xs font-bold text-cyan-300 hover:bg-slate-800 border-b border-slate-800 transition-colors"
