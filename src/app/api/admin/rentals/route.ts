@@ -10,6 +10,7 @@ export async function POST(request: Request) {
     const { error } = await supabase.from("tenant_rentals").insert([{
       ...listing,
       user_id: listing.user_id || user.id,
+      status: "Available",
     }]);
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
     return NextResponse.json({ ok: true });

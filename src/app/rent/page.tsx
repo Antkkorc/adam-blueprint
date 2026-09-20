@@ -24,7 +24,7 @@ export default async function RentPage({ searchParams }: RentPageProps) {
   const minBeds = Math.max(0, Number(params.minBeds) || 0);
   const minBaths = Math.max(0, Number(params.minBaths) || 0);
   const supabase = await createClient();
-  let query = supabase.from("tenant_rentals").select("*");
+  let query = supabase.from("tenant_rentals").select("*").eq("status", "Available");
   if (location) query = query.ilike("location", `%${location}%`);
   if (minPrice > 0) query = query.gte("price", minPrice);
   if (maxPrice > 0) query = query.lte("price", maxPrice);

@@ -49,6 +49,7 @@ export async function reviewRentalSubmission(
       contact_number: submission.contact_number,
       contact_name: submission.contact_name,
       contact_phone: submission.contact_number,
+      status: "Available",
     })
     .select("id")
     .single();
