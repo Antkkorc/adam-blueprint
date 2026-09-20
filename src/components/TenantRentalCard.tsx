@@ -8,6 +8,7 @@ export interface TenantRental {
   description: string;
   location: string;
   price: number;
+  bedrooms: number;
   tenant_name: string;
   contact_number: string;
   images: string[];
@@ -59,7 +60,9 @@ export default function TenantRentalCard({ rental }: { rental: TenantRental }) {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-cyan-400 font-extrabold text-sm">{price}</p>
-            <p className="text-[10px] text-slate-500">per month</p>
+            <p className="text-[10px] text-slate-500">
+              {rental.bedrooms} bedroom{rental.bedrooms === 1 ? "" : "s"} · per month
+            </p>
           </div>
           <p className="text-[10px] text-slate-500">
             Listed by {rental.tenant_name || "Owner"}
