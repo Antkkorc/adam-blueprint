@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { AuthProvider } from "@/context/AuthContext";
+import ScrollToTop from "@/components/ScrollToTop";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -31,6 +32,7 @@ export default function RootLayout({
       <body className="bg-[#070b15] text-white antialiased" suppressHydrationWarning>
         <ThemeProvider>
           <AuthProvider>
+            <ScrollToTop />
             <Header />
             <div className="min-h-screen">{children}</div>
             <Footer />
