@@ -17,17 +17,35 @@ export default function HomePage() {
   const [location, setLocation] = useState("");
   const [activeTab, setActiveTab] = useState<"buy" | "rent" | "sell">("buy");
   const { user } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isReturningUser, setIsReturningUser] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
   const metadata = user?.user_metadata as { full_name?: string; name?: string; first_name?: string } | undefined;
   const accountName = metadata?.first_name || metadata?.full_name || metadata?.name || user?.email?.split("@")[0] || "there";
   const firstName = accountName.trim().split(/\s+/)[0];
-  const isReturningUser = user
-    ? window.localStorage.getItem(`adam-blueprint-seen-user:${user.id}`) === "true"
-    : false;
-
   useEffect(() => {
-    if (user) {
-      window.localStorage.setItem(`adam-blueprint-seen-user:${user.id}`, "true");
+    let mounted = true;
+    if (!user) {
+      return () => { mounted = false; };
     }
+
+    const key = `adam-blueprint-seen-user:${user.id}`;
+    queueMicrotask(() => {
+      if (mounted) setIsReturningUser(window.localStorage.getItem(key) === "true");
+    });
+    window.localStorage.setItem(key, "true");
+    fetch("/api/admin-check")
+      .then((response) => response.json())
+      .then((data) => {
+        if (mounted) setIsAdmin(!!data.isAdmin);
+      })
+      .catch(() => {
+        if (mounted) setIsAdmin(false);
+      })
+      .finally(() => {
+        if (mounted) setAuthChecked(true);
+      });
+    return () => { mounted = false; };
   }, [user]);
 
   useEffect(() => {
@@ -72,10 +90,10 @@ export default function HomePage() {
         </div>
 
         <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">
-          {user ? (
+          {user && authChecked ? (
             <>
-              {isReturningUser ? "Welcome back" : "Welcome to Adam Blueprint"}<br />
-              <span className="text-cyan-400">{firstName}</span>
+              {isAdmin ? "Welcome Back Admin" : isReturningUser ? "Welcome back" : "Welcome to Adam Blueprint"}<br />
+              <span className="text-cyan-400">{isAdmin ? "" : firstName}</span>
             </>
           ) : (
             <>
