@@ -21,7 +21,9 @@ export default function AuthPage() {
   const [phoneStep, setPhoneStep] = useState<"input" | "otp">("input");
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(() =>
+    typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("error")
+  );
   const [message, setMessage] = useState<string | null>(null);
 
   const formatPhoneForSupabase = (rawPhone: string) => rawPhone.replace(/\D/g, "");
@@ -66,11 +68,14 @@ export default function AuthPage() {
 
   const handleOAuth = async (provider: "google" | "facebook") => {
     setError(null);
-    const { error } = await supabase.auth.signInWithOAuth({
+    setLoading(true);
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: `${window.location.origin}/auth/callback?auth_mode=${tab}` },
     });
     if (error) setError(error.message);
+    if (data.url) window.location.assign(data.url);
+    setLoading(false);
   };
 
   const handleSendPhoneOtp = async (e: React.FormEvent) => {

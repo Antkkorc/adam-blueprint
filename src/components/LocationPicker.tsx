@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { MapPin, ChevronRight, Check, ListFilter } from "lucide-react";
+import { MapPin, ChevronRight, Check } from "lucide-react";
 import { LOCATION_TREE } from "@/data/locations";
 
 interface Props {
@@ -36,11 +36,9 @@ export default function LocationPicker({ value, onChange }: Props) {
           aria-label="Browse Botswana locations"
           className="shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-2.5 py-2 text-[10px] font-extrabold uppercase tracking-wide text-cyan-300 hover:bg-cyan-500/20"
         >
-          <ListFilter className="h-4 w-4" />
-          <span className="hidden sm:inline">All locations</span>
+          <MapPin className="h-4 w-4" />
+          <span>All locations</span>
         </button>
-        <MapPin className="h-6 w-6 text-cyan-400 shrink-0" aria-hidden="true" />
-        <span className="hidden text-[10px] font-extrabold uppercase tracking-wider text-cyan-300 sm:inline">Location</span>
         <input
           value={value}
           onChange={(event) => {

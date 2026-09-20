@@ -19,7 +19,6 @@ export default function Header() {
 
   useEffect(() => {
     let mounted = true;
-
     const checkAdmin = async () => {
       try {
         const res = await fetch("/api/admin-check");
@@ -59,9 +58,6 @@ export default function Header() {
   };
 
   const whatsappNumber = BRAND.whatsapp || BRAND.phone?.replace(/[^0-9]/g, "") || "26774551429";
-  const metadata = user?.user_metadata as { full_name?: string; name?: string; first_name?: string } | undefined;
-  const accountName = metadata?.first_name || metadata?.full_name || metadata?.name || user?.email?.split("@")[0] || "there";
-  const firstName = accountName.trim().split(/\s+/)[0];
 
   return (
     <>
@@ -100,12 +96,6 @@ export default function Header() {
           </div>
         </div>
       </header>
-      {user && (
-        <div className="border-b border-cyan-500/20 bg-cyan-500/5 px-4 py-2 text-center text-sm font-semibold text-cyan-200">
-          Welcome to Adam Blueprint, {firstName}
-        </div>
-      )}
-
       {isMenuOpen && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 transition-opacity" onClick={() => setIsMenuOpen(false)} />
       )}

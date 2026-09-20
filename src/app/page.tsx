@@ -8,6 +8,7 @@ import PropertyCard from "@/components/PropertyCard";
 import LocationPicker from "@/components/LocationPicker";
 import { Search, ShieldCheck, Award, MessageSquare } from "lucide-react";
 import type { Property } from "@/types/property";
+import { useAuth } from "@/context/AuthContext";
 
 export default function HomePage() {
   const router = useRouter();
@@ -15,6 +16,19 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [location, setLocation] = useState("");
   const [activeTab, setActiveTab] = useState<"buy" | "rent" | "sell">("buy");
+  const { user } = useAuth();
+  const metadata = user?.user_metadata as { full_name?: string; name?: string; first_name?: string } | undefined;
+  const accountName = metadata?.first_name || metadata?.full_name || metadata?.name || user?.email?.split("@")[0] || "there";
+  const firstName = accountName.trim().split(/\s+/)[0];
+  const isReturningUser = user
+    ? window.localStorage.getItem(`adam-blueprint-seen-user:${user.id}`) === "true"
+    : false;
+
+  useEffect(() => {
+    if (user) {
+      window.localStorage.setItem(`adam-blueprint-seen-user:${user.id}`, "true");
+    }
+  }, [user]);
 
   useEffect(() => {
     async function loadFeaturedProperties() {
@@ -58,8 +72,17 @@ export default function HomePage() {
         </div>
 
         <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">
-          Find Your Perfect <br />
-          <span className="text-cyan-400">Property in Botswana</span>
+          {user ? (
+            <>
+              {isReturningUser ? "Welcome back" : "Welcome to Adam Blueprint"}<br />
+              <span className="text-cyan-400">{firstName}</span>
+            </>
+          ) : (
+            <>
+              Find Your Perfect <br />
+              <span className="text-cyan-400">Property in Botswana</span>
+            </>
+          )}
         </h1>
 
         <p className="text-slate-400 text-sm md:text-base max-w-2xl mx-auto">
