@@ -19,10 +19,12 @@ Create `.env.local` with:
 NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 ADMIN_EMAIL=...
+SUPABASE_SERVICE_ROLE_KEY=...
 ```
 
 `ADMIN_EMAIL` is required for admin routes to work. Admin access fails closed if it is missing or does not match the authenticated user's email.
 Alternatively, set `ADMIN_USER_ID` to the authenticated Supabase user's UUID. Find it in Supabase under Authentication > Users. Do not use the secret API key in this file or in browser code.
+`SUPABASE_SERVICE_ROLE_KEY` is required for the server-only rental review workflow. It bypasses RLS only after `requireAdmin()` has authenticated the administrator and must never be exposed to the browser.
 
 ## Supabase requirements
 
@@ -31,6 +33,7 @@ The application expects Supabase tables for `properties`, `tenant_rentals`, `ren
 If an existing `tenant_rentals` table was created with only some rental fields, run the complete schema SQL in `supabase/migrations/20260920133500_complete_tenant_rentals_schema.sql` in Supabase SQL Editor before submitting new rental listings. It supports the existing `tenant_name`/`contact_number` fields and maps the form description into both `description` and the legacy required `info` field. It is safe to run after the earlier migrations.
 
 Run `supabase/migrations/20260920170000_add_rental_review_workflow.sql` after that schema migration. Authenticated users submit rental details and photos into `rental_submissions` for review; those submissions do not appear on `/rent`. Only an administrator can publish a verified listing through `/admin/add-rental`, which inserts the final record into `tenant_rentals`.
+Pending submissions can be reviewed at `/admin/rentals`; approval publishes the listing and records review metadata, while rejection only records the review decision.
 
 Public property results are expected to use `intent = 'buy'` or `intent = 'rent'` and `status = 'active'`. Review existing records before enabling the production site so older status values are migrated if necessary.
 

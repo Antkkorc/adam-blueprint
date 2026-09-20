@@ -28,6 +28,12 @@ export default async function AdminPage() {
             <p className="text-slate-400 text-xs mt-2">Review a user&apos;s submitted details, then publish the verified rental listing.</p>
           </Link>
 
+          <Link href="/admin/rentals" className="bg-slate-900 border border-slate-800 hover:border-cyan-500/50 rounded-2xl p-6 transition-all group">
+            <ClipboardCheck className="w-8 h-8 text-cyan-400 mb-3 group-hover:scale-110 transition-transform" />
+            <h2 className="font-bold text-lg">Review Rental Submissions</h2>
+            <p className="text-slate-400 text-xs mt-2">Approve or reject pending community rental listings and their photos.</p>
+          </Link>
+
           <Link href="/" className="bg-slate-900 border border-slate-800 hover:border-cyan-500/50 rounded-2xl p-6 transition-all group">
             <Home className="w-8 h-8 text-cyan-400 mb-3 group-hover:scale-110 transition-transform" />
             <h2 className="font-bold text-lg">View Live Site</h2>
