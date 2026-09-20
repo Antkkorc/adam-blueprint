@@ -34,7 +34,7 @@ function getErrorMessage(error: unknown): string {
   return "Unable to submit rental listing. Please try again.";
 }
 
-export default function TenantRentalForm() {
+export default function TenantRentalForm({ adminMode = false }: { adminMode?: boolean }) {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
@@ -136,7 +136,7 @@ export default function TenantRentalForm() {
             throw new Error("Each image must be an image file smaller than 5 MB.");
           }
           const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
-          const filePath = `rentals/${Date.now()}-${i}-${safeName}`;
+          const filePath = `submissions/${session.user.id}/${Date.now()}-${i}-${safeName}`;
 
           const { error: uploadError } = await supabase.storage
             .from("rental-images")
@@ -155,31 +155,43 @@ export default function TenantRentalForm() {
           imageLabels.push(formatPhotoLabel(photo.category, photo.description));
       }
 
-      const { error } = await supabase.from("tenant_rentals").insert([
-        {
-          title,
-          location,
-          price: Number(price),
-          bedrooms: Number(bedrooms),
-          bathrooms: Number(bathrooms),
-          description,
-          info: description,
-          image_labels: imageLabels,
-          latitude: latitude ? Number(latitude) : null,
-          longitude: longitude ? Number(longitude) : null,
-          tenant_name: contactName,
-          contact_number: contactPhone,
-          images: imageUrls,
-          user_id: session.user.id,
-        },
-      ]);
-
-      if (error) {
-        throw error;
+      const listing = {
+        title,
+        location,
+        price: Number(price),
+        bedrooms: Number(bedrooms),
+        bathrooms: Number(bathrooms),
+        description,
+        info: description,
+        image_labels: imageLabels,
+        latitude: latitude ? Number(latitude) : null,
+        longitude: longitude ? Number(longitude) : null,
+        tenant_name: contactName,
+        contact_number: contactPhone,
+        images: imageUrls,
+        user_id: session.user.id,
+      };
+      if (adminMode) {
+        const response = await fetch("/api/admin/rentals", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(listing),
+        });
+        const result = await response.json() as { error?: string };
+        if (!response.ok) throw new Error(result.error || "Unable to publish rental.");
+      } else {
+        const { error } = await supabase.from("rental_submissions").insert([{
+          title, location, price: Number(price), bedrooms: Number(bedrooms),
+          bathrooms: Number(bathrooms), description, image_labels: imageLabels,
+          latitude: latitude ? Number(latitude) : null, longitude: longitude ? Number(longitude) : null,
+          contact_name: contactName, contact_number: contactPhone,
+          images: imageUrls, user_id: session.user.id,
+        }]);
+        if (error) throw error;
       }
 
       setSubmitted(true);
-      router.push("/rent");
+      if (adminMode) router.push("/rent");
       router.refresh();
     } catch (error) {
       if (uploadedPaths.length > 0) {
@@ -202,9 +214,10 @@ export default function TenantRentalForm() {
       onSubmit={handleSubmit}
       className="p-6 bg-slate-900 border border-slate-800 rounded-2xl max-w-xl w-full space-y-4 text-white"
     >
-      <h2 className="text-xl font-bold">List Your Rental Space</h2>
+      <h2 className="text-xl font-bold">{adminMode ? "Publish Verified Rental" : "Submit Rental for Review"}</h2>
+      {!adminMode && <p className="text-xs text-slate-400">Your submission will be reviewed before it appears publicly. Do not submit sensitive documents or private information.</p>}
       {error && <p role="alert" className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">{error}</p>}
-      {submitted && <p role="status" className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-300">Rental submitted successfully.</p>}
+      {submitted && <p role="status" className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-300">{adminMode ? "Rental published successfully." : "Rental submitted for admin review."}</p>}
 
       <input
         type="text"

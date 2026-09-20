@@ -26,9 +26,11 @@ Alternatively, set `ADMIN_USER_ID` to the authenticated Supabase user's UUID. Fi
 
 ## Supabase requirements
 
-The application expects Supabase tables for `properties`, `tenant_rentals`, `saved_properties`, and `enquiries`, plus the `property-images` and `rental-images` storage buckets. Public listing reads and authenticated writes must be covered by Row Level Security policies appropriate to your deployment.
+The application expects Supabase tables for `properties`, `tenant_rentals`, `rental_submissions`, `saved_properties`, and `enquiries`, plus the `property-images` and `rental-images` storage buckets. Public listing reads and authenticated writes must be covered by Row Level Security policies appropriate to your deployment.
 
 If an existing `tenant_rentals` table was created with only some rental fields, run the complete schema SQL in `supabase/migrations/20260920133500_complete_tenant_rentals_schema.sql` in Supabase SQL Editor before submitting new rental listings. It supports the existing `tenant_name`/`contact_number` fields and maps the form description into both `description` and the legacy required `info` field. It is safe to run after the earlier migrations.
+
+Run `supabase/migrations/20260920170000_add_rental_review_workflow.sql` after that schema migration. Authenticated users submit rental details and photos into `rental_submissions` for review; those submissions do not appear on `/rent`. Only an administrator can publish a verified listing through `/admin/add-rental`, which inserts the final record into `tenant_rentals`.
 
 Public property results are expected to use `intent = 'buy'` or `intent = 'rent'` and `status = 'active'`. Review existing records before enabling the production site so older status values are migrated if necessary.
 

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
-import { PlusCircle, Home } from "lucide-react";
+import { PlusCircle, Home, ClipboardCheck } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +20,12 @@ export default async function AdminPage() {
             <PlusCircle className="w-8 h-8 text-cyan-400 mb-3 group-hover:scale-110 transition-transform" />
             <h2 className="font-bold text-lg">Add Official Property</h2>
             <p className="text-slate-400 text-xs mt-2">Upload listings with categorized photos, sketch plans and exact pinned locations.</p>
+          </Link>
+
+          <Link href="/admin/add-rental" className="bg-slate-900 border border-slate-800 hover:border-cyan-500/50 rounded-2xl p-6 transition-all group">
+            <ClipboardCheck className="w-8 h-8 text-cyan-400 mb-3 group-hover:scale-110 transition-transform" />
+            <h2 className="font-bold text-lg">Publish Verified Rental</h2>
+            <p className="text-slate-400 text-xs mt-2">Review a user&apos;s submitted details, then publish the verified rental listing.</p>
           </Link>
 
           <Link href="/" className="bg-slate-900 border border-slate-800 hover:border-cyan-500/50 rounded-2xl p-6 transition-all group">
