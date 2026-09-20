@@ -44,6 +44,13 @@ export default async function RentalDetailPage({ params }: PageProps) {
   const whatsappMessage = encodeURIComponent(
     `Hello, I am interested in your rental listing "${rental.title}" in ${rental.location}. Is it still available?`
   );
+  const hasCoords = rental.latitude != null && rental.longitude != null;
+  const mapLink = hasCoords
+    ? `https://www.openstreetmap.org/?mlat=${rental.latitude}&mlon=${rental.longitude}#map=17/${rental.latitude}/${rental.longitude}`
+    : `https://www.openstreetmap.org/search?query=${encodeURIComponent(`${rental.location}, Botswana`)}`;
+  const satelliteLink = hasCoords
+    ? `https://www.google.com/maps/@?api=1&map_action=map&center=${rental.latitude},${rental.longitude}&zoom=18&basemap=satellite`
+    : "";
 
   return (
     <main className="min-h-screen bg-slate-950 text-white p-4 md:p-10">
@@ -82,19 +89,37 @@ export default async function RentalDetailPage({ params }: PageProps) {
               </div>
             </div>
 
-            {rental.latitude != null && rental.longitude != null && (
-              <section className="space-y-3 rounded-2xl border border-slate-800 bg-slate-900 p-6">
+            <section className="space-y-4 rounded-2xl border border-slate-800 bg-slate-900 p-6">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <h2 className="flex items-center gap-2 text-lg font-bold"><MapPin className="h-5 w-5 text-cyan-400" /> Location</h2>
-                <p className="text-sm text-slate-400">Approximate map location for {rental.location}.</p>
-                <iframe
-                  title={`Map showing ${rental.title}`}
-                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(rental.longitude) - 0.02},${Number(rental.latitude) - 0.02},${Number(rental.longitude) + 0.02},${Number(rental.latitude) + 0.02}&layer=mapnik&marker=${rental.latitude},${rental.longitude}`}
-                  className="h-80 w-full rounded-xl border-0"
-                  loading="lazy"
-                />
-                <a href={`https://www.openstreetmap.org/?mlat=${rental.latitude}&mlon=${rental.longitude}#map=15/${rental.latitude}/${rental.longitude}`} target="_blank" rel="noopener noreferrer" className="inline-block text-xs font-bold text-cyan-400 hover:underline">Open larger map</a>
-              </section>
-            )}
+                <div className="flex flex-wrap gap-3">
+                  <a href={mapLink} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-cyan-400 hover:underline">
+                    Open street map →
+                  </a>
+                  {satelliteLink && (
+                    <a href={satelliteLink} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-emerald-400 hover:underline">
+                      Open satellite view →
+                    </a>
+                  )}
+                </div>
+              </div>
+              {hasCoords ? (
+                <>
+                  <p className="text-sm text-slate-400">Approximate map location for {rental.location}.</p>
+                  <iframe
+                    title={`Map showing ${rental.title}`}
+                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(rental.longitude) - 0.02},${Number(rental.latitude) - 0.02},${Number(rental.longitude) + 0.02},${Number(rental.latitude) + 0.02}&layer=mapnik&marker=${rental.latitude},${rental.longitude}`}
+                    className="h-80 w-full rounded-xl border-0"
+                    loading="lazy"
+                  />
+                  <p className="text-xs text-slate-500">The satellite view opens in Google Maps at the saved rental coordinates.</p>
+                </>
+              ) : (
+                <div className="flex min-h-28 items-center justify-center rounded-xl border border-dashed border-slate-700 p-4 text-center text-xs text-slate-500">
+                  An exact pin was not saved for this rental. Open the area search above to view the approximate location.
+                </div>
+              )}
+            </section>
 
             <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 space-y-3">
               <h2 className="text-lg font-bold">Rental Information</h2>
