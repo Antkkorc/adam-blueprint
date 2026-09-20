@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { ThemeProvider } from "@/context/ThemeContext";
@@ -32,7 +33,9 @@ export default function RootLayout({
       <body className="bg-[#070b15] text-white antialiased" suppressHydrationWarning>
         <ThemeProvider>
           <AuthProvider>
-            <ScrollToTop />
+            <Suspense fallback={null}>
+              <ScrollToTop />
+            </Suspense>
             <Header />
             <div className="min-h-screen">{children}</div>
             <Footer />
