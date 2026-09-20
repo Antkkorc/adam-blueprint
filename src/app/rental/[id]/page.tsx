@@ -1,9 +1,9 @@
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Bath, Bed, MapPin, MessageCircle, Phone } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { BRAND } from "@/lib/brand";
+import RentalPhotoGallery from "@/components/RentalPhotoGallery";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +13,11 @@ interface PageProps {
 
 function toImageArray(value: unknown): string[] {
   if (Array.isArray(value)) return value.filter((item): item is string => typeof item === "string" && item.length > 0);
+  return [];
+}
+
+function toStringArray(value: unknown): string[] {
+  if (Array.isArray(value)) return value.filter((item): item is string => typeof item === "string");
   return [];
 }
 
@@ -28,6 +33,7 @@ export default async function RentalDetailPage({ params }: PageProps) {
   if (error || !rental) notFound();
 
   const images = toImageArray(rental.images);
+  const imageLabels = toStringArray(rental.image_labels);
   const image = images[0] || "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1600&q=80";
   const price = new Intl.NumberFormat("en-BW", {
     style: "currency",
@@ -47,19 +53,8 @@ export default async function RentalDetailPage({ params }: PageProps) {
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          <div className="lg:col-span-3 space-y-4">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
-              <Image src={image} alt={rental.title} fill priority sizes="(max-width: 1024px) 100vw, 60vw" className="object-cover" />
-            </div>
-            {images.length > 1 && (
-              <div className="grid grid-cols-4 gap-3">
-                {images.slice(0, 8).map((src, index) => (
-                  <div key={`${src}-${index}`} className="relative aspect-square overflow-hidden rounded-xl border border-slate-800">
-                    <Image src={src} alt={`${rental.title} photo ${index + 1}`} fill sizes="25vw" className="object-cover" />
-                  </div>
-                ))}
-              </div>
-            )}
+          <div className="lg:col-span-3">
+            <RentalPhotoGallery images={images.length > 0 ? images : [image]} labels={imageLabels} title={rental.title} />
           </div>
 
           <section className="lg:col-span-2 space-y-6">
@@ -86,6 +81,20 @@ export default async function RentalDetailPage({ params }: PageProps) {
                 <p className="text-xs uppercase tracking-wider text-slate-400">Bathrooms</p>
               </div>
             </div>
+
+            {rental.latitude != null && rental.longitude != null && (
+              <section className="space-y-3 rounded-2xl border border-slate-800 bg-slate-900 p-6">
+                <h2 className="flex items-center gap-2 text-lg font-bold"><MapPin className="h-5 w-5 text-cyan-400" /> Location</h2>
+                <p className="text-sm text-slate-400">Approximate map location for {rental.location}.</p>
+                <iframe
+                  title={`Map showing ${rental.title}`}
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(rental.longitude) - 0.02},${Number(rental.latitude) - 0.02},${Number(rental.longitude) + 0.02},${Number(rental.latitude) + 0.02}&layer=mapnik&marker=${rental.latitude},${rental.longitude}`}
+                  className="h-80 w-full rounded-xl border-0"
+                  loading="lazy"
+                />
+                <a href={`https://www.openstreetmap.org/?mlat=${rental.latitude}&mlon=${rental.longitude}#map=15/${rental.latitude}/${rental.longitude}`} target="_blank" rel="noopener noreferrer" className="inline-block text-xs font-bold text-cyan-400 hover:underline">Open larger map</a>
+              </section>
+            )}
 
             <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 space-y-3">
               <h2 className="text-lg font-bold">Rental Information</h2>

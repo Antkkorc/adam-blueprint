@@ -3,6 +3,17 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
+import Image from "next/image";
+import { MapPin, Search, Upload, X } from "lucide-react";
+import { formatPhotoLabel, PHOTO_CATEGORIES } from "@/lib/photos";
+
+interface RentalPhoto {
+  id: string;
+  file: File;
+  preview: string;
+  category: string;
+  description: string;
+}
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -35,9 +46,66 @@ export default function TenantRentalForm() {
   const [description, setDescription] = useState("");
   const [contactName, setContactName] = useState("");
   const [contactPhone, setContactPhone] = useState("");
-  const [files, setFiles] = useState<FileList | null>(null);
+  const [photos, setPhotos] = useState<RentalPhoto[]>([]);
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
+  const [mapLoading, setMapLoading] = useState(false);
+  const [mapMessage, setMapMessage] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+
+  const addPhotos = (list: FileList | null) => {
+    if (!list) return;
+    setPhotos((current) => [
+      ...current,
+      ...Array.from(list).map((file, index) => ({
+        id: `${Date.now()}-${index}-${file.name}`,
+        file,
+        preview: URL.createObjectURL(file),
+        category: PHOTO_CATEGORIES[0],
+        description: "",
+      })),
+    ]);
+  };
+
+  const updatePhoto = (id: string, changes: Partial<RentalPhoto>) => {
+    setPhotos((current) => current.map((photo) => photo.id === id ? { ...photo, ...changes } : photo));
+  };
+
+  const removePhoto = (id: string) => {
+    setPhotos((current) => {
+      const photo = current.find((item) => item.id === id);
+      if (photo) URL.revokeObjectURL(photo.preview);
+      return current.filter((item) => item.id !== id);
+    });
+  };
+
+  const findCoordinates = async () => {
+    if (!location.trim()) {
+      setMapMessage("Enter a location first.");
+      return;
+    }
+    setMapLoading(true);
+    setMapMessage("");
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=bw&q=${encodeURIComponent(`${location}, Botswana`)}`
+      );
+      if (!response.ok) throw new Error("Location lookup failed.");
+      const results = (await response.json()) as Array<{ lat: string; lon: string; display_name: string }>;
+      if (!results[0]) {
+        setMapMessage("No Botswana location found. Try a nearby city or suburb.");
+      } else {
+        setLatitude(results[0].lat);
+        setLongitude(results[0].lon);
+        setMapMessage(`Pinned: ${results[0].display_name}`);
+      }
+    } catch (error) {
+      setMapMessage(error instanceof Error ? error.message : "Location lookup failed.");
+    } finally {
+      setMapLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,11 +126,12 @@ export default function TenantRentalForm() {
 
     try {
       const imageUrls: string[] = [];
+      const imageLabels: string[] = [];
 
-      if (files && files.length > 0) {
-        if (files.length > 8) throw new Error("Please upload no more than 8 images.");
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i];
+      if (photos.length > 8) throw new Error("Please upload no more than 8 images.");
+      for (let i = 0; i < photos.length; i++) {
+          const photo = photos[i];
+          const file = photo.file;
           if (!file.type.startsWith("image/") || file.size > 5 * 1024 * 1024) {
             throw new Error("Each image must be an image file smaller than 5 MB.");
           }
@@ -83,7 +152,7 @@ export default function TenantRentalForm() {
             .getPublicUrl(filePath);
 
           imageUrls.push(data.publicUrl);
-        }
+          imageLabels.push(formatPhotoLabel(photo.category, photo.description));
       }
 
       const { error } = await supabase.from("tenant_rentals").insert([
@@ -95,6 +164,9 @@ export default function TenantRentalForm() {
           bathrooms: Number(bathrooms),
           description,
           info: description,
+          image_labels: imageLabels,
+          latitude: latitude ? Number(latitude) : null,
+          longitude: longitude ? Number(longitude) : null,
           tenant_name: contactName,
           contact_number: contactPhone,
           images: imageUrls,
@@ -227,14 +299,41 @@ export default function TenantRentalForm() {
         onChange={(e) => setDescription(e.target.value)}
       />
 
-      <input
-        type="file"
-        multiple
-        accept="image/*"
-        aria-label="Rental photos"
-        onChange={(e) => setFiles(e.target.files)}
-        className="text-sm text-slate-400"
-      />
+      <div className="space-y-3">
+        <p className="text-xs font-bold text-slate-400">Rental Photos — preview and label each photo</p>
+        <label className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-cyan-500/40 bg-slate-950 py-5 hover:border-cyan-400">
+          <Upload className="h-6 w-6 text-cyan-400" />
+          <span className="text-sm font-bold text-cyan-300">Click to add photos</span>
+          <input type="file" multiple accept="image/*" className="hidden" onChange={(e) => { addPhotos(e.target.files); e.target.value = ""; }} />
+        </label>
+        {photos.length > 0 && (
+          <div className="grid grid-cols-2 gap-3">
+            {photos.map((photo) => (
+              <div key={photo.id} className="relative space-y-2 rounded-xl border border-slate-800 bg-slate-950 p-2">
+                <Image src={photo.preview} alt="Rental photo preview" width={320} height={180} unoptimized className="h-32 w-full rounded-lg object-cover" />
+                <select value={photo.category} onChange={(e) => updatePhoto(photo.id, { category: e.target.value })} className="w-full rounded-lg bg-slate-800 px-2 py-1.5 text-xs">
+                  {PHOTO_CATEGORIES.map((category) => <option key={category}>{category}</option>)}
+                </select>
+                <input value={photo.description} onChange={(e) => updatePhoto(photo.id, { description: e.target.value })} maxLength={120} placeholder="Label, e.g. Main entrance" className="w-full rounded-lg bg-slate-800 px-2 py-1.5 text-xs" />
+                <button type="button" onClick={() => removePhoto(photo.id)} aria-label="Remove photo" className="absolute right-3 top-3 rounded-full bg-red-500 p-1 text-white"><X className="h-3 w-3" /></button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <p className="text-xs font-bold text-slate-400">Rental Location on Map (optional)</p>
+        <div className="flex gap-2">
+          <input value={latitude} onChange={(e) => setLatitude(e.target.value)} placeholder="Latitude" aria-label="Rental latitude" className="w-full rounded-xl bg-slate-800 p-3 text-sm" />
+          <input value={longitude} onChange={(e) => setLongitude(e.target.value)} placeholder="Longitude" aria-label="Rental longitude" className="w-full rounded-xl bg-slate-800 p-3 text-sm" />
+        </div>
+        <button type="button" onClick={findCoordinates} disabled={mapLoading} className="inline-flex items-center gap-2 rounded-xl border border-cyan-500/40 px-3 py-2 text-xs font-bold text-cyan-300 disabled:opacity-50">
+          {mapLoading ? <Search className="h-3.5 w-3.5 animate-pulse" /> : <MapPin className="h-3.5 w-3.5" />}
+          {mapLoading ? "Finding location..." : "Find pin from address"}
+        </button>
+        {mapMessage && <p className="text-[11px] text-slate-400">{mapMessage}</p>}
+      </div>
 
       <button
         type="submit"
