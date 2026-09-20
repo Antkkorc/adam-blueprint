@@ -60,8 +60,8 @@ export default async function BuyPage({ searchParams }: BuyPageProps) {
   if (hasPool) query = query.eq("pool", true);
   if (hasGarage) query = query.eq("garage", true);
   if (wifiType) query = query.eq("wifi_type", wifiType);
-  if (minBeds > 0) query = query.gte("beds", minBeds);
-  if (minBaths > 0) query = query.gte("baths", minBaths);
+  if (minBeds > 0) query = minBeds >= 6 ? query.gte("beds", 6) : query.eq("beds", minBeds);
+  if (minBaths > 0) query = minBaths >= 6 ? query.gte("baths", 6) : query.eq("baths", minBaths);
   if (minParking > 0) query = query.gte("parking", minParking);
   if (minBuildingSqm > 0) query = query.gte("building_sqm", minBuildingSqm);
   if (minLandSqm > 0) query = query.gte("land_sqm", minLandSqm);
@@ -102,8 +102,6 @@ export default async function BuyPage({ searchParams }: BuyPageProps) {
           </div>
 
           {[
-            ["minBeds", "Bedrooms", "Any bedrooms"],
-            ["minBaths", "Bathrooms", "Any bathrooms"],
             ["minParking", "Parking / Garage", "Any parking"],
             ["minBuildingSqm", "Floor Size (m²)", "Minimum floor size"],
             ["minLandSqm", "Erf Size (m²)", "Minimum erf size"],
@@ -112,6 +110,29 @@ export default async function BuyPage({ searchParams }: BuyPageProps) {
               <label className="block text-slate-400 mb-1 font-semibold">{label}</label>
               <input type="number" min="0" name={name} defaultValue={params[name as keyof typeof params] || ""}
                 placeholder={placeholder} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-cyan-500" />
+            </div>
+          ))}
+
+          {[
+            ["minBeds", "Bedrooms", "Any bedrooms", "bedroom"],
+            ["minBaths", "Bathrooms", "Any bathrooms", "bathroom"],
+          ].map(([name, label, placeholder, unit]) => (
+            <div key={name}>
+              <label className="block text-slate-400 mb-1 font-semibold">{label}</label>
+              <select
+                name={name}
+                defaultValue={params[name as keyof typeof params] || ""}
+                aria-label={label}
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              >
+                <option value="">{placeholder}</option>
+                <option value="1">1 {unit}</option>
+                <option value="2">2 {unit}s</option>
+                <option value="3">3 {unit}s</option>
+                <option value="4">4 {unit}s</option>
+                <option value="5">5 {unit}s</option>
+                <option value="6">6+ {unit}s</option>
+              </select>
             </div>
           ))}
 

@@ -28,8 +28,8 @@ export default async function RentPage({ searchParams }: RentPageProps) {
   if (location) query = query.ilike("location", `%${location}%`);
   if (minPrice > 0) query = query.gte("price", minPrice);
   if (maxPrice > 0) query = query.lte("price", maxPrice);
-  if (minBeds > 0) query = query.gte("bedrooms", minBeds);
-  if (minBaths > 0) query = query.gte("bathrooms", minBaths);
+  if (minBeds > 0) query = minBeds >= 6 ? query.gte("bedrooms", 6) : query.eq("bedrooms", minBeds);
+  if (minBaths > 0) query = minBaths >= 6 ? query.gte("bathrooms", 6) : query.eq("bathrooms", minBaths);
   const { data: rentals, error } = await query.order("created_at", { ascending: false });
 
   if (error) {
@@ -64,17 +64,22 @@ export default async function RentPage({ searchParams }: RentPageProps) {
             <select name="minBeds" defaultValue={minBeds || ""} aria-label="Minimum bedrooms"
               className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan-500">
               <option value="">Any bedrooms</option>
-              <option value="1">1+ bedroom</option>
-              <option value="2">2+ bedrooms</option>
-              <option value="3">3+ bedrooms</option>
-              <option value="4">4+ bedrooms</option>
+              <option value="1">1 bedroom</option>
+              <option value="2">2 bedrooms</option>
+              <option value="3">3 bedrooms</option>
+              <option value="4">4 bedrooms</option>
+              <option value="5">5 bedrooms</option>
+              <option value="6">6+ bedrooms</option>
             </select>
             <select name="minBaths" defaultValue={minBaths || ""} aria-label="Minimum bathrooms"
               className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan-500">
               <option value="">Any bathrooms</option>
-              <option value="1">1+ bathroom</option>
-              <option value="2">2+ bathrooms</option>
-              <option value="3">3+ bathrooms</option>
+              <option value="1">1 bathroom</option>
+              <option value="2">2 bathrooms</option>
+              <option value="3">3 bathrooms</option>
+              <option value="4">4 bathrooms</option>
+              <option value="5">5 bathrooms</option>
+              <option value="6">6+ bathrooms</option>
             </select>
             <div className="flex gap-2 sm:col-span-2 lg:col-span-5">
               <button type="submit" className="rounded-xl bg-slate-800 px-5 py-3 text-sm font-bold hover:bg-slate-700">Search rentals</button>
