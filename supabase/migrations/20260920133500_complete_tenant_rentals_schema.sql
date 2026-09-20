@@ -5,6 +5,7 @@ alter table public.tenant_rentals
   add column if not exists bedrooms integer,
   add column if not exists bathrooms integer,
   add column if not exists description text,
+  add column if not exists info text,
   add column if not exists images jsonb not null default '[]'::jsonb,
   add column if not exists user_id uuid,
   add column if not exists created_at timestamptz not null default now(),

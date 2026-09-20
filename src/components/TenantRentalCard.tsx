@@ -12,6 +12,7 @@ export interface TenantRental {
   bathrooms: number;
   tenant_name: string;
   contact_number: string;
+  info?: string;
   images: string[];
   user_id?: string;
 }
@@ -72,7 +73,7 @@ export default function TenantRentalCard({ rental }: { rental: TenantRental }) {
         </div>
 
         <p className="text-slate-400 text-xs line-clamp-2">
-          {rental.description}
+          {rental.description || rental.info}
         </p>
 
         {phone && (
