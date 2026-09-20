@@ -125,6 +125,12 @@ export default async function PropertyDetailPage({ params }: PageProps) {
               <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-line">{property.overview || property.description || "No overview provided."}</p>
               {property.overview && property.description && <p className="text-slate-400 text-sm leading-relaxed whitespace-pre-line">{property.description}</p>}
             </section>
+            {property.house_plan_url && (
+              <section className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                <h2 className="text-lg font-bold flex items-center gap-2"><DraftingCompass className="w-5 h-5 text-cyan-400" /> House plan</h2>
+                <a href={property.house_plan_url} target="_blank" rel="noreferrer" className="mt-3 inline-block text-sm text-cyan-400 hover:underline">View or download floor plan</a>
+              </section>
+            )}
 
             {(property.inside_features || property.outside_features) && (
               <section className="grid grid-cols-1 md:grid-cols-2 gap-4">

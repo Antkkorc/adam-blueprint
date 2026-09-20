@@ -28,13 +28,15 @@ Alternatively, set `ADMIN_USER_ID` to the authenticated Supabase user's UUID. Fi
 
 ## Supabase requirements
 
-The application expects Supabase tables for `properties`, `tenant_rentals`, `rental_submissions`, `saved_properties`, and `enquiries`, plus the `property-images` and `rental-images` storage buckets. Public listing reads and authenticated writes must be covered by Row Level Security policies appropriate to your deployment.
+The application expects Supabase tables for `properties`, `tenant_rentals`, `rental_submissions`, `property_submissions`, `notifications`, `saved_properties`, and `enquiries`, plus the `property-images`, `rental-images`, and `property-submissions` storage buckets. Public listing reads and authenticated writes must be covered by Row Level Security policies appropriate to your deployment.
 
 If an existing `tenant_rentals` table was created with only some rental fields, run the complete schema SQL in `supabase/migrations/20260920133500_complete_tenant_rentals_schema.sql` in Supabase SQL Editor before submitting new rental listings. It supports the existing `tenant_name`/`contact_number` fields and maps the form description into both `description` and the legacy required `info` field. It is safe to run after the earlier migrations.
 
 Run `supabase/migrations/20260920170000_add_rental_review_workflow.sql` after that schema migration. Authenticated users submit rental details and photos into `rental_submissions` for review; those submissions do not appear on `/rent`. Only an administrator can publish a verified listing through `/admin/add-rental`, which inserts the final record into `tenant_rentals`.
 Pending submissions can be reviewed at `/admin/rentals`; approval publishes the listing and records review metadata, while rejection only records the review decision.
 Administrators can manage published properties and tenant rentals at `/admin/listings`. Properties support `Available`, `Sold`, and `Rented`; tenant rentals support `Available` and `Rented`. Apply `20260920180000_add_rental_listing_status.sql` to add the rental status column and prevent regular users from mutating published rentals.
+
+Property owners can submit a sell or rent-out request at `/sell`. The form accepts optional property photos and an optional house/floor plan. These requests remain private until an administrator reviews them at `/admin/inbox`; approval creates an `Available` property listing and rejection records the review decision. Authenticated submitters receive approval or rejection updates at `/notifications`. Apply `20260920195000_property_submission_workflow.sql` after the rental migrations.
 
 Public property results are expected to use `intent = 'buy'` or `intent = 'rent'` and `status = 'active'`. Review existing records before enabling the production site so older status values are migrated if necessary.
 

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
-import { PlusCircle, Home, ClipboardCheck, List } from "lucide-react";
+import { PlusCircle, Home, ClipboardCheck, List, Inbox } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +16,11 @@ export default async function AdminPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Link href="/admin/inbox" className="bg-slate-900 border border-slate-800 hover:border-cyan-500/50 rounded-2xl p-6 transition-all group">
+            <Inbox className="w-8 h-8 text-cyan-400 mb-3 group-hover:scale-110 transition-transform" />
+            <h2 className="font-bold text-lg">Submission inbox</h2>
+            <p className="text-slate-400 text-xs mt-2">Review property listing requests and contact enquiries.</p>
+          </Link>
           <Link href="/admin/listings" className="bg-slate-900 border border-slate-800 hover:border-cyan-500/50 rounded-2xl p-6 transition-all group">
             <List className="w-8 h-8 text-cyan-400 mb-3 group-hover:scale-110 transition-transform" />
             <h2 className="font-bold text-lg">Manage Listings</h2>
