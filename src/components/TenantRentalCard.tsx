@@ -8,8 +8,8 @@ export interface TenantRental {
   description: string;
   location: string;
   price: number;
-  contact_name: string;
-  contact_phone: string;
+  tenant_name: string;
+  tenant_phone: string;
   images: string[];
   user_id?: string;
 }
@@ -25,7 +25,7 @@ export default function TenantRentalCard({ rental }: { rental: TenantRental }) {
     maximumFractionDigits: 0,
   }).format(Number(rental.price || 0));
 
-  const phone = (rental.contact_phone || "").replace(/\D/g, "");
+  const phone = (rental.tenant_phone || "").replace(/\D/g, "");
   const message = encodeURIComponent(
     `Hello, I am interested in your rental listing "${rental.title}" in ${rental.location}. Is it still available?`
   );
@@ -62,7 +62,7 @@ export default function TenantRentalCard({ rental }: { rental: TenantRental }) {
             <p className="text-[10px] text-slate-500">per month</p>
           </div>
           <p className="text-[10px] text-slate-500">
-            Listed by {rental.contact_name || "Owner"}
+            Listed by {rental.tenant_name || "Owner"}
           </p>
         </div>
 
