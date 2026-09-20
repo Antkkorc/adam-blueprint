@@ -28,6 +28,8 @@ Alternatively, set `ADMIN_USER_ID` to the authenticated Supabase user's UUID. Fi
 
 The application expects Supabase tables for `properties`, `tenant_rentals`, `saved_properties`, and `enquiries`, plus the `property-images` and `rental-images` storage buckets. Public listing reads and authenticated writes must be covered by Row Level Security policies appropriate to your deployment.
 
+If an existing `tenant_rentals` table was created with only some rental fields, run the complete schema SQL in `supabase/migrations/20260920133500_complete_tenant_rentals_schema.sql` in Supabase SQL Editor before submitting new rental listings. It supports both the original `tenant_name`/`tenant_phone` fields and the newer contact fields and is safe to run after the earlier contact-column migration.
+
 Public property results are expected to use `intent = 'buy'` or `intent = 'rent'` and `status = 'active'`. Review existing records before enabling the production site so older status values are migrated if necessary.
 
 ## Free map and image features
