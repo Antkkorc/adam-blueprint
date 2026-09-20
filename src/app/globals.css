@@ -62,6 +62,43 @@ html[data-theme="light"] .text-slate-600 {
   color: #687b8f !important;
 }
 
+html[data-theme="light"] .glass {
+  background: rgba(255, 255, 255, 0.96);
+  border-color: #d7e2eb;
+  box-shadow: 0 18px 45px rgba(30, 64, 85, 0.12);
+}
+
+html[data-theme="light"] .glass .bg-white\/5 {
+  background-color: #eef4f8 !important;
+}
+
+html[data-theme="light"] .glass .border-white\/5,
+html[data-theme="light"] .glass .border-white\/10 {
+  border-color: #cbd9e3 !important;
+}
+
+html[data-theme="light"] .glass input {
+  color: #102033 !important;
+}
+
+html[data-theme="light"] .glass input::placeholder {
+  color: #687b8f !important;
+}
+
+html[data-theme="light"] .glass .text-slate-400,
+html[data-theme="light"] .glass .text-slate-500,
+html[data-theme="light"] .glass .text-slate-600 {
+  color: #526477 !important;
+}
+
+html[data-theme="light"] .glass .bg-slate-900 {
+  background-color: #eef4f8 !important;
+}
+
+html[data-theme="light"] .glass .hover\:text-white:hover {
+  color: #102033 !important;
+}
+
 html[data-theme="light"] [class*="border-slate-"] {
   border-color: #d7e2eb !important;
 }
