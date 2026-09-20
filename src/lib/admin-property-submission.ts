@@ -11,6 +11,7 @@ export async function reviewPropertySubmission(id: string, action: "approve" | "
       title: submission.title || `${submission.intent === "rent" ? "Rental" : "Property"} submission`,
       description: submission.description, overview: submission.description,
       location: submission.location || "Botswana", city: submission.location || "Botswana",
+      latitude: submission.latitude, longitude: submission.longitude,
       price: submission.price || 0, price_unit: submission.intent === "rent" ? "month" : "total",
       intent: submission.intent, type: "House", category: "house",
       beds: 0, baths: 0, parking: 0, plot_size: 0,

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import Image from "next/image";
-import { MapPin, Search, Upload, X } from "lucide-react";
+import { CheckCircle2, MapPin, Search, Upload, X } from "lucide-react";
 import { formatPhotoLabel, PHOTO_CATEGORIES } from "@/lib/photos";
 
 interface RentalPhoto {
@@ -105,6 +105,28 @@ export default function TenantRentalForm({ adminMode = false }: { adminMode?: bo
     } finally {
       setMapLoading(false);
     }
+  };
+
+  const useCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setMapMessage("Location services are not available in this browser.");
+      return;
+    }
+    setMapLoading(true);
+    setMapMessage("Requesting your location...");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLatitude(String(position.coords.latitude));
+        setLongitude(String(position.coords.longitude));
+        setMapMessage("Your current location is pinned. Review it before submitting.");
+        setMapLoading(false);
+      },
+      () => {
+        setMapMessage("Location permission was not granted. You can search by address instead.");
+        setMapLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -217,9 +239,16 @@ export default function TenantRentalForm({ adminMode = false }: { adminMode?: bo
       <h2 className="text-xl font-bold">{adminMode ? "Publish Verified Rental" : "Submit Rental for Review"}</h2>
       {!adminMode && <p className="text-xs text-slate-400">Your submission will be reviewed before it appears publicly. Do not submit sensitive documents or private information.</p>}
       {error && <p role="alert" className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">{error}</p>}
-      {submitted && <p role="status" className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-300">{adminMode ? "Rental published successfully." : "Rental submitted for admin review."}</p>}
+      {submitted ? (
+        <div role="status" className="flex min-h-72 flex-col items-center justify-center gap-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-8 text-center">
+          <CheckCircle2 className="h-16 w-16 text-emerald-400" />
+          <h3 className="text-2xl font-extrabold text-white">{adminMode ? "Rental published successfully!" : "Rental submitted for admin review!"}</h3>
+          <p className="max-w-md text-sm leading-relaxed text-slate-300">{adminMode ? "The rental is now available on the public rentals page." : "Thank you. An administrator will verify your information and contact you if more photos or details are needed."}</p>
+          {!adminMode && <button type="button" onClick={() => setSubmitted(false)} className="rounded-xl border border-emerald-400/50 px-4 py-2 text-sm font-bold text-emerald-300 hover:bg-emerald-400/10">Submit another rental</button>}
+        </div>
+      ) : null}
 
-      <input
+      {!submitted && <><input
         type="text"
         placeholder="Title (e.g. 2 Bedroom Flat in Block 6)"
         required
@@ -345,6 +374,9 @@ export default function TenantRentalForm({ adminMode = false }: { adminMode?: bo
           {mapLoading ? <Search className="h-3.5 w-3.5 animate-pulse" /> : <MapPin className="h-3.5 w-3.5" />}
           {mapLoading ? "Finding location..." : "Find pin from address"}
         </button>
+        <button type="button" onClick={useCurrentLocation} disabled={mapLoading} className="ml-2 inline-flex items-center gap-2 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-xs font-bold text-emerald-300 disabled:opacity-50">
+          <MapPin className="h-3.5 w-3.5" /> Select my location
+        </button>
         {mapMessage && <p className="text-[11px] text-slate-400">{mapMessage}</p>}
       </div>
 
@@ -354,7 +386,7 @@ export default function TenantRentalForm({ adminMode = false }: { adminMode?: bo
         className="w-full py-3 bg-cyan-500 hover:bg-cyan-400 font-bold rounded-xl text-black disabled:opacity-50"
       >
         {loading ? "Submitting..." : "Submit Rental"}
-      </button>
+      </button></>}
     </form>
   );
 }

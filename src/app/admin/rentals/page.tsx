@@ -1,6 +1,7 @@
 import { requireAdmin } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import AdminRentalReview from "@/components/AdminRentalReview";
+import BackToAdmin from "@/components/BackToAdmin";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,7 @@ export default async function AdminRentalsPage() {
     <main className="min-h-screen bg-slate-950 p-6 text-white md:p-12">
       <div className="mx-auto max-w-4xl space-y-6">
         <div>
+          <BackToAdmin />
           <h1 className="text-3xl font-extrabold">Rental submissions</h1>
           <p className="mt-1 text-sm text-slate-400">Review pending community rental listings before publishing them.</p>
         </div>

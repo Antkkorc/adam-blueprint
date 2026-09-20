@@ -335,7 +335,12 @@ export default function AdminPropertyForm() {
         <input type="text" placeholder="Agent Name" className={inputClass} value={agentName} onChange={(e) => setAgentName(e.target.value)} />
         <input type="text" placeholder="Agent Phone" className={inputClass} value={agentPhone} onChange={(e) => setAgentPhone(e.target.value)} />
       </div>
-      <input type="file" multiple accept="image/*" onChange={(e) => setSketchFiles(e.target.files)} className="text-sm text-slate-400" />
+      <label className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-cyan-500/40 bg-slate-950 px-4 py-5 text-center transition-colors hover:border-cyan-400">
+        <Upload className="h-6 w-6 text-cyan-400" />
+        <span className="text-sm font-bold text-cyan-300">Click to add house or floor plans</span>
+        <span className="text-xs text-slate-500">Optional image files</span>
+        <input type="file" multiple accept="image/*" onChange={(e) => setSketchFiles(e.target.files)} className="sr-only" />
+      </label>
       <button type="submit" disabled={loading} className="w-full py-3 bg-cyan-500 hover:bg-cyan-400 font-bold rounded-xl text-black disabled:opacity-50">{loading ? "Publishing..." : "Add Property"}</button>
     </form>
   );

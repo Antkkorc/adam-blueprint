@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { BRAND } from "@/lib/brand";
-import { Phone, Mail, MapPin, Loader2, CheckCircle2 } from "lucide-react";
+import { Phone, Mail, MapPin, Loader2, CheckCircle2, Upload } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 
 export default function SellPage() {
@@ -13,6 +13,9 @@ export default function SellPage() {
   const [title, setTitle] = useState("");
   const [location, setLocation] = useState("");
   const [price, setPrice] = useState("");
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
+  const [mapMessage, setMapMessage] = useState("");
   const [photos, setPhotos] = useState<File[]>([]);
   const [plan, setPlan] = useState<File | null>(null);
   const [description, setDescription] = useState("");
@@ -47,6 +50,7 @@ export default function SellPage() {
         user_id: currentUser?.id || null, name, phone, email, title, location,
         price: price ? Number(price) : null, intent: intent.includes("rent") ? "rent" : "sell",
         description, images: imageUrls, house_plan_url: planUrl,
+        latitude: latitude ? Number(latitude) : null, longitude: longitude ? Number(longitude) : null,
       });
       if (insertError) throw insertError;
     } catch (insertError) {
@@ -60,6 +64,24 @@ export default function SellPage() {
     setSubmitted(true);
     setName(""); setPhone(""); setEmail(""); setDescription("");
     setTitle(""); setLocation(""); setPrice(""); setPhotos([]); setPlan(null);
+    setLatitude(""); setLongitude(""); setMapMessage("");
+  };
+
+  const selectLocation = () => {
+    if (!navigator.geolocation) {
+      setMapMessage("Location services are not available in this browser.");
+      return;
+    }
+    setMapMessage("Requesting your location...");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLatitude(String(position.coords.latitude));
+        setLongitude(String(position.coords.longitude));
+        setMapMessage("Your location is pinned. Review it before submitting.");
+      },
+      () => setMapMessage("Location permission was not granted. You can still submit the address."),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
   };
 
   return (
@@ -109,52 +131,68 @@ export default function SellPage() {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input
-                type="text"
-                required
-                minLength={2}
-                maxLength={80}
-                aria-label="Your name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Your Name"
-                className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-              />
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Property title (optional)" className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600" />
-                <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location (optional)" className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600" />
-                <input type="number" min="0" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Expected price (BWP)" className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600" />
-              </div>
-              <input
-                type="tel"
-                required
-                maxLength={30}
-                aria-label="Phone number"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="Phone Number"
-                className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-              />
+            <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2">
+              <label className="min-w-0 space-y-1 text-xs text-slate-400">
+                Your name
+                <input
+                  type="text"
+                  required
+                  minLength={2}
+                  maxLength={80}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Your name"
+                  className="w-full min-w-0 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                />
+              </label>
+              <label className="min-w-0 space-y-1 text-xs text-slate-400">
+                Phone number
+                <input
+                  type="tel"
+                  required
+                  maxLength={30}
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="Phone number"
+                  className="w-full min-w-0 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                />
+              </label>
+              <label className="min-w-0 space-y-1 text-xs text-slate-400">
+                Email address
+                <input
+                  type="email"
+                  required
+                  maxLength={160}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Email address"
+                  className="w-full min-w-0 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                />
+              </label>
+              <label className="min-w-0 space-y-1 text-xs text-slate-400">
+                Listing type
+                <select
+                  value={intent}
+                  onChange={(e) => setIntent(e.target.value)}
+                  className="w-full min-w-0 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                >
+                  <option value="I want to sell">I want to sell</option>
+                  <option value="I want to rent out">I want to rent out</option>
+                </select>
+              </label>
+              <label className="min-w-0 space-y-1 text-xs text-slate-400">
+                Property title (optional)
+                <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Family home in Gaborone" className="w-full min-w-0 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600" />
+              </label>
+              <label className="min-w-0 space-y-1 text-xs text-slate-400">
+                Location (optional)
+                <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Town or neighbourhood" className="w-full min-w-0 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600" />
+              </label>
+              <label className="min-w-0 space-y-1 text-xs text-slate-400 md:col-span-2">
+                Expected price in BWP (optional)
+                <input type="number" min="0" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Expected price" className="w-full min-w-0 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600" />
+              </label>
             </div>
-            <input
-              type="email"
-              required
-              maxLength={160}
-              aria-label="Email address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email Address"
-              className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-            />
-            <select
-              value={intent}
-              onChange={(e) => setIntent(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-            >
-              <option value="I want to sell">I want to sell</option>
-              <option value="I want to rent out">I want to rent out</option>
-            </select>
             <textarea
               rows={4}
               required
@@ -166,13 +204,25 @@ export default function SellPage() {
               placeholder="Tell us about your property (location, features, desired price)..."
               className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-emerald-500"
             />
-            <label className="block text-xs text-slate-400">Property photos (optional, up to 10)
-              <input type="file" accept="image/*" multiple onChange={(e) => setPhotos(Array.from(e.target.files || []).slice(0, 10))} className="mt-2 block w-full text-xs text-slate-400" />
+            <label className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-cyan-500/40 bg-slate-950 px-4 py-5 text-center text-xs text-slate-400 transition-colors hover:border-cyan-400">
+              <Upload className="h-7 w-7 text-cyan-400" />
+              <span className="font-bold text-cyan-300">Click to upload property photos</span>
+              <span>Up to 10 images</span>
+              <input type="file" accept="image/*" multiple onChange={(e) => setPhotos(Array.from(e.target.files || []).slice(0, 10))} className="sr-only" />
             </label>
             {photos.length > 0 && <div className="flex gap-2 overflow-auto">{photos.map((file) => <img key={file.name} src={URL.createObjectURL(file)} alt={file.name} className="h-16 w-16 rounded object-cover" />)}</div>}
-            <label className="block text-xs text-slate-400">House or floor plan (optional image/PDF)
-              <input type="file" accept="image/*,.pdf" onChange={(e) => setPlan(e.target.files?.[0] || null)} className="mt-2 block w-full text-xs text-slate-400" />
+            <label className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-cyan-500/40 bg-slate-950 px-4 py-5 text-center text-xs text-slate-400 transition-colors hover:border-cyan-400">
+              <Upload className="h-7 w-7 text-cyan-400" />
+              <span className="font-bold text-cyan-300">Click to upload house or floor plan</span>
+              <span>Optional image or PDF</span>
+              <input type="file" accept="image/*,.pdf" onChange={(e) => setPlan(e.target.files?.[0] || null)} className="sr-only" />
             </label>
+            <div className="space-y-2 rounded-xl border border-slate-800 bg-slate-950 p-4">
+              <p className="text-xs font-bold text-slate-400">Property location on map (optional)</p>
+              <button type="button" onClick={selectLocation} className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm font-bold text-emerald-300 hover:bg-emerald-500/20"><MapPin className="h-4 w-4" /> Select location from map</button>
+              {latitude && longitude && <p className="text-xs text-slate-400">Pinned coordinates: {latitude}, {longitude}</p>}
+              {mapMessage && <p className="text-xs text-slate-400">{mapMessage}</p>}
+            </div>
             <button
               type="submit"
               disabled={loading}
