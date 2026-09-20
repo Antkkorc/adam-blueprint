@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 type ListingType = "property" | "rental";
 type Listing = { id: string; title?: string; location?: string; status?: string; price?: number };
+type Archive = { id: string; listing_type: ListingType; listing_id: string; title?: string; location?: string; status?: string; deleted_at: string };
 
 const statusOptions: Record<ListingType, string[]> = {
   property: ["Available", "Sold", "Rented"],
@@ -14,12 +15,15 @@ const statusOptions: Record<ListingType, string[]> = {
 export default function AdminListingsManager({
   properties,
   rentals,
+  archives,
 }: {
   properties: Listing[];
   rentals: Listing[];
+  archives: Archive[];
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
+  const [tab, setTab] = useState<"available" | "sold" | "rented" | "deleted">("available");
   const update = async (listingType: ListingType, id: string, status: string) => {
     setBusy(id);
     const response = await fetch("/api/admin/listings", {
@@ -32,7 +36,8 @@ export default function AdminListingsManager({
     else router.refresh();
   };
   const remove = async (listingType: ListingType, id: string) => {
-    if (!window.confirm("Delete this listing permanently?")) return;
+    const listing = [...properties, ...rentals].find((item) => item.id === id);
+    if (!window.confirm(`Archive and delete "${listing?.title || "Untitled listing"}"? This removes it from public listings but keeps a history record.`)) return;
     setBusy(id);
     const response = await fetch("/api/admin/listings", {
       method: "DELETE",
@@ -67,5 +72,11 @@ export default function AdminListingsManager({
       ))}
     </section>
   );
-  return <div className="space-y-8">{section("Properties", "property", properties)}{section("Tenant rentals", "rental", rentals)}</div>;
+  const filtered = (items: Listing[]) => tab === "available" ? items.filter((item) => item.status === "Available") : tab === "sold" ? items.filter((item) => item.status === "Sold") : tab === "rented" ? items.filter((item) => item.status === "Rented") : [];
+  return <div className="space-y-8">
+    <div className="flex flex-wrap gap-2" role="tablist" aria-label="Listing status">
+      {(["available", "sold", "rented", "deleted"] as const).map((value) => <button key={value} type="button" role="tab" aria-selected={tab === value} onClick={() => setTab(value)} className={`rounded-lg px-3 py-2 text-sm font-semibold ${tab === value ? "bg-cyan-500 text-slate-950" : "bg-slate-800 text-slate-300"}`}>{value === "deleted" ? "Deleted/history" : value[0].toUpperCase() + value.slice(1)}</button>)}
+    </div>
+    {tab === "deleted" ? <section className="space-y-3"><h2 className="text-xl font-bold">Deleted/history</h2>{!archives.length ? <p className="rounded-xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-400">No archived listings.</p> : archives.map((archive) => <article key={archive.id} className="rounded-xl border border-slate-800 bg-slate-900 p-4"><p className="font-semibold">{archive.title || "Untitled listing"}</p><p className="text-xs text-slate-400">{archive.listing_type} · {archive.location || "No location"} · {archive.status || "Unknown"} · deleted {new Date(archive.deleted_at).toLocaleString()}</p></article>)}</section> : <>{section("Properties", "property", filtered(properties))}{section("Tenant rentals", "rental", filtered(rentals))}</>}
+  </div>;
 }

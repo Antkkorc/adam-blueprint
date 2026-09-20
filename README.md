@@ -37,6 +37,7 @@ Pending submissions can be reviewed at `/admin/rentals`; approval publishes the 
 Administrators can manage published properties and tenant rentals at `/admin/listings`. Properties support `Available`, `Sold`, and `Rented`; tenant rentals support `Available` and `Rented`. Apply `20260920180000_add_rental_listing_status.sql` to add the rental status column and prevent regular users from mutating published rentals.
 
 Property owners can submit a sell or rent-out request at `/sell`. The form accepts optional property photos and an optional house/floor plan. These requests remain private until an administrator reviews them at `/admin/inbox`; approval creates an `Available` property listing and rejection records the review decision. Authenticated submitters receive approval or rejection updates at `/notifications`. Apply `20260920195000_property_submission_workflow.sql` after the rental migrations.
+Deleted listings are archived in `listing_archives` before removal, and the admin listing page exposes a Deleted/history tab. The deletion endpoint also attempts to remove image and floor-plan objects referenced by the listing.
 
 Public property results are expected to use `intent = 'buy'` or `intent = 'rent'` and `status = 'active'`. Review existing records before enabling the production site so older status values are migrated if necessary.
 

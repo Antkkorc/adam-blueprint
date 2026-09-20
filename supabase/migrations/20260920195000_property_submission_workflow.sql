@@ -40,3 +40,16 @@ create policy "Public property submission files" on storage.objects for select t
   using (bucket_id = 'property-submissions');
 
 alter table public.properties add column if not exists house_plan_url text;
+
+create table if not exists public.listing_archives (
+  id uuid primary key default gen_random_uuid(),
+  listing_type text not null check (listing_type in ('property','rental')),
+  listing_id text not null,
+  title text,
+  location text,
+  status text,
+  payload jsonb not null,
+  deleted_at timestamptz not null default now(),
+  deleted_by uuid references auth.users(id)
+);
+alter table public.listing_archives enable row level security;
