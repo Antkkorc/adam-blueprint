@@ -1,8 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase/client";
 import { BRAND } from "@/lib/brand";
 import { useTheme, type Theme } from "@/context/ThemeContext";
 import { useAuth } from "@/context/AuthContext";
@@ -10,12 +8,25 @@ import {
   Menu as MenuIcon, X, PhoneCall, User, Home, Building, Tag, Info, LogIn, Heart, LogOut, Shield, Settings, Sun, Moon, Sparkles,
 } from "lucide-react";
 
+function NotificationBadge({ count }: { count: number }) {
+  return (
+    <span className="inline-flex min-w-6 h-6 items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-extrabold text-white shadow-lg shadow-red-950/50" aria-label={`${count} new notifications`}>
+      {count > 99 ? "99+" : count}
+    </span>
+  );
+}
+
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const router = useRouter();
   const { theme, setTheme } = useTheme();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const [notificationCounts, setNotificationCounts] = useState({
+    propertySubmissions: 0,
+    rentalSubmissions: 0,
+    unreadEnquiries: 0,
+    total: 0,
+  });
 
   useEffect(() => {
     let mounted = true;
@@ -37,11 +48,35 @@ export default function Header() {
   }, [user]);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await signOut();
     setIsAdmin(false);
     setIsMenuOpen(false);
-    router.refresh();
   };
+
+  useEffect(() => {
+    if (!isAdmin) {
+      return;
+    }
+
+    let mounted = true;
+    const loadNotificationCounts = async () => {
+      try {
+        const response = await fetch("/api/admin/notifications", { cache: "no-store" });
+        if (!response.ok) return;
+        const data = await response.json();
+        if (mounted) setNotificationCounts(data);
+      } catch {
+        // Notification badges are supplemental; navigation remains available if loading fails.
+      }
+    };
+
+    void loadNotificationCounts();
+    const interval = window.setInterval(loadNotificationCounts, 30000);
+    return () => {
+      mounted = false;
+      window.clearInterval(interval);
+    };
+  }, [isAdmin]);
 
   const whatsappNumber = BRAND.whatsapp || BRAND.phone?.replace(/[^0-9]/g, "") || "26774551429";
 
@@ -134,8 +169,9 @@ export default function Header() {
               
               {/* 🔐 ADMIN LINK — ONLY SHOWS IF API CONFIRMS YOU ARE ADMIN */}
               {isAdmin && (
-                <Link href="/admin" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-4 px-3 py-2.5 rounded-xl text-slate-100 hover:text-cyan-400 hover:bg-slate-900/60 transition-all text-base font-semibold">
-                  <Shield className="w-5 h-5 text-cyan-400 shrink-0" /> Admin
+                <Link href="/admin" onClick={() => setIsMenuOpen(false)} className="flex items-center justify-between gap-4 px-3 py-2.5 rounded-xl text-slate-100 hover:text-cyan-400 hover:bg-slate-900/60 transition-all text-base font-semibold">
+                  <span className="flex items-center gap-4"><Shield className="w-5 h-5 text-cyan-400 shrink-0" /> Admin Dashboard</span>
+                  {notificationCounts.total > 0 && <NotificationBadge count={notificationCounts.total} />}
                 </Link>
               )}
 
