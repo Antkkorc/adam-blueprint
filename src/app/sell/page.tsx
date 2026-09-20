@@ -10,6 +10,11 @@ export default function SellPage() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [intent, setIntent] = useState("I want to sell");
+  const [title, setTitle] = useState("");
+  const [location, setLocation] = useState("");
+  const [price, setPrice] = useState("");
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [plan, setPlan] = useState<File | null>(null);
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,30 +25,41 @@ export default function SellPage() {
     setLoading(true);
     setError(null);
 
-    // Insert property listing request into Supabase table 'enquiries'
-    const { error: insertError } = await supabase.from("enquiries").insert([
-      {
-        name,
-        phone,
-        email,
-        message: `[Intent: ${intent}] ${description}`,
-        type: "listing_request",
-        created_at: new Date().toISOString(),
-      },
-    ]);
+    const imageUrls: string[] = [];
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const folder = `${user?.id || "guest"}/${Date.now()}`;
+      for (const [index, file] of photos.entries()) {
+        const path = `${folder}/${index}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+        const { error } = await supabase.storage.from("property-submissions").upload(path, file);
+        if (error) throw error;
+        imageUrls.push(supabase.storage.from("property-submissions").getPublicUrl(path).data.publicUrl);
+      }
+      let planUrl: string | null = null;
+      if (plan) {
+        const path = `${folder}/house-plan-${plan.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+        const { error } = await supabase.storage.from("property-submissions").upload(path, plan);
+        if (error) throw error;
+        planUrl = supabase.storage.from("property-submissions").getPublicUrl(path).data.publicUrl;
+      }
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const { error: insertError } = await supabase.from("property_submissions").insert({
+        user_id: currentUser?.id || null, name, phone, email, title, location,
+        price: price ? Number(price) : null, intent: intent.includes("rent") ? "rent" : "sell",
+        description, images: imageUrls, house_plan_url: planUrl,
+      });
+      if (insertError) throw insertError;
+    } catch (insertError) {
+      setLoading(false);
+      setError(insertError instanceof Error ? insertError.message : "Failed to submit listing request.");
+      return;
+    }
 
     setLoading(false);
 
-    if (insertError) {
-      console.error("Supabase error:", insertError.message);
-      setError("Failed to submit listing request. Please contact us directly via phone or email.");
-    } else {
-      setSubmitted(true);
-      setName("");
-      setPhone("");
-      setEmail("");
-      setDescription("");
-    }
+    setSubmitted(true);
+    setName(""); setPhone(""); setEmail(""); setDescription("");
+    setTitle(""); setLocation(""); setPrice(""); setPhotos([]); setPlan(null);
   };
 
   return (
@@ -105,6 +121,11 @@ export default function SellPage() {
                 placeholder="Your Name"
                 className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-emerald-500"
               />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Property title (optional)" className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600" />
+                <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location (optional)" className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600" />
+                <input type="number" min="0" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Expected price (BWP)" className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600" />
+              </div>
               <input
                 type="tel"
                 required
@@ -145,6 +166,13 @@ export default function SellPage() {
               placeholder="Tell us about your property (location, features, desired price)..."
               className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-emerald-500"
             />
+            <label className="block text-xs text-slate-400">Property photos (optional, up to 10)
+              <input type="file" accept="image/*" multiple onChange={(e) => setPhotos(Array.from(e.target.files || []).slice(0, 10))} className="mt-2 block w-full text-xs text-slate-400" />
+            </label>
+            {photos.length > 0 && <div className="flex gap-2 overflow-auto">{photos.map((file) => <img key={file.name} src={URL.createObjectURL(file)} alt={file.name} className="h-16 w-16 rounded object-cover" />)}</div>}
+            <label className="block text-xs text-slate-400">House or floor plan (optional image/PDF)
+              <input type="file" accept="image/*,.pdf" onChange={(e) => setPlan(e.target.files?.[0] || null)} className="mt-2 block w-full text-xs text-slate-400" />
+            </label>
             <button
               type="submit"
               disabled={loading}
