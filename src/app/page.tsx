@@ -7,13 +7,46 @@ import { supabase } from "@/lib/supabase/client";
 import PropertyCard from "@/components/PropertyCard";
 import LocationPicker from "@/components/LocationPicker";
 import { Search, ShieldCheck, Award, MessageSquare } from "lucide-react";
+import type { Property } from "@/types/property";
+import { useAuth } from "@/context/AuthContext";
 
 export default function HomePage() {
   const router = useRouter();
-  const [properties, setProperties] = useState<any[]>([]);
+  const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [location, setLocation] = useState("");
   const [activeTab, setActiveTab] = useState<"buy" | "rent" | "sell">("buy");
+  const { user } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isReturningUser, setIsReturningUser] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+  const metadata = user?.user_metadata as { full_name?: string; name?: string; first_name?: string } | undefined;
+  const accountName = metadata?.first_name || metadata?.full_name || metadata?.name || user?.email?.split("@")[0] || "there";
+  const firstName = accountName.trim().split(/\s+/)[0];
+  useEffect(() => {
+    let mounted = true;
+    if (!user) {
+      return () => { mounted = false; };
+    }
+
+    const key = `adam-blueprint-seen-user:${user.id}`;
+    queueMicrotask(() => {
+      if (mounted) setIsReturningUser(window.localStorage.getItem(key) === "true");
+    });
+    window.localStorage.setItem(key, "true");
+    fetch("/api/admin-check")
+      .then((response) => response.json())
+      .then((data) => {
+        if (mounted) setIsAdmin(!!data.isAdmin);
+      })
+      .catch(() => {
+        if (mounted) setIsAdmin(false);
+      })
+      .finally(() => {
+        if (mounted) setAuthChecked(true);
+      });
+    return () => { mounted = false; };
+  }, [user]);
 
   useEffect(() => {
     async function loadFeaturedProperties() {
@@ -57,8 +90,17 @@ export default function HomePage() {
         </div>
 
         <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">
-          Find Your Perfect <br />
-          <span className="text-cyan-400">Property in Botswana</span>
+          {user && authChecked ? (
+            <>
+              {isAdmin ? "Welcome Back Admin" : isReturningUser ? "Welcome back" : "Welcome to Adam Blueprint"}<br />
+              <span className="text-cyan-400">{isAdmin ? "" : firstName}</span>
+            </>
+          ) : (
+            <>
+              Find Your Perfect <br />
+              <span className="text-cyan-400">Property in Botswana</span>
+            </>
+          )}
         </h1>
 
         <p className="text-slate-400 text-sm md:text-base max-w-2xl mx-auto">
@@ -66,7 +108,7 @@ export default function HomePage() {
           Francistown & beyond. Verified listings by Segolame Adam.
         </p>
 
-        {/* Search Widget */}
+        {/* Location search widget */}
         <div className="max-w-3xl mx-auto bg-slate-900/90 border border-slate-800 p-4 rounded-2xl shadow-2xl space-y-4">
           <div className="flex items-center justify-center gap-6 pb-2">
             {(["buy", "rent", "sell"] as const).map((tab) => (

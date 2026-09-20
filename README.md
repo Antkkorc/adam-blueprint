@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Adam Blueprint
 
-## Getting Started
+Adam Blueprint is a Botswana-focused real-estate website for browsing property listings, finding community rentals, saving properties, and contacting the team through WhatsApp or enquiry forms.
 
-First, run the development server:
+## Local development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Required environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create `.env.local` with:
 
-## Learn More
+```env
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+ADMIN_EMAIL=...
+```
 
-To learn more about Next.js, take a look at the following resources:
+`ADMIN_EMAIL` is required for admin routes to work. Admin access fails closed if it is missing or does not match the authenticated user's email.
+Alternatively, set `ADMIN_USER_ID` to the authenticated Supabase user's UUID. Find it in Supabase under Authentication > Users. Do not use the secret API key in this file or in browser code.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Supabase requirements
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The application expects Supabase tables for `properties`, `tenant_rentals`, `saved_properties`, and `enquiries`, plus the `property-images` and `rental-images` storage buckets. Public listing reads and authenticated writes must be covered by Row Level Security policies appropriate to your deployment.
 
-## Deploy on Vercel
+Public property results are expected to use `intent = 'buy'` or `intent = 'rent'` and `status = 'active'`. Review existing records before enabling the production site so older status values are migrated if necessary.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Free map and image features
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The admin property form uses OpenStreetMap's free Nominatim geocoder to turn a Botswana city/suburb/address into coordinates. The detail page displays the exact pin using OpenStreetMap embeds and links to the full map. This avoids a Google Maps API key and billing requirement. Nominatim is rate-limited, so use it for occasional admin lookups rather than bulk geocoding.
+
+Each property photo can be assigned a category and a short description such as `Front / Outside — Main entrance` or `Backyard — Pool and garden`. These labels are stored with the existing `image_labels` field and shown in the property photo tour.
+
+Location names are based on Botswana local-authority references and common real-estate area labels. Blocks and suburbs are useful search labels but are not always formal municipal wards; verify legal property details against the deed or municipal records.
+
+## Validation
+
+```bash
+npm run lint
+npm run build
+```
+
+## Main routes
+
+- `/` - search and featured properties
+- `/buy` - searchable sale listings
+- `/rent` - searchable community rentals
+- `/sell` - valuation and listing enquiry
+- `/contact` - general contact form
+- `/saved` - authenticated saved properties
+- `/admin` - admin-only property management

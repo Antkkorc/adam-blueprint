@@ -29,16 +29,28 @@ export default function LocationPicker({ value, onChange }: Props) {
 
   return (
     <div className="relative flex-1" ref={ref}>
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 border border-white/5 hover:border-cyan-500/50 transition-colors text-left"
-      >
-        <MapPin className="w-4 h-4 text-cyan-400 shrink-0" />
-        <span className={`text-sm truncate ${value ? "text-white" : "text-slate-400"}`}>
-          {value || "All Locations"}
-        </span>
-      </button>
+      <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 border border-white/5 focus-within:border-cyan-500/50 transition-colors">
+        <button
+          type="button"
+          onClick={() => setOpen(!open)}
+          aria-label="Browse Botswana locations"
+          className="shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-2.5 py-2 text-[10px] font-extrabold uppercase tracking-wide text-cyan-300 hover:bg-cyan-500/20"
+        >
+          <MapPin className="h-4 w-4" />
+          <span>All locations</span>
+        </button>
+        <input
+          value={value}
+          onChange={(event) => {
+            onChange(event.target.value);
+            setOpen(true);
+          }}
+          onFocus={() => setOpen(true)}
+          placeholder="Search by city or suburb, e.g. Gaborone"
+          aria-label="Search by city or suburb"
+          className="min-w-0 flex-1 bg-transparent text-sm text-white placeholder:text-slate-400 outline-none"
+        />
+      </div>
 
       {open && (
         <div className="absolute z-30 mt-2 w-full md:w-[440px] bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden">
@@ -46,6 +58,7 @@ export default function LocationPicker({ value, onChange }: Props) {
             type="button"
             onClick={() => {
               onChange("");
+              setActiveCity(null);
               setOpen(false);
             }}
             className="w-full px-4 py-2.5 text-left text-xs font-bold text-cyan-300 hover:bg-slate-800 border-b border-slate-800 transition-colors"
@@ -56,7 +69,10 @@ export default function LocationPicker({ value, onChange }: Props) {
           <div className="flex h-64">
             {/* Cities column */}
             <div className="w-1/2 overflow-y-auto border-r border-slate-800">
-              {LOCATION_TREE.map((c) => (
+              {LOCATION_TREE.filter((c) =>
+                !value || c.city.toLowerCase().includes(value.toLowerCase()) ||
+                c.wards.some((ward) => ward.toLowerCase().includes(value.toLowerCase()))
+              ).map((c) => (
                 <button
                   key={c.city}
                   type="button"

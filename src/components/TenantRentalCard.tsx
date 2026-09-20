@@ -1,4 +1,5 @@
 import { MapPin, MessageCircle } from "lucide-react";
+import Image from "next/image";
 
 export interface TenantRental {
   id: string;
@@ -32,9 +33,11 @@ export default function TenantRentalCard({ rental }: { rental: TenantRental }) {
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden hover:border-cyan-500/40 transition-all group">
       <div className="relative h-52">
-        <img
+        <Image
           src={image}
           alt={rental.title}
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
         <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-emerald-400 text-slate-950 text-[10px] font-extrabold uppercase">

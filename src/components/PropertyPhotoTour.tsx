@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { ChevronLeft, ChevronRight, Camera } from "lucide-react";
-import { PHOTO_CATEGORIES } from "@/lib/photos";
+import { parsePhotoLabel, PHOTO_CATEGORIES } from "@/lib/photos";
 
 interface Props {
   images: string[];
@@ -13,21 +14,22 @@ interface Props {
 export default function PropertyPhotoTour({ images, labels, title }: Props) {
   const items = images.map((url, i) => ({
     url,
-    label: labels[i] || "Other",
+    ...parsePhotoLabel(labels[i] || "Other"),
   }));
 
   const knownTabs = PHOTO_CATEGORIES.filter((c) =>
-    items.some((item) => item.label === c)
+    items.some((item) => item.category === c)
   );
-  const extraTabs = Array.from(new Set(items.map((i) => i.label))).filter(
+  const extraTabs = Array.from(new Set(items.map((i) => i.category))).filter(
     (l) => !PHOTO_CATEGORIES.includes(l)
   );
   const tabs = ["All", ...knownTabs, ...extraTabs];
 
   const [activeTab, setActiveTab] = useState("All");
   const filtered =
-    activeTab === "All" ? items : items.filter((i) => i.label === activeTab);
+    activeTab === "All" ? items : items.filter((i) => i.category === activeTab);
   const [activeUrl, setActiveUrl] = useState(filtered[0]?.url ?? "");
+  const [touchStart, setTouchStart] = useState<number | null>(null);
 
   const current = filtered.find((i) => i.url === activeUrl) ?? filtered[0];
   const currentIndex = current ? filtered.indexOf(current) : -1;
@@ -42,6 +44,16 @@ export default function PropertyPhotoTour({ images, labels, title }: Props) {
     if (filtered.length === 0) return;
     const idx = (currentIndex + 1) % filtered.length;
     setActiveUrl(filtered[idx].url);
+  };
+
+  const handleTouchEnd = (endX: number) => {
+    if (touchStart === null || filtered.length < 2) return;
+    const distance = endX - touchStart;
+    if (Math.abs(distance) > 45) {
+      if (distance < 0) goNext();
+      else goPrev();
+    }
+    setTouchStart(null);
   };
 
   if (items.length === 0) {
@@ -64,7 +76,7 @@ export default function PropertyPhotoTour({ images, labels, title }: Props) {
             onClick={() => {
               setActiveTab(tab);
               const first =
-                tab === "All" ? items[0] : items.find((i) => i.label === tab);
+                tab === "All" ? items[0]                 : items.find((i) => i.category === tab);
               if (first) setActiveUrl(first.url);
             }}
             className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-colors ${
@@ -76,23 +88,29 @@ export default function PropertyPhotoTour({ images, labels, title }: Props) {
             {tab} (
             {tab === "All"
               ? items.length
-              : items.filter((i) => i.label === tab).length}
+              : items.filter((i) => i.category === tab).length}
             )
           </button>
         ))}
       </div>
 
       {/* Main viewer */}
-      <div className="relative h-[320px] md:h-[460px] rounded-2xl overflow-hidden border border-slate-800 bg-slate-900">
+      <div
+        className="relative h-[280px] sm:h-[360px] md:h-[420px] rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 touch-pan-y"
+        onTouchStart={(event) => setTouchStart(event.touches[0]?.clientX ?? null)}
+        onTouchEnd={(event) => handleTouchEnd(event.changedTouches[0]?.clientX ?? 0)}
+      >
         {current && (
           <>
-            <img
+            <Image
               src={current.url}
-              alt={`${title} - ${current.label}`}
+              alt={`${title} - ${current.category}${current.description ? ` - ${current.description}` : ""}`}
+              fill
+              sizes="(max-width: 768px) 100vw, 66vw"
               className="w-full h-full object-cover"
             />
             <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-slate-950/80 border border-cyan-500/40 text-cyan-300 text-[10px] font-extrabold uppercase backdrop-blur-md">
-              {current.label}
+              {current.category}{current.description ? `: ${current.description}` : ""}
             </span>
 
             {filtered.length > 1 && (
@@ -129,13 +147,13 @@ export default function PropertyPhotoTour({ images, labels, title }: Props) {
             key={item.url}
             type="button"
             onClick={() => setActiveUrl(item.url)}
-            className={`shrink-0 w-24 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+            className={`relative shrink-0 w-24 h-16 rounded-lg overflow-hidden border-2 transition-all ${
               item.url === activeUrl
                 ? "border-cyan-400 opacity-100"
                 : "border-transparent opacity-60 hover:opacity-100"
             }`}
           >
-            <img src={item.url} alt={item.label} className="w-full h-full object-cover" />
+            <Image src={item.url} alt={`${item.category}${item.description ? ` - ${item.description}` : ""}`} fill sizes="96px" className="w-full h-full object-cover" />
           </button>
         ))}
       </div>

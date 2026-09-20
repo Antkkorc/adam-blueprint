@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import PropertyCard from "@/components/PropertyCard";
 import Link from "next/link";
+import { getLocationSearch } from "@/lib/filters";
 
 export const revalidate = 0;
 
@@ -12,6 +13,14 @@ interface BuyPageProps {
     wifi?: string;
     pool?: string;
     garage?: string;
+    location?: string;
+    type?: string;
+    minBeds?: string;
+    minBaths?: string;
+    minParking?: string;
+    minBuildingSqm?: string;
+    minLandSqm?: string;
+    amenity?: string | string[];
   }>;
 }
 
@@ -23,17 +32,42 @@ export default async function BuyPage({ searchParams }: BuyPageProps) {
   const wifiType = params.wifi || "";
   const hasPool = params.pool === "true";
   const hasGarage = params.garage === "true";
+  const location = getLocationSearch(params.location || "");
+  const propertyType = params.type || "";
+  const minBeds = Math.max(0, Number(params.minBeds) || 0);
+  const minBaths = Math.max(0, Number(params.minBaths) || 0);
+  const minParking = Math.max(0, Number(params.minParking) || 0);
+  const minBuildingSqm = Math.max(0, Number(params.minBuildingSqm) || 0);
+  const minLandSqm = Math.max(0, Number(params.minLandSqm) || 0);
+  const selectedAmenities = Array.isArray(params.amenity)
+    ? params.amenity
+    : params.amenity ? [params.amenity] : [];
 
   const supabase = await createClient();
 
   let query = supabase.from("properties").select("*");
 
-  if (selectedTenure) query = query.eq("tenure_type", selectedTenure);
+  query = query.eq("intent", "buy").in("status", ["active", "Available"]);
+  if (location) {
+    query = query.or(
+      `location.ilike.%${location}%,city.ilike.%${location}%,suburb.ilike.%${location}%`
+    );
+  }
+  if (propertyType && propertyType !== "All Types") query = query.eq("type", propertyType);
+  if (selectedTenure) query = query.eq("tenure", selectedTenure);
   if (minPrice > 0) query = query.gte("price", minPrice);
   if (maxPrice < Infinity && maxPrice > 0) query = query.lte("price", maxPrice);
   if (hasPool) query = query.eq("pool", true);
   if (hasGarage) query = query.eq("garage", true);
   if (wifiType) query = query.eq("wifi_type", wifiType);
+  if (minBeds > 0) query = query.gte("beds", minBeds);
+  if (minBaths > 0) query = query.gte("baths", minBaths);
+  if (minParking > 0) query = query.gte("parking", minParking);
+  if (minBuildingSqm > 0) query = query.gte("building_sqm", minBuildingSqm);
+  if (minLandSqm > 0) query = query.gte("land_sqm", minLandSqm);
+  for (const amenity of selectedAmenities) {
+    query = query.contains("amenities", [amenity]);
+  }
 
   const { data: properties, error } = await query;
 
@@ -46,11 +80,58 @@ export default async function BuyPage({ searchParams }: BuyPageProps) {
       <div className="max-w-7xl mx-auto space-y-8">
         <div>
           <h1 className="text-3xl font-extrabold">Properties for Sale</h1>
-          <p className="text-slate-400 text-sm mt-1">Filter listings across Botswana by budget, land tenure, and features.</p>
+          <p className="text-slate-400 text-sm mt-1">Filter active listings across Botswana by location, budget, land tenure, and features.</p>
         </div>
 
         {/* Filter Bar */}
-        <form className="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
+        <details className="group bg-slate-900/90 border border-slate-800 rounded-2xl">
+          <summary className="flex cursor-pointer list-none items-center justify-between p-4 text-sm font-bold text-white">
+            <span>Filters</span>
+            <span className="text-xs font-normal text-slate-400 group-open:text-cyan-300">Refine results</span>
+          </summary>
+          <form className="border-t border-slate-800 p-4 grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
+          <div>
+            <label className="block text-slate-400 mb-1 font-semibold">Location</label>
+            <input
+              type="search"
+              name="location"
+              defaultValue={location}
+              placeholder="Gaborone, Phakalane, Maun"
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            />
+          </div>
+
+          {[
+            ["minBeds", "Bedrooms", "Any bedrooms"],
+            ["minBaths", "Bathrooms", "Any bathrooms"],
+            ["minParking", "Parking / Garage", "Any parking"],
+            ["minBuildingSqm", "Floor Size (m²)", "Minimum floor size"],
+            ["minLandSqm", "Erf Size (m²)", "Minimum erf size"],
+          ].map(([name, label, placeholder]) => (
+            <div key={name}>
+              <label className="block text-slate-400 mb-1 font-semibold">{label}</label>
+              <input type="number" min="0" name={name} defaultValue={params[name as keyof typeof params] || ""}
+                placeholder={placeholder} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-cyan-500" />
+            </div>
+          ))}
+
+          <div>
+            <label className="block text-slate-400 mb-1 font-semibold">Property Type</label>
+            <select
+              name="type"
+              defaultValue={propertyType}
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            >
+              <option value="">All Types</option>
+              <option value="House">House</option>
+              <option value="Apartment">Apartment</option>
+              <option value="Land">Land</option>
+              <option value="Office">Office</option>
+              <option value="Commercial">Commercial</option>
+              <option value="Warehouse">Warehouse</option>
+            </select>
+          </div>
+
           <div>
             <label className="block text-slate-400 mb-1 font-semibold">Min Price (BWP)</label>
             <input
@@ -100,17 +181,31 @@ export default async function BuyPage({ searchParams }: BuyPageProps) {
             </select>
           </div>
 
-          <div className="md:col-span-4 flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-slate-800">
-            <div className="flex items-center gap-6">
-              <label className="flex items-center gap-2 text-slate-300 font-semibold cursor-pointer">
-                <input type="checkbox" name="pool" value="true" defaultChecked={hasPool} className="rounded border-slate-800 bg-slate-950 text-cyan-500" />
-                Swimming Pool
-              </label>
-              <label className="flex items-center gap-2 text-slate-300 font-semibold cursor-pointer">
-                <input type="checkbox" name="garage" value="true" defaultChecked={hasGarage} className="rounded border-slate-800 bg-slate-950 text-cyan-500" />
-                Garage / Carport
-              </label>
-            </div>
+          <div className="md:col-span-4 space-y-4 border-t border-slate-800 pt-4">
+            <fieldset>
+              <legend className="mb-2 font-bold text-slate-300">Features</legend>
+              <div className="flex flex-wrap gap-x-5 gap-y-2">
+                {["Pet Friendly", "Garden", "Swimming Pool", "Flatlet"].map((feature) => (
+                  <label key={feature} className="flex items-center gap-2 text-slate-300 font-semibold cursor-pointer">
+                    <input type="checkbox" name="amenity" value={feature} defaultChecked={selectedAmenities.includes(feature)}
+                      className="rounded border-slate-800 bg-slate-950 text-cyan-500" />
+                    {feature}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend className="mb-2 font-bold text-slate-300">Other</legend>
+              <div className="flex flex-wrap gap-x-5 gap-y-2">
+                {["Retirement", "Repossessed", "On Show", "Security Estate / Cluster", "On Auction"].map((feature) => (
+                  <label key={feature} className="flex items-center gap-2 text-slate-300 font-semibold cursor-pointer">
+                    <input type="checkbox" name="amenity" value={feature} defaultChecked={selectedAmenities.includes(feature)}
+                      className="rounded border-slate-800 bg-slate-950 text-cyan-500" />
+                    {feature}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
 
             <div className="flex items-center gap-3">
               <Link href="/buy" className="text-slate-400 hover:text-white px-3 py-2">Reset</Link>
@@ -119,7 +214,8 @@ export default async function BuyPage({ searchParams }: BuyPageProps) {
               </button>
             </div>
           </div>
-        </form>
+          </form>
+        </details>
 
         {/* Listings Display */}
         {!properties || properties.length === 0 ? (

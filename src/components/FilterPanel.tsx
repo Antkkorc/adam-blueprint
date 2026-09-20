@@ -25,9 +25,17 @@ export default function FilterPanel({ basePath, initialFilters }: Props) {
     (filters.minPrice > 0 ? 1 : 0) +
     (filters.maxPrice > 0 ? 1 : 0) +
     (filters.type !== "All Types" ? 1 : 0) +
+    (filters.minBeds > 0 ? 1 : 0) +
+    (filters.minBaths > 0 ? 1 : 0) +
+    (filters.minParking > 0 ? 1 : 0) +
+    (filters.minBuildingSqm > 0 ? 1 : 0) +
+    (filters.minLandSqm > 0 ? 1 : 0) +
     filters.amenities.length;
 
-  const update = (key: keyof PropertyFiltersState, value: any) => {
+  const update = <K extends keyof PropertyFiltersState>(
+    key: K,
+    value: PropertyFiltersState[K]
+  ) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -50,6 +58,11 @@ export default function FilterPanel({ basePath, initialFilters }: Props) {
       minPrice: 0,
       maxPrice: 0,
       type: "All Types",
+      minBeds: 0,
+      minBaths: 0,
+      minParking: 0,
+      minBuildingSqm: 0,
+      minLandSqm: 0,
       amenities: [],
     });
     router.push(basePath);
@@ -60,10 +73,10 @@ export default function FilterPanel({ basePath, initialFilters }: Props) {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-800/50 transition-colors"
+        className="w-full flex items-center justify-between px-4 py-4 hover:bg-slate-800/50 transition-colors md:py-3"
       >
-        <span className="flex items-center gap-2 text-white font-semibold text-sm">
-          <SlidersHorizontal className="w-4 h-4 text-cyan-400" />
+        <span className="flex items-center gap-2 text-white font-semibold text-base md:text-sm">
+          <SlidersHorizontal className="w-5 h-5 text-cyan-400" />
           Filters
           {activeCount > 0 && (
             <span className="px-2 py-0.5 rounded-full bg-cyan-400 text-slate-950 text-[10px] font-extrabold">
@@ -77,7 +90,7 @@ export default function FilterPanel({ basePath, initialFilters }: Props) {
       </button>
 
       {open && (
-        <div className="p-4 pt-2 space-y-4 border-t border-slate-800">
+        <div className="p-4 pt-3 space-y-5 border-t border-slate-800 md:space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
               <label className="text-slate-400 text-xs mb-1 block">Location</label>
@@ -86,7 +99,7 @@ export default function FilterPanel({ basePath, initialFilters }: Props) {
                 value={filters.location}
                 onChange={(e) => update("location", e.target.value)}
                 placeholder="Gaborone, Phakalane, Maun..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white placeholder:text-slate-600 outline-none focus:border-cyan-500"
+                className="w-full min-h-12 bg-slate-950 border border-slate-800 rounded-xl px-3 py-3 text-sm text-white placeholder:text-slate-600 outline-none focus:border-cyan-500 md:min-h-0 md:py-2.5 md:text-xs"
               />
             </div>
             <div>
@@ -96,7 +109,7 @@ export default function FilterPanel({ basePath, initialFilters }: Props) {
                 value={filters.minPrice || ""}
                 onChange={(e) => update("minPrice", Number(e.target.value) || 0)}
                 placeholder="e.g. 500000"
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white placeholder:text-slate-600 outline-none focus:border-cyan-500"
+                className="w-full min-h-12 bg-slate-950 border border-slate-800 rounded-xl px-3 py-3 text-sm text-white placeholder:text-slate-600 outline-none focus:border-cyan-500 md:min-h-0 md:py-2.5 md:text-xs"
               />
             </div>
             <div>
@@ -106,7 +119,7 @@ export default function FilterPanel({ basePath, initialFilters }: Props) {
                 value={filters.maxPrice || ""}
                 onChange={(e) => update("maxPrice", Number(e.target.value) || 0)}
                 placeholder="e.g. 2500000"
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white placeholder:text-slate-600 outline-none focus:border-cyan-500"
+                className="w-full min-h-12 bg-slate-950 border border-slate-800 rounded-xl px-3 py-3 text-sm text-white placeholder:text-slate-600 outline-none focus:border-cyan-500 md:min-h-0 md:py-2.5 md:text-xs"
               />
             </div>
           </div>
@@ -116,7 +129,7 @@ export default function FilterPanel({ basePath, initialFilters }: Props) {
             <select
               value={filters.type}
               onChange={(e) => update("type", e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-cyan-500"
+              className="w-full min-h-12 bg-slate-950 border border-slate-800 rounded-xl px-3 py-3 text-sm text-white outline-none focus:border-cyan-500 md:min-h-0 md:py-2.5 md:text-xs"
             >
               {PROPERTY_TYPES.map((type) => (
                 <option key={type} value={type}>
@@ -138,7 +151,7 @@ export default function FilterPanel({ basePath, initialFilters }: Props) {
                     key={amenity}
                     type="button"
                     onClick={() => toggleAmenity(amenity)}
-                    className={`text-[10px] px-2.5 py-1.5 rounded-md border transition-colors flex items-center gap-1 ${
+                    className={`text-xs px-3 py-2 rounded-md border transition-colors flex items-center gap-1 ${
                       active
                         ? "bg-cyan-500/20 border-cyan-400 text-cyan-300"
                         : "bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-600"

@@ -14,9 +14,13 @@ export async function requireAdmin() {
   }
 
   const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase().trim();
+  const adminUserId = process.env.ADMIN_USER_ID?.trim();
   const userEmail = user.email?.toLowerCase().trim();
 
-  if (adminEmail && userEmail !== adminEmail) {
+  const isAdmin = (!!adminEmail && !!userEmail && userEmail === adminEmail) ||
+    (!!adminUserId && user.id === adminUserId);
+
+  if (!isAdmin) {
     redirect("/");
   }
 
