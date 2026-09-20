@@ -30,6 +30,7 @@ export default function TenantRentalForm() {
   const [title, setTitle] = useState("");
   const [location, setLocation] = useState("");
   const [price, setPrice] = useState("");
+  const [bedrooms, setBedrooms] = useState("");
   const [description, setDescription] = useState("");
   const [contactName, setContactName] = useState("");
   const [contactPhone, setContactPhone] = useState("");
@@ -89,6 +90,7 @@ export default function TenantRentalForm() {
           title,
           location,
           price: Number(price),
+          bedrooms: Number(bedrooms),
           description,
           tenant_name: contactName,
           contact_number: contactPhone,
@@ -161,6 +163,18 @@ export default function TenantRentalForm() {
         className="w-full p-3 bg-slate-800 rounded-xl outline-none focus:ring-1 focus:ring-cyan-500"
         value={price}
         onChange={(e) => setPrice(e.target.value)}
+      />
+
+      <input
+        type="number"
+        placeholder="Number of Bedrooms"
+        required
+        min={1}
+        max={100}
+        aria-label="Number of bedrooms"
+        className="w-full p-3 bg-slate-800 rounded-xl outline-none focus:ring-1 focus:ring-cyan-500"
+        value={bedrooms}
+        onChange={(e) => setBedrooms(e.target.value)}
       />
 
       <input
