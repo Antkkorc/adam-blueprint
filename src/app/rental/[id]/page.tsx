@@ -50,7 +50,7 @@ export default async function RentalDetailPage({ params }: PageProps) {
     : `https://www.openstreetmap.org/search?query=${encodeURIComponent(`${rental.location}, Botswana`)}`;
   const satelliteLink = hasCoords
     ? `https://www.google.com/maps/@?api=1&map_action=map&center=${rental.latitude},${rental.longitude}&zoom=18&basemap=satellite`
-    : "";
+    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${rental.location}, Botswana`)}`;
 
   return (
     <main className="min-h-screen bg-slate-950 text-white p-4 md:p-10">
@@ -96,11 +96,9 @@ export default async function RentalDetailPage({ params }: PageProps) {
                   <a href={mapLink} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-cyan-400 hover:underline">
                     Open street map →
                   </a>
-                  {satelliteLink && (
-                    <a href={satelliteLink} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-emerald-400 hover:underline">
-                      Open satellite view →
-                    </a>
-                  )}
+                  <a href={satelliteLink} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-emerald-400 hover:underline">
+                    {hasCoords ? "Open satellite view →" : "Open satellite area view →"}
+                  </a>
                 </div>
               </div>
               {hasCoords ? (
