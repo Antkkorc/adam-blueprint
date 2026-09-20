@@ -28,6 +28,24 @@ html[data-theme="light"] .bg-slate-900\/60 {
   background-color: #ffffff !important;
 }
 
+html[data-theme="light"] aside {
+  background-color: #ffffff !important;
+  border-color: #d7e2eb !important;
+}
+
+html[data-theme="light"] aside .bg-slate-900\/70 {
+  background-color: #edf4f8 !important;
+}
+
+html[data-theme="light"] aside .hover\:bg-slate-900\/60:hover,
+html[data-theme="light"] aside .hover\:bg-slate-900:hover {
+  background-color: #edf4f8 !important;
+}
+
+html[data-theme="light"] aside .hover\:text-white:hover {
+  color: #102033 !important;
+}
+
 html[data-theme="light"] .text-white,
 html[data-theme="light"] .text-slate-100,
 html[data-theme="light"] .text-slate-200 {
