@@ -49,6 +49,8 @@ export async function reviewRentalSubmission(
       contact_number: submission.contact_number,
       contact_name: submission.contact_name,
       contact_phone: submission.contact_number,
+      student_friendly: submission.student_friendly ?? false,
+      student_proof_required: submission.student_proof_type != null,
       status: "Available",
     })
     .select("id")

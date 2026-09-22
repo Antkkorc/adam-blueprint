@@ -24,6 +24,16 @@ export default function AdminEnquiries({ enquiries }: { enquiries: Enquiry[] }) 
     if (response.ok) router.refresh();
   };
 
+  const whatsappHref = (phone: string) => {
+    const digits = phone.replace(/\D/g, "");
+    const international = digits.startsWith("00")
+      ? digits.slice(2)
+      : digits.length === 8
+        ? `267${digits}`
+        : digits;
+    return `https://wa.me/${international}`;
+  };
+
   return (
     <div className="space-y-3">
       {!enquiries.length ? <p className="rounded-xl bg-slate-900 p-5 text-slate-400">No contact enquiries.</p> : enquiries.map((enquiry) => (
@@ -38,7 +48,26 @@ export default function AdminEnquiries({ enquiries }: { enquiries: Enquiry[] }) 
             </button>
           </div>
           <p className="mt-2 whitespace-pre-wrap text-sm text-slate-300">{enquiry.message}</p>
-          <a href={`mailto:${enquiry.email}`} className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-cyan-300 hover:underline"><Mail className="h-3 w-3" /> Reply by email</a>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <a
+              href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(enquiry.email)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="glass-icon btn-pop inline-flex items-center gap-1 rounded-lg px-3 py-2 text-xs font-semibold text-cyan-700 dark:text-cyan-300"
+            >
+              <Mail className="h-3 w-3" /> Reply by email
+            </a>
+            {enquiry.phone && (
+              <a
+                href={whatsappHref(enquiry.phone)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="glass-icon btn-pop inline-flex items-center gap-1 rounded-lg px-3 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300"
+              >
+                <Phone className="h-3 w-3" /> Reply by WhatsApp
+              </a>
+            )}
+          </div>
         </article>
       ))}
     </div>

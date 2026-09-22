@@ -74,18 +74,20 @@ export default function SavePropertyButton({
   }
 
   return (
-    <button
-      type="button"
-      onClick={toggleSaved}
-      disabled={saving}
-      className={`save-property-button absolute top-3 right-3 z-10 p-2 rounded-full border backdrop-blur-md transition-all ${
-        saved
-          ? "bg-cyan-400 text-slate-950 border-cyan-300"
-          : "glass-icon text-slate-700 dark:text-white border-white/30 hover:border-cyan-300 hover:text-cyan-300"
-      }`}
-      aria-label={saved ? "Remove from saved properties" : "Save property"}
-    >
-      <Heart className={`w-4 h-4 ${saved ? "fill-current" : ""}`} />
-    </button>
+    <div className="absolute right-3 top-3 z-20">
+      <button
+        type="button"
+        onClick={toggleSaved}
+        disabled={saving}
+        className={`save-property-button p-2 rounded-full border backdrop-blur-md ${
+          saved
+            ? "glass-icon glass-icon-primary text-slate-950"
+            : "glass-icon text-slate-700 dark:text-white border-white/30 hover:border-cyan-300 hover:text-cyan-300"
+        }`}
+        aria-label={saved ? "Remove from saved properties" : "Save property"}
+      >
+        <Heart className={`w-4 h-4 ${saved ? "fill-current" : ""}`} />
+      </button>
+    </div>
   );
 }

@@ -16,10 +16,17 @@ export default async function StudentsPage() {
     .order("created_at", { ascending: false });
 
   if (error) {
+    console.error("Student housing query failed:", error.message);
     return (
       <main className="min-h-screen px-4 py-24 text-center">
-        <h1 className="text-2xl font-bold">Student housing is temporarily unavailable</h1>
-        <p className="mt-3 text-slate-400">Please try again shortly.</p>
+        <h1 className="text-2xl font-bold">No student housing is available yet</h1>
+        <p className="mx-auto mt-3 max-w-xl text-slate-400">
+          Student listings will appear here after an admin publishes a suitable rental priced from P0 to P3,000.
+          If you already ran the migration and published one, refresh this page and check its status is Available.
+        </p>
+        <Link href="/list-my-rental" className="glass-icon btn-pop mt-6 inline-flex rounded-xl px-4 py-3 text-sm font-bold">
+          List student housing
+        </Link>
       </main>
     );
   }
