@@ -78,7 +78,7 @@ export default function SavePropertyButton({
       type="button"
       onClick={toggleSaved}
       disabled={saving}
-      className={`absolute top-3 right-3 p-2 rounded-full border backdrop-blur-md transition-all ${
+      className={`save-property-button absolute top-3 right-3 z-10 p-2 rounded-full border backdrop-blur-md transition-all ${
         saved
           ? "bg-cyan-400 text-slate-950 border-cyan-300"
           : "glass-icon text-slate-700 dark:text-white border-white/30 hover:border-cyan-300 hover:text-cyan-300"

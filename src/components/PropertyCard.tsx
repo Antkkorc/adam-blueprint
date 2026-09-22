@@ -58,7 +58,7 @@ export default function PropertyCard({ property, initialSaved = false }: Props) 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden hover:border-cyan-500/40 transition-all group">
       <div className="relative h-52">
-        <Link href={`/property/${property.id}`}>
+        <Link href={`/property/${property.id}`} className="relative block h-full">
           <Image
             src={image}
             alt={property.title}
