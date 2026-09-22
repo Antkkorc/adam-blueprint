@@ -54,7 +54,6 @@ export default function TenantRentalForm({ adminMode = false }: { adminMode?: bo
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [studentFriendly, setStudentFriendly] = useState(false);
-  const [studentProofType, setStudentProofType] = useState("");
 
   const addPhotos = (list: FileList | null) => {
     if (!list) return;
@@ -216,8 +215,7 @@ export default function TenantRentalForm({ adminMode = false }: { adminMode?: bo
           contact_name: contactName, contact_number: contactPhone,
           images: imageUrls, user_id: session.user.id,
           student_friendly: studentFriendly,
-          student_proof_type: studentFriendly ? studentProofType : null,
-          student_verification_status: studentFriendly ? "pending" : "not_required",
+          student_verification_status: "not_required",
         }]);
         if (error) throw error;
       }
@@ -356,16 +354,7 @@ export default function TenantRentalForm({ adminMode = false }: { adminMode?: bo
           <input type="checkbox" checked={studentFriendly} onChange={(e) => setStudentFriendly(e.target.checked)} className="h-5 w-5 accent-cyan-500" />
           Suitable for students
         </label>
-        {studentFriendly && (
-          <select required value={studentProofType} onChange={(e) => setStudentProofType(e.target.value)} className="w-full rounded-xl bg-slate-800 p-3 text-sm">
-            <option value="">Choose proof applicants should provide</option>
-            <option value="student_id">Student ID</option>
-            <option value="enrollment_confirmation">Enrollment confirmation</option>
-            <option value="registration_proof">Registration proof</option>
-            <option value="admission_letter">Admission letter</option>
-          </select>
-        )}
-        <p className="text-xs text-slate-500">Student documents are reviewed privately by an admin and are not displayed on the public listing.</p>
+        <p className="text-xs text-slate-500">Student applicants can provide proof privately when they enquire about this rental.</p>
       </div>
 
       <div className="space-y-3">

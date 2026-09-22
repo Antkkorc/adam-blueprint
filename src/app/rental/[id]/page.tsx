@@ -4,6 +4,7 @@ import { ArrowLeft, Bath, Bed, MapPin, MessageCircle, Phone } from "lucide-react
 import { createClient } from "@/lib/supabase/server";
 import { BRAND } from "@/lib/brand";
 import RentalPhotoGallery from "@/components/RentalPhotoGallery";
+import RentalInquiryForm from "@/components/RentalInquiryForm";
 
 export const dynamic = "force-dynamic";
 
@@ -137,6 +138,7 @@ export default async function RentalDetailPage({ params }: PageProps) {
                 <Phone className="h-5 w-5" /> Call about this rental
               </a>
             </div>
+            <RentalInquiryForm rentalId={rental.id} rentalTitle={rental.title} />
           </section>
         </div>
       </div>
