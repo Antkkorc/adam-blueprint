@@ -39,6 +39,7 @@ Administrators can manage published properties and tenant rentals at `/admin/lis
 Property owners can submit a sell or rent-out request at `/sell`. The form accepts optional property photos, an optional house/floor plan, and optional pinned coordinates. These requests remain private until an administrator reviews them at `/admin/inbox`; approval creates an `Available` property listing and rejection records the review decision. Authenticated submitters receive approval or rejection updates at `/notifications`. Apply `20260920195000_property_submission_workflow.sql` after the rental migrations, followed by `20260920211500_add_property_submission_coordinates.sql` if the property workflow migration was already applied.
 Deleted listings are archived in `listing_archives` before removal, and the admin listing page exposes a Deleted/history tab. The deletion endpoint also attempts to remove image and floor-plan objects referenced by the listing.
 Contact enquiries in `/admin/inbox` can be marked as read. Apply `20260920210000_add_enquiry_read_state.sql` before using that action.
+Apply `20260922210000_harden_storage_policies.sql` to remove anonymous storage uploads and restrict submitted files to each authenticated user's own folder. The public read behavior is retained for listing media that the site intentionally displays.
 
 Public property results are expected to use `intent = 'buy'` or `intent = 'rent'` and `status = 'active'`. Review existing records before enabling the production site so older status values are migrated if necessary.
 

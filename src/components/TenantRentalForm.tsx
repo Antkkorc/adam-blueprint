@@ -142,6 +142,10 @@ export default function TenantRentalForm({ adminMode = false }: { adminMode?: bo
       router.push("/login");
       return;
     }
+    if (photos.some((photo) => photo.file.size > 8 * 1024 * 1024 || !photo.file.type.startsWith("image/"))) {
+      setError("Each rental photo must be an image smaller than 8 MB.");
+      return;
+    }
 
     setLoading(true);
     const uploadedPaths: string[] = [];

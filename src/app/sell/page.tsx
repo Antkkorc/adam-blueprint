@@ -27,10 +27,22 @@ export default function SellPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    const allFiles = [...photos, ...(plan ? [plan] : [])];
+    if (allFiles.some((file) => file.size > 8 * 1024 * 1024)) {
+      setLoading(false);
+      setError("Each uploaded file must be smaller than 8 MB.");
+      return;
+    }
+    if (photos.some((file) => !file.type.startsWith("image/")) || (plan && plan.type !== "application/pdf" && !plan.type.startsWith("image/"))) {
+      setLoading(false);
+      setError("Please upload images for photos and an image or PDF for the floor plan.");
+      return;
+    }
 
     const imageUrls: string[] = [];
     try {
       const { data: { user } } = await supabase.auth.getUser();
+      if (!user && allFiles.length) throw new Error("Please sign in before uploading property documents.");
       const folder = `${user?.id || "guest"}/${Date.now()}`;
       for (const [index, file] of photos.entries()) {
         const path = `${folder}/${index}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;

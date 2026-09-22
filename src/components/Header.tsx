@@ -87,7 +87,7 @@ export default function Header() {
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsMenuOpen(true)}
-              className="flex flex-col items-center justify-center border border-slate-800 bg-slate-900/60 rounded-xl px-2.5 py-1 text-slate-300 hover:text-cyan-400 hover:border-cyan-500/50 transition-all focus:outline-none"
+              className="glass-icon flex flex-col items-center justify-center rounded-xl px-2.5 py-1 text-slate-300 hover:text-cyan-300 transition-all focus:outline-none"
               aria-label="Open menu"
             >
               <MenuIcon className="w-5 h-5" />
@@ -97,19 +97,30 @@ export default function Header() {
               {BRAND.name}
             </Link>
           </div>
+          <nav className="hidden items-center gap-2 md:flex">
+            {[
+              ["/buy", "Buy", Building],
+              ["/sell", "Sell", Tag],
+              ["/rent", "Rent", Home],
+            ].map(([href, label, Icon]) => (
+              <Link key={href as string} href={href as string} className="glass-icon flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold text-slate-200 hover:text-cyan-300">
+                <Icon className="h-4 w-4 text-cyan-300" /> {label as string}
+              </Link>
+            ))}
+          </nav>
           <div className="flex items-center gap-3">
             <a
               href={`https://wa.me/${whatsappNumber}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-slate-950 transition-all text-xs font-semibold"
+              className="glass-icon flex items-center gap-2 rounded-full px-3 py-1.5 text-emerald-300 hover:text-emerald-100 transition-all text-xs font-semibold"
             >
               <PhoneCall className="w-4 h-4" />
               <span>WhatsApp</span>
             </a>
             <Link
               href={user ? "/saved" : "/login"}
-              className="p-2 rounded-full border border-cyan-500/40 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500 hover:text-slate-950 transition-all flex items-center justify-center"
+              className="glass-icon flex items-center justify-center rounded-full p-2 text-cyan-300 hover:text-white transition-all"
               aria-label={user ? "Saved properties" : "Login"}
             >
               <User className="w-5 h-5" />
