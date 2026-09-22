@@ -21,7 +21,10 @@ export default function HomePage() {
   const [isReturningUser, setIsReturningUser] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const metadata = user?.user_metadata as { full_name?: string; name?: string; first_name?: string } | undefined;
-  const accountName = metadata?.first_name || metadata?.full_name || metadata?.name || user?.email?.split("@")[0] || "there";
+  const emailName = user?.email && !user.email.toLowerCase().endsWith("@supabase.co")
+    ? user.email.split("@")[0]
+    : undefined;
+  const accountName = metadata?.first_name || metadata?.full_name || metadata?.name || emailName || "there";
   const firstName = accountName.trim().split(/\s+/)[0];
   useEffect(() => {
     let mounted = true;

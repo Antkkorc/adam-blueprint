@@ -1,6 +1,7 @@
 -- Keep public reads for already-published listing media, but prevent anonymous
 -- uploads and prevent users from writing outside their own submission folder.
-alter table storage.objects enable row level security;
+-- Supabase manages RLS on storage.objects; changing the table itself requires
+-- the storage owner role and is not needed when creating these policies.
 
 drop policy if exists "Public property submission uploads" on storage.objects;
 create policy "Authenticated users can upload property submissions"
