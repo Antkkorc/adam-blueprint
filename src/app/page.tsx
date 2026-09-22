@@ -126,7 +126,7 @@ export default function HomePage() {
                 }}
                 className={`glass-icon btn-pop px-6 py-2 rounded-full text-xs font-bold capitalize ${
                   activeTab === tab
-                    ? "bg-cyan-400 text-slate-950 shadow-[0_0_15px_rgba(34,211,238,0.4)]"
+                    ? "glass-icon-primary text-slate-950 shadow-[0_0_15px_rgba(34,211,238,0.4)]"
                     : "text-slate-700 dark:text-slate-300"
                 }`}
               >
@@ -140,7 +140,7 @@ export default function HomePage() {
 
             <button
               onClick={handleSearch}
-              className="glass-icon btn-pop flex items-center justify-center gap-2 bg-cyan-400 px-8 py-2.5 text-xs font-bold text-slate-950 hover:bg-cyan-300"
+              className="glass-icon glass-icon-primary btn-pop flex items-center justify-center gap-2 px-8 py-2.5 text-xs font-bold text-slate-950"
             >
               <Search className="w-4 h-4" />
               {activeTab === "sell" ? "Valuate / Sell" : "Search"}

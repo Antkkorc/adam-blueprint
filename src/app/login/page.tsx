@@ -61,7 +61,7 @@ export default function AuthPage() {
         router.push("/");
         router.refresh();
       } else {
-        setMessage("Account created! Please check your email to confirm your account.");
+        setMessage("Account created. Supabase requires email confirmation before you are signed in. Confirm the email, then return here and log in to see your account menu and admin features.");
       }
     }
   };
