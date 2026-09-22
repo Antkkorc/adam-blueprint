@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useSyncExternalStore } from "react";
 
-export type Theme = "neon" | "light";
+export type Theme = "light" | "dark";
 
 interface ThemeContextValue {
   theme: Theme;
@@ -10,11 +10,11 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-  theme: "neon",
+  theme: "light",
   setTheme: () => {},
 });
 
-let themeSnapshot: Theme = "neon";
+let themeSnapshot: Theme = "light";
 
 function getThemeSnapshot(): Theme {
   return themeSnapshot;
@@ -23,7 +23,7 @@ function getThemeSnapshot(): Theme {
 function subscribeToTheme(callback: () => void): () => void {
   const handleThemeChange = () => {
     const saved = window.localStorage.getItem("adam-blueprint-theme");
-    themeSnapshot = saved === "neon" || saved === "light" ? saved : "neon";
+    themeSnapshot = saved === "dark" || saved === "light" ? saved : "light";
     callback();
   };
   window.addEventListener("adam-blueprint-theme-change", handleThemeChange);
@@ -35,16 +35,18 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const theme = useSyncExternalStore(
     subscribeToTheme,
     getThemeSnapshot,
-    (): Theme => "neon"
+    (): Theme => "light"
   );
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
+    document.documentElement.classList.toggle("dark", theme === "dark");
   }, [theme]);
 
   const setTheme = (nextTheme: Theme) => {
     window.localStorage.setItem("adam-blueprint-theme", nextTheme);
     document.documentElement.dataset.theme = nextTheme;
+    document.documentElement.classList.toggle("dark", nextTheme === "dark");
     window.dispatchEvent(new Event("adam-blueprint-theme-change"));
   };
 

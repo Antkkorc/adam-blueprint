@@ -64,7 +64,7 @@ export default function SavePropertyButton({
         className={`flex items-center gap-2 px-5 py-3 rounded-xl border text-xs font-bold transition-colors ${
           saved
             ? "bg-cyan-500/20 border-cyan-400 text-cyan-300"
-            : "bg-slate-950 border-slate-800 text-slate-300 hover:border-cyan-400 hover:text-cyan-300"
+            : "glass-icon text-slate-700 dark:text-slate-200 hover:border-cyan-400 hover:text-cyan-300"
         }`}
       >
         <Heart className={`w-4 h-4 ${saved ? "fill-current" : ""}`} />
@@ -81,7 +81,7 @@ export default function SavePropertyButton({
       className={`absolute top-3 right-3 p-2 rounded-full border backdrop-blur-md transition-all ${
         saved
           ? "bg-cyan-400 text-slate-950 border-cyan-300"
-          : "bg-slate-950/70 text-white border-white/20 hover:border-cyan-300 hover:text-cyan-300"
+          : "glass-icon text-slate-700 dark:text-white border-white/30 hover:border-cyan-300 hover:text-cyan-300"
       }`}
       aria-label={saved ? "Remove from saved properties" : "Save property"}
     >

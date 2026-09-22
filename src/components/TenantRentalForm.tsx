@@ -53,6 +53,8 @@ export default function TenantRentalForm({ adminMode = false }: { adminMode?: bo
   const [mapMessage, setMapMessage] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [studentFriendly, setStudentFriendly] = useState(false);
+  const [studentProofType, setStudentProofType] = useState("");
 
   const addPhotos = (list: FileList | null) => {
     if (!list) return;
@@ -196,6 +198,7 @@ export default function TenantRentalForm({ adminMode = false }: { adminMode?: bo
         contact_number: contactPhone,
         images: imageUrls,
         user_id: session.user.id,
+        student_friendly: studentFriendly,
       };
       if (adminMode) {
         const response = await fetch("/api/admin/rentals", {
@@ -212,6 +215,9 @@ export default function TenantRentalForm({ adminMode = false }: { adminMode?: bo
           latitude: latitude ? Number(latitude) : null, longitude: longitude ? Number(longitude) : null,
           contact_name: contactName, contact_number: contactPhone,
           images: imageUrls, user_id: session.user.id,
+          student_friendly: studentFriendly,
+          student_proof_type: studentFriendly ? studentProofType : null,
+          student_verification_status: studentFriendly ? "pending" : "not_required",
         }]);
         if (error) throw error;
       }
@@ -344,6 +350,23 @@ export default function TenantRentalForm({ adminMode = false }: { adminMode?: bo
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
+
+      <div className="rounded-2xl border border-cyan-500/25 bg-cyan-500/5 p-4 space-y-3">
+        <label className="flex items-center gap-3 text-sm font-bold">
+          <input type="checkbox" checked={studentFriendly} onChange={(e) => setStudentFriendly(e.target.checked)} className="h-5 w-5 accent-cyan-500" />
+          Suitable for students
+        </label>
+        {studentFriendly && (
+          <select required value={studentProofType} onChange={(e) => setStudentProofType(e.target.value)} className="w-full rounded-xl bg-slate-800 p-3 text-sm">
+            <option value="">Choose proof applicants should provide</option>
+            <option value="student_id">Student ID</option>
+            <option value="enrollment_confirmation">Enrollment confirmation</option>
+            <option value="registration_proof">Registration proof</option>
+            <option value="admission_letter">Admission letter</option>
+          </select>
+        )}
+        <p className="text-xs text-slate-500">Student documents are reviewed privately by an admin and are not displayed on the public listing.</p>
+      </div>
 
       <div className="space-y-3">
         <p className="text-xs font-bold text-slate-400">Rental Photos — preview and label each photo</p>

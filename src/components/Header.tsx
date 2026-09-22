@@ -5,7 +5,7 @@ import { BRAND } from "@/lib/brand";
 import { useTheme, type Theme } from "@/context/ThemeContext";
 import { useAuth } from "@/context/AuthContext";
 import {
-  Menu as MenuIcon, X, PhoneCall, User, Home, Building, Tag, Info, LogIn, Heart, LogOut, Shield, Settings, Sun, Sparkles,
+  Menu as MenuIcon, X, PhoneCall, User, Home, Building, Tag, Info, LogIn, Heart, LogOut, Shield, Settings, Sun, Moon,
 } from "lucide-react";
 
 function NotificationBadge({ count }: { count: number }) {
@@ -97,17 +97,7 @@ export default function Header() {
               {BRAND.name}
             </Link>
           </div>
-          <nav className="hidden items-center gap-2 md:flex">
-            {[
-              ["/buy", "Buy", Building],
-              ["/sell", "Sell", Tag],
-              ["/rent", "Rent", Home],
-            ].map(([href, label, Icon]) => (
-              <Link key={href as string} href={href as string} className="glass-icon flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold text-slate-200 hover:text-cyan-300">
-                <Icon className="h-4 w-4 text-cyan-300" /> {label as string}
-              </Link>
-            ))}
-          </nav>
+          <div className="hidden md:block" aria-hidden="true" />
           <div className="flex items-center gap-3">
             <a
               href={`https://wa.me/${whatsappNumber}`}
@@ -165,6 +155,9 @@ export default function Header() {
           <Link href="/sell" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-4 px-3 py-2.5 rounded-xl text-slate-100 hover:text-cyan-400 hover:bg-slate-900/60 transition-all text-base font-semibold">
             <Tag className="w-5 h-5 text-cyan-400 shrink-0" /> Sell / Valuation
           </Link>
+          <Link href="/students" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-4 px-3 py-2.5 rounded-xl text-slate-100 hover:text-cyan-400 hover:bg-slate-900/60 transition-all text-base font-semibold">
+            <Building className="w-5 h-5 text-cyan-400 shrink-0" /> Student Housing
+          </Link>
           <Link href="/about" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-4 px-3 py-2.5 rounded-xl text-slate-100 hover:text-cyan-400 hover:bg-slate-900/60 transition-all text-base font-semibold">
             <Info className="w-5 h-5 text-cyan-400 shrink-0" /> About Us
           </Link>
@@ -198,8 +191,8 @@ export default function Header() {
             </div>
             <div className="grid grid-cols-2 gap-1 rounded-xl bg-slate-900/70 p-1">
               {([
-                ["neon", "Neon", Sparkles],
                 ["light", "Light", Sun],
+                ["dark", "Dark", Moon],
               ] as const).map(([value, label, Icon]) => (
                 <button
                   key={value}

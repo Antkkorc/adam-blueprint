@@ -48,21 +48,21 @@ export default async function RentPage({ searchParams }: RentPageProps) {
             </p>
           </div>
 
-          <form className="grid w-full gap-3 sm:grid-cols-2 lg:grid-cols-5" role="search">
+          <form className="glass grid w-full gap-4 rounded-2xl border border-slate-200/70 p-4 sm:grid-cols-2 lg:grid-cols-6" role="search">
             <label htmlFor="rental-location" className="sr-only">Search rental location</label>
             <input id="rental-location" name="location" defaultValue={location} type="search"
               placeholder="Location, e.g. Gaborone"
-              className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan-500 lg:col-span-2" />
+              className="min-h-12 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500 lg:col-span-2 dark:border-slate-700 dark:bg-slate-900 dark:text-white" />
             <label htmlFor="rental-min-price" className="sr-only">Minimum monthly price</label>
             <input id="rental-min-price" name="minPrice" defaultValue={minPrice || ""} type="number" min="0"
               placeholder="Min price"
-              className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan-500" />
+              className="min-h-12 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white" />
             <label htmlFor="rental-max-price" className="sr-only">Maximum monthly price</label>
             <input id="rental-max-price" name="maxPrice" defaultValue={maxPrice || ""} type="number" min="0"
               placeholder="Max price"
-              className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan-500" />
+              className="min-h-12 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white" />
             <select name="minBeds" defaultValue={minBeds || ""} aria-label="Minimum bedrooms"
-              className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan-500">
+              className="min-h-12 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white">
               <option value="">Any bedrooms</option>
               <option value="1">1 bedroom</option>
               <option value="2">2 bedrooms</option>
@@ -72,7 +72,7 @@ export default async function RentPage({ searchParams }: RentPageProps) {
               <option value="6">6+ bedrooms</option>
             </select>
             <select name="minBaths" defaultValue={minBaths || ""} aria-label="Minimum bathrooms"
-              className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan-500">
+              className="min-h-12 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white">
               <option value="">Any bathrooms</option>
               <option value="1">1 bathroom</option>
               <option value="2">2 bathrooms</option>
@@ -81,9 +81,9 @@ export default async function RentPage({ searchParams }: RentPageProps) {
               <option value="5">5 bathrooms</option>
               <option value="6">6+ bathrooms</option>
             </select>
-            <div className="flex gap-2 sm:col-span-2 lg:col-span-5">
-              <button type="submit" className="rounded-xl bg-slate-800 px-5 py-3 text-sm font-bold hover:bg-slate-700">Search rentals</button>
-              {(location || minPrice || maxPrice || minBeds || minBaths) ? <Link href="/rent" className="rounded-xl px-4 py-3 text-sm text-slate-400 hover:text-white">Clear filters</Link> : null}
+            <div className="flex flex-wrap gap-3 sm:col-span-2 lg:col-span-6">
+              <button type="submit" className="glass-icon min-h-12 rounded-xl px-6 py-3 text-sm font-extrabold text-cyan-700 dark:text-cyan-300">Search rentals</button>
+              {(location || minPrice || maxPrice || minBeds || minBaths) ? <Link href="/rent" className="glass-icon min-h-12 rounded-xl px-5 py-3 text-sm font-bold">Clear filters</Link> : null}
             </div>
           </form>
           <Link

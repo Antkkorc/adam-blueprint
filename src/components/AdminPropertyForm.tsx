@@ -308,6 +308,16 @@ export default function AdminPropertyForm() {
             <MapPin className="h-3.5 w-3.5" />
             Use my current location
           </button>
+          {latitude && longitude && (
+            <a
+              href={`https://www.google.com/maps/@${latitude},${longitude},18z/data=!3m1!1e3`}
+              target="_blank"
+              rel="noreferrer"
+              className="glass-icon ml-2 inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold"
+            >
+              <MapPin className="h-3.5 w-3.5" /> Review satellite pin
+            </a>
+          )}
           {mapMessage && <p className="text-[11px] text-slate-400">{mapMessage}</p>}
         </div>
       </div>

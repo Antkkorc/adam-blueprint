@@ -15,7 +15,7 @@ export default function HomePage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [location, setLocation] = useState("");
-  const [activeTab, setActiveTab] = useState<"buy" | "rent" | "sell">("buy");
+  const [activeTab, setActiveTab] = useState<"buy" | "rent" | "sell" | "students">("buy");
   const { user, loading: authLoading } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isReturningUser, setIsReturningUser] = useState(false);
@@ -116,12 +116,13 @@ export default function HomePage() {
         {/* Location search widget */}
         <div className="max-w-3xl mx-auto bg-slate-900/90 border border-slate-800 p-4 rounded-2xl shadow-2xl space-y-4">
           <div className="flex items-center justify-center gap-6 pb-2">
-            {(["buy", "rent", "sell"] as const).map((tab) => (
+            {(["buy", "rent", "sell", "students"] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => {
                   setActiveTab(tab);
                   if (tab === "rent") router.push("/rent");
+                  if (tab === "students") router.push("/students");
                 }}
                 className={`px-6 py-2 rounded-full text-xs font-bold transition-all capitalize ${
                   activeTab === tab
@@ -129,7 +130,7 @@ export default function HomePage() {
                     : "text-slate-300 hover:text-white"
                 }`}
               >
-                {tab}
+                {tab === "students" ? "Student Housing" : tab}
               </button>
             ))}
           </div>
