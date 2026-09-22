@@ -127,51 +127,6 @@ html[data-theme="light"] option {
   color: #102033;
 }
 
-html[data-theme="dark"] body {
-  background: #000000;
-  color: #f8fafc;
-}
-
-html[data-theme="dark"] .bg-\[\#070b15\],
-html[data-theme="dark"] .bg-slate-950 {
-  background-color: #000000 !important;
-}
-
-html[data-theme="dark"] .bg-slate-900,
-html[data-theme="dark"] .bg-slate-900\/90,
-html[data-theme="dark"] .bg-slate-900\/60,
-html[data-theme="dark"] .bg-slate-900\/50 {
-  background-color: #050505 !important;
-}
-
-html[data-theme="dark"] .bg-slate-800,
-html[data-theme="dark"] .bg-slate-800\/50 {
-  background-color: #0b0b0b !important;
-}
-
-html[data-theme="dark"] aside {
-  background-color: #000000 !important;
-}
-
-html[data-theme="dark"] input,
-html[data-theme="dark"] select,
-html[data-theme="dark"] textarea {
-  background-color: #050505 !important;
-  color: #f8fafc !important;
-  border-color: #334155 !important;
-}
-
-html[data-theme="dark"] input::placeholder,
-html[data-theme="dark"] textarea::placeholder {
-  color: #94a3b8 !important;
-  opacity: 1;
-}
-
-html[data-theme="dark"] option {
-  background-color: #050505;
-  color: #f8fafc;
-}
-
 .glass {
   background: rgba(15, 23, 42, 0.55);
   backdrop-filter: blur(14px);

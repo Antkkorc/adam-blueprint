@@ -5,7 +5,7 @@ import { BRAND } from "@/lib/brand";
 import { useTheme, type Theme } from "@/context/ThemeContext";
 import { useAuth } from "@/context/AuthContext";
 import {
-  Menu as MenuIcon, X, PhoneCall, User, Home, Building, Tag, Info, LogIn, Heart, LogOut, Shield, Settings, Sun, Moon, Sparkles,
+  Menu as MenuIcon, X, PhoneCall, User, Home, Building, Tag, Info, LogIn, Heart, LogOut, Shield, Settings, Sun, Sparkles,
 } from "lucide-react";
 
 function NotificationBadge({ count }: { count: number }) {
@@ -147,7 +147,7 @@ export default function Header() {
           <Link href="/" onClick={() => setIsMenuOpen(false)} className="font-extrabold text-2xl text-cyan-400 tracking-wider">
             {BRAND.name}
           </Link>
-          <button onClick={() => setIsMenuOpen(false)} className="p-2 rounded-full bg-slate-900/80 border border-slate-800 text-slate-400 hover:text-white transition-colors" aria-label="Close menu">
+          <button onClick={() => setIsMenuOpen(false)} className="glass-icon flex items-center justify-center rounded-full p-2 text-cyan-300 hover:text-white transition-colors" aria-label="Close menu">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -196,11 +196,10 @@ export default function Header() {
             <div className="mb-2 flex items-center gap-2 px-3 text-xs font-bold uppercase tracking-wider text-slate-500">
               <Settings className="h-4 w-4" /> Display
             </div>
-            <div className="grid grid-cols-3 gap-1 rounded-xl bg-slate-900/70 p-1">
+            <div className="grid grid-cols-2 gap-1 rounded-xl bg-slate-900/70 p-1">
               {([
                 ["neon", "Neon", Sparkles],
                 ["light", "Light", Sun],
-                ["dark", "Dark", Moon],
               ] as const).map(([value, label, Icon]) => (
                 <button
                   key={value}

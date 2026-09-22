@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useSyncExternalStore } from "react";
 
-export type Theme = "neon" | "light" | "dark";
+export type Theme = "neon" | "light";
 
 interface ThemeContextValue {
   theme: Theme;
@@ -23,7 +23,7 @@ function getThemeSnapshot(): Theme {
 function subscribeToTheme(callback: () => void): () => void {
   const handleThemeChange = () => {
     const saved = window.localStorage.getItem("adam-blueprint-theme");
-    themeSnapshot = saved === "neon" || saved === "light" || saved === "dark" ? saved : "neon";
+    themeSnapshot = saved === "neon" || saved === "light" ? saved : "neon";
     callback();
   };
   window.addEventListener("adam-blueprint-theme-change", handleThemeChange);
