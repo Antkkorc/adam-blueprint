@@ -124,10 +124,10 @@ export default function HomePage() {
                   if (tab === "rent") router.push("/rent");
                   if (tab === "students") router.push("/students");
                 }}
-                className={`px-6 py-2 rounded-full text-xs font-bold transition-all capitalize ${
+                className={`glass-icon btn-pop px-6 py-2 rounded-full text-xs font-bold capitalize ${
                   activeTab === tab
                     ? "bg-cyan-400 text-slate-950 shadow-[0_0_15px_rgba(34,211,238,0.4)]"
-                    : "text-slate-300 hover:text-white"
+                    : "text-slate-700 dark:text-slate-300"
                 }`}
               >
                 {tab === "students" ? "Student Housing" : tab}
@@ -140,7 +140,7 @@ export default function HomePage() {
 
             <button
               onClick={handleSearch}
-              className="flex items-center justify-center gap-2 bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold px-8 py-2.5 rounded-xl text-xs transition-all"
+              className="glass-icon btn-pop flex items-center justify-center gap-2 bg-cyan-400 px-8 py-2.5 text-xs font-bold text-slate-950 hover:bg-cyan-300"
             >
               <Search className="w-4 h-4" />
               {activeTab === "sell" ? "Valuate / Sell" : "Search"}

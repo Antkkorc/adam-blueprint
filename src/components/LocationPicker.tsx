@@ -61,7 +61,7 @@ export default function LocationPicker({ value, onChange }: Props) {
               setActiveCity(null);
               setOpen(false);
             }}
-            className="w-full px-4 py-2.5 text-left text-xs font-bold text-cyan-300 hover:bg-slate-800 border-b border-slate-800 transition-colors"
+            className="glass-icon btn-pop w-full rounded-none border-b border-slate-800 px-4 py-2.5 text-left text-xs font-bold text-cyan-300 hover:bg-slate-800"
           >
             All Locations (Botswana)
           </button>
@@ -84,7 +84,7 @@ export default function LocationPicker({ value, onChange }: Props) {
                       setOpen(false);
                     }
                   }}
-                  className={`w-full flex items-center justify-between px-4 py-2.5 text-xs transition-colors ${
+                  className={`btn-pop flex w-full items-center justify-between px-4 py-2.5 text-xs ${
                     activeCity === c.city
                       ? "bg-cyan-500/15 text-cyan-300"
                       : "text-slate-300 hover:bg-slate-800"
@@ -106,7 +106,7 @@ export default function LocationPicker({ value, onChange }: Props) {
                       onChange(activeCity);
                       setOpen(false);
                     }}
-                    className="w-full px-4 py-2.5 text-left text-xs font-bold text-cyan-300 hover:bg-slate-800 transition-colors"
+                    className="glass-icon btn-pop w-full rounded-none px-4 py-2.5 text-left text-xs font-bold text-cyan-300 hover:bg-slate-800"
                   >
                     All {activeCity}
                   </button>
