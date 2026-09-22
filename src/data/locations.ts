@@ -43,7 +43,10 @@ export const LOCATION_TREE: CityWards[] = [
     ],
   },
   { city: "Maun", wards: ["Maun", "Matlapana", "Boseja", "Disaneng", "Matshwane"] },
-  { city: "Selebi-Phikwe", wards: ["Town Centre", "Block 1", "Block 2", "Block 3", "Block 4", "Block 5"] },
+  {
+    city: "Selebi-Phikwe",
+    wards: ["Town Centre", "Phase 1", "Phase 2", "Phase 3", "Phase 4", "B (Botshabelo)"],
+  },
   { city: "Kasane", wards: ["Kasane", "Kazungula", "Chobe"] },
   { city: "Palapye", wards: ["Palapye", "Extension 1", "Extension 2"] },
   { city: "Lobatse", wards: ["Lobatse", "Peleng", "Woodhall"] },

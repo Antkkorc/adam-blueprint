@@ -352,9 +352,9 @@ export default function TenantRentalForm({ adminMode = false }: { adminMode?: bo
       <div className="rounded-2xl border border-cyan-500/25 bg-cyan-500/5 p-4 space-y-3">
         <label className="flex items-center gap-3 text-sm font-bold">
           <input type="checkbox" checked={studentFriendly} onChange={(e) => setStudentFriendly(e.target.checked)} className="h-5 w-5 accent-cyan-500" />
-          Suitable for students
+          This rental is suitable for students
         </label>
-        <p className="text-xs text-slate-500">Student applicants can provide proof privately when they enquire about this rental.</p>
+        <p className="text-xs text-slate-500">Only select this when you are submitting a rental intended for student tenants. Student applicants provide proof privately when they enquire.</p>
       </div>
 
       <div className="space-y-3">

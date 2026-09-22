@@ -48,7 +48,7 @@ export default function LocationPicker({ value, onChange }: Props) {
           onFocus={() => setOpen(true)}
           placeholder="Search by city or suburb, e.g. Gaborone"
           aria-label="Search by city or suburb"
-          className="min-w-0 flex-1 bg-transparent text-sm text-white placeholder:text-slate-400 outline-none"
+          className="min-w-0 flex-1 border-0 bg-transparent text-sm text-white placeholder:text-slate-400 outline-none ring-0 focus:border-0 focus:outline-none focus:ring-0"
         />
       </div>
 
