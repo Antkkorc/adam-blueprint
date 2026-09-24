@@ -1,13 +1,14 @@
 // File: C:\Users\anton\OneDrive\Documents\PROJECTS\adam-blueprint\src\app\api\properties\route.ts
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { PUBLIC_PROPERTY_COLUMNS } from "@/lib/supabase/public-columns";
 
 export async function GET() {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("properties")
-      .select("*")
+      .select(PUBLIC_PROPERTY_COLUMNS)
       .order("id", { ascending: false }); // Changed created_at -> id
 
     if (error) {

@@ -9,6 +9,9 @@ export async function POST(
   const user = await requireAdmin();
   try {
     const { id } = await params;
+    if (!id || id.length > 100) {
+      return NextResponse.json({ error: "Invalid submission id." }, { status: 400 });
+    }
     await reviewRentalSubmission(id, "approve", user.id);
     return NextResponse.json({ ok: true });
   } catch (error) {

@@ -14,7 +14,18 @@ const ThemeContext = createContext<ThemeContextValue>({
   setTheme: () => {},
 });
 
-let themeSnapshot: Theme = "light";
+function readSavedTheme(): Theme | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const saved = window.localStorage.getItem("adam-blueprint-theme");
+    return saved === "dark" || saved === "light" ? saved : null;
+  } catch {
+    return null;
+  }
+}
+
+const savedTheme = readSavedTheme();
+let themeSnapshot: Theme = savedTheme === "dark" || savedTheme === "light" ? savedTheme : "light";
 
 function getThemeSnapshot(): Theme {
   return themeSnapshot;
@@ -22,8 +33,7 @@ function getThemeSnapshot(): Theme {
 
 function subscribeToTheme(callback: () => void): () => void {
   const handleThemeChange = () => {
-    const saved = window.localStorage.getItem("adam-blueprint-theme");
-    themeSnapshot = saved === "dark" || saved === "light" ? saved : "light";
+    themeSnapshot = readSavedTheme() ?? "light";
     callback();
   };
   window.addEventListener("adam-blueprint-theme-change", handleThemeChange);
@@ -44,7 +54,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [theme]);
 
   const setTheme = (nextTheme: Theme) => {
-    window.localStorage.setItem("adam-blueprint-theme", nextTheme);
+    try {
+      window.localStorage.setItem("adam-blueprint-theme", nextTheme);
+    } catch {
+      // The in-memory theme still updates when storage is unavailable.
+    }
     document.documentElement.dataset.theme = nextTheme;
     document.documentElement.classList.toggle("dark", nextTheme === "dark");
     window.dispatchEvent(new Event("adam-blueprint-theme-change"));

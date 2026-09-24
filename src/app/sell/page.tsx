@@ -4,6 +4,7 @@ import { useState } from "react";
 import { BRAND } from "@/lib/brand";
 import { Phone, Mail, MapPin, Loader2, CheckCircle2, Upload } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
+import { MAX_IMAGE_SIZE } from "@/lib/uploads";
 
 export default function SellPage() {
   const [name, setName] = useState("");
@@ -28,9 +29,9 @@ export default function SellPage() {
     setLoading(true);
     setError(null);
     const allFiles = [...photos, ...(plan ? [plan] : [])];
-    if (allFiles.some((file) => file.size > 8 * 1024 * 1024)) {
+    if (allFiles.some((file) => file.size > MAX_IMAGE_SIZE)) {
       setLoading(false);
-      setError("Each uploaded file must be smaller than 8 MB.");
+      setError("Each uploaded file must be 10 MB or smaller.");
       return;
     }
     if (photos.some((file) => !file.type.startsWith("image/")) || (plan && plan.type !== "application/pdf" && !plan.type.startsWith("image/"))) {
@@ -102,7 +103,7 @@ export default function SellPage() {
         <h1 className="text-white font-bold text-2xl mb-4">List Your Property</h1>
         <p className="text-slate-400 text-sm mb-8">
           Ready to sell or rent out your property? Contact us and our team will
-          help you list it and find the right buyer or tenant.
+          help you list it and find the right buyer or renter.
         </p>
 
         <div className="space-y-4 mb-8">
@@ -216,14 +217,14 @@ export default function SellPage() {
               placeholder="Tell us about your property (location, features, desired price)..."
               className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-emerald-500"
             />
-            <label className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-cyan-500/40 bg-slate-950 px-4 py-5 text-center text-xs text-slate-400 transition-colors hover:border-cyan-400">
+            <label className="glass-icon btn-pop flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-cyan-500/40 bg-slate-950 px-4 py-5 text-center text-xs text-slate-400">
               <Upload className="h-7 w-7 text-cyan-400" />
               <span className="font-bold text-cyan-300">Click to upload property photos</span>
               <span>Up to 10 images</span>
               <input type="file" accept="image/*" multiple onChange={(e) => setPhotos(Array.from(e.target.files || []).slice(0, 10))} className="sr-only" />
             </label>
             {photos.length > 0 && <div className="flex gap-2 overflow-auto">{photos.map((file) => <img key={file.name} src={URL.createObjectURL(file)} alt={file.name} className="h-16 w-16 rounded object-cover" />)}</div>}
-            <label className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-cyan-500/40 bg-slate-950 px-4 py-5 text-center text-xs text-slate-400 transition-colors hover:border-cyan-400">
+            <label className="glass-icon btn-pop flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-cyan-500/40 bg-slate-950 px-4 py-5 text-center text-xs text-slate-400">
               <Upload className="h-7 w-7 text-cyan-400" />
               <span className="font-bold text-cyan-300">Click to upload house or floor plan</span>
               <span>Optional image or PDF</span>

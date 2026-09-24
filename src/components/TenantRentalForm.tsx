@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase/client";
 import Image from "next/image";
 import { CheckCircle2, MapPin, Search, Upload, X } from "lucide-react";
 import { formatPhotoLabel, PHOTO_CATEGORIES } from "@/lib/photos";
+import { MAX_IMAGE_SIZE, MAX_RENTAL_IMAGES, MAX_STUDENT_IMAGES } from "@/lib/uploads";
 
 interface RentalPhoto {
   id: string;
@@ -143,8 +144,13 @@ export default function TenantRentalForm({ adminMode = false }: { adminMode?: bo
       router.push("/login");
       return;
     }
-    if (photos.some((photo) => photo.file.size > 8 * 1024 * 1024 || !photo.file.type.startsWith("image/"))) {
-      setError("Each rental photo must be an image smaller than 8 MB.");
+    const maxImages = studentFriendly ? MAX_STUDENT_IMAGES : MAX_RENTAL_IMAGES;
+    if (photos.length > maxImages) {
+      setError(`Please upload no more than ${maxImages} images.`);
+      return;
+    }
+    if (photos.some((photo) => photo.file.size > MAX_IMAGE_SIZE || !photo.file.type.startsWith("image/"))) {
+      setError("Each rental photo must be an image 10 MB or smaller.");
       return;
     }
 
@@ -155,12 +161,11 @@ export default function TenantRentalForm({ adminMode = false }: { adminMode?: bo
       const imageUrls: string[] = [];
       const imageLabels: string[] = [];
 
-      if (photos.length > 8) throw new Error("Please upload no more than 8 images.");
       for (let i = 0; i < photos.length; i++) {
           const photo = photos[i];
           const file = photo.file;
-          if (!file.type.startsWith("image/") || file.size > 5 * 1024 * 1024) {
-            throw new Error("Each image must be an image file smaller than 5 MB.");
+          if (!file.type.startsWith("image/") || file.size > MAX_IMAGE_SIZE) {
+            throw new Error("Each image must be an image file 10 MB or smaller.");
           }
           const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
           const filePath = `submissions/${session.user.id}/${Date.now()}-${i}-${safeName}`;
@@ -354,12 +359,12 @@ export default function TenantRentalForm({ adminMode = false }: { adminMode?: bo
           <input type="checkbox" checked={studentFriendly} onChange={(e) => setStudentFriendly(e.target.checked)} className="h-5 w-5 accent-cyan-500" />
           This rental is suitable for students
         </label>
-        <p className="text-xs text-slate-500">Only select this when you are submitting a rental intended for student tenants. Student applicants provide proof privately when they enquire.</p>
+        <p className="text-xs text-slate-500">Tick this only for accommodation intended for college students. After approval, the listing will appear in Student Housing and not in Community Rentals.</p>
       </div>
 
       <div className="space-y-3">
         <p className="text-xs font-bold text-slate-400">Rental Photos — preview and label each photo</p>
-        <label className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-cyan-500/40 bg-slate-950 py-5 hover:border-cyan-400">
+        <label className="glass-icon btn-pop flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-cyan-500/40 bg-slate-950 py-5 hover:border-cyan-400">
           <Upload className="h-6 w-6 text-cyan-400" />
           <span className="text-sm font-bold text-cyan-300">Click to add photos</span>
           <input type="file" multiple accept="image/*" className="hidden" onChange={(e) => { addPhotos(e.target.files); e.target.value = ""; }} />

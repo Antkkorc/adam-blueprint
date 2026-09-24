@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase/client";
 import { BRAND } from "@/lib/brand";
 import { AMENITY_OPTIONS, PROPERTY_TYPES } from "@/lib/filters";
 import { formatPhotoLabel, PHOTO_CATEGORIES } from "@/lib/photos";
+import { MAX_IMAGE_SIZE } from "@/lib/uploads";
 
 interface PhotoItem {
   id: string;
@@ -161,6 +162,9 @@ export default function AdminPropertyForm() {
     const urls: string[] = [];
     for (let i = 0; i < list.length; i++) {
       const file = list[i];
+      if (!file.type.startsWith("image/") || file.size > MAX_IMAGE_SIZE) {
+        throw new Error("Each property image must be an image 10 MB or smaller.");
+      }
       const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
       const filePath = `${folder}/${Date.now()}-${i}-${safeName}`;
       const { error: uploadError } = await supabase.storage.from("property-images").upload(filePath, file);
@@ -190,6 +194,9 @@ export default function AdminPropertyForm() {
       const imageLabels: string[] = [];
       for (let i = 0; i < photos.length; i++) {
         const photo = photos[i];
+        if (!photo.file.type.startsWith("image/") || photo.file.size > MAX_IMAGE_SIZE) {
+          throw new Error("Each property image must be an image 10 MB or smaller.");
+        }
         const safeName = photo.file.name.replace(/[^a-zA-Z0-9.]/g, "_");
         const filePath = `properties/${Date.now()}-${i}-${safeName}`;
         const { error: uploadError } = await supabase.storage.from("property-images").upload(filePath, photo.file);
@@ -255,7 +262,7 @@ export default function AdminPropertyForm() {
       <h2 className="text-xl font-bold">Add Official Property</h2>
       <div className="space-y-3">
         <p className="text-xs text-slate-400 font-bold">Property Photos * — pick many at once, then tag each photo below</p>
-        <label className="flex flex-col items-center gap-2 py-6 border-2 border-dashed border-cyan-500/40 hover:border-cyan-400 rounded-xl cursor-pointer bg-slate-950 transition-colors">
+        <label className="glass-icon btn-pop flex flex-col items-center gap-2 py-6 border-2 border-dashed border-cyan-500/40 hover:border-cyan-400 rounded-xl cursor-pointer bg-slate-950">
           <Upload className="w-6 h-6 text-cyan-400" />
           <span className="text-sm font-bold text-cyan-300">Click to add photos</span>
           <span className="text-[10px] text-slate-500 text-center px-4">Kitchen, bathroom, garage... select them all at once, then choose a category</span>
@@ -345,7 +352,7 @@ export default function AdminPropertyForm() {
         <input type="text" placeholder="Agent Name" className={inputClass} value={agentName} onChange={(e) => setAgentName(e.target.value)} />
         <input type="text" placeholder="Agent Phone" className={inputClass} value={agentPhone} onChange={(e) => setAgentPhone(e.target.value)} />
       </div>
-      <label className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-cyan-500/40 bg-slate-950 px-4 py-5 text-center transition-colors hover:border-cyan-400">
+      <label className="glass-icon btn-pop flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-cyan-500/40 bg-slate-950 px-4 py-5 text-center">
         <Upload className="h-6 w-6 text-cyan-400" />
         <span className="text-sm font-bold text-cyan-300">Click to add house or floor plans</span>
         <span className="text-xs text-slate-500">Optional image files</span>

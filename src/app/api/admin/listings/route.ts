@@ -13,7 +13,7 @@ export async function PATCH(request: Request) {
       id?: string;
       status?: string;
     };
-    if (!body.id || !body.listingType || !body.status || !["property", "rental"].includes(body.listingType)) {
+    if (typeof body.id !== "string" || body.id.length > 100 || !body.listingType || !body.status || !["property", "rental"].includes(body.listingType)) {
       return NextResponse.json({ error: "Listing type, id, and status are required." }, { status: 400 });
     }
     const statuses = body.listingType === "property" ? propertyStatuses : rentalStatuses;
@@ -33,7 +33,7 @@ export async function DELETE(request: Request) {
   const admin = await requireAdmin();
   try {
     const body = (await request.json()) as { listingType?: "property" | "rental"; id?: string };
-    if (!body.id || !body.listingType || !["property", "rental"].includes(body.listingType)) {
+    if (typeof body.id !== "string" || body.id.length > 100 || !body.listingType || !["property", "rental"].includes(body.listingType)) {
       return NextResponse.json({ error: "Listing type and id are required." }, { status: 400 });
     }
     const db = createAdminClient();

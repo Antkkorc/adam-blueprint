@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Bath, Bed, MapPin, MessageCircle, Phone } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { PUBLIC_RENTAL_COLUMNS } from "@/lib/supabase/public-columns";
 import { BRAND } from "@/lib/brand";
 import RentalPhotoGallery from "@/components/RentalPhotoGallery";
 import RentalInquiryForm from "@/components/RentalInquiryForm";
@@ -27,7 +28,7 @@ export default async function RentalDetailPage({ params }: PageProps) {
   const supabase = await createClient();
   const { data: rental, error } = await supabase
     .from("tenant_rentals")
-    .select("*")
+    .select(PUBLIC_RENTAL_COLUMNS)
     .eq("id", id)
     .single();
 
@@ -56,7 +57,7 @@ export default async function RentalDetailPage({ params }: PageProps) {
   return (
     <main className="min-h-screen bg-slate-950 text-white p-4 md:p-10">
       <div className="max-w-5xl mx-auto space-y-8">
-        <Link href="/rent" className="inline-flex items-center gap-2 text-xs text-slate-400 hover:text-cyan-400">
+        <Link href={rental.student_friendly ? "/students" : "/rent"} className="glass-icon btn-pop inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs text-slate-400 hover:text-cyan-400">
           <ArrowLeft className="w-4 h-4" /> Back to Rentals
         </Link>
 
@@ -68,7 +69,7 @@ export default async function RentalDetailPage({ params }: PageProps) {
           <section className="lg:col-span-2 space-y-6">
             <div className="space-y-3">
               <span className="inline-flex rounded-full bg-emerald-400 px-3 py-1 text-[10px] font-extrabold uppercase text-slate-950">
-                Community Rental
+                {rental.student_friendly ? "Student Housing" : "Community Rental"}
               </span>
               <h1 className="text-3xl font-extrabold">{rental.title}</h1>
               <p className="flex items-center gap-2 text-sm text-slate-400">
@@ -125,7 +126,7 @@ export default async function RentalDetailPage({ params }: PageProps) {
               <p className="whitespace-pre-line text-sm leading-relaxed text-slate-300">
                 {rental.description || rental.info || "No description provided."}
               </p>
-              <p className="text-sm text-slate-400">Listed by {rental.tenant_name || "Owner"}</p>
+              <p className="text-sm text-slate-400">Listed by {rental.tenant_name || "Property owner"}</p>
             </div>
 
             <div className="flex flex-col gap-3">
@@ -138,7 +139,7 @@ export default async function RentalDetailPage({ params }: PageProps) {
                 <Phone className="h-5 w-5" /> Call about this rental
               </a>
             </div>
-            <RentalInquiryForm rentalId={rental.id} rentalTitle={rental.title} />
+            <RentalInquiryForm rentalId={rental.id} rentalTitle={rental.title} studentOnly={rental.student_friendly === true} />
           </section>
         </div>
       </div>

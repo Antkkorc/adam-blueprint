@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import { BRAND } from "@/lib/brand";
 import PropertyPhotoTour from "@/components/PropertyPhotoTour";
 import SavePropertyButton from "@/components/SavePropertyButton";
+import { PUBLIC_PROPERTY_COLUMNS } from "@/lib/supabase/public-columns";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +29,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
   const { id } = await params;
   const supabase = await createClient();
 
-  const { data: property } = await supabase.from("properties").select("*").eq("id", id).single();
+  const { data: property } = await supabase.from("properties").select(PUBLIC_PROPERTY_COLUMNS).eq("id", id).single();
   if (!property) notFound();
 
   const { data: { user } } = await supabase.auth.getUser();
