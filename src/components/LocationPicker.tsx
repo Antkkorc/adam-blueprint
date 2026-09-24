@@ -28,13 +28,13 @@ export default function LocationPicker({ value, onChange }: Props) {
     LOCATION_TREE.find((c) => c.city === activeCity)?.wards ?? [];
 
   return (
-    <div className="relative flex-1" ref={ref}>
-      <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 border border-cyan-500/50 transition-colors">
+    <div className="homepage-location-picker relative flex-1" ref={ref}>
+      <div className="flex items-center gap-3 overflow-hidden rounded-full border border-cyan-500/50 bg-white/5 px-4 py-2.5 transition-colors">
         <button
           type="button"
           onClick={() => setOpen(!open)}
           aria-label="Browse Botswana locations"
-          className="shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-cyan-500/10 px-2.5 py-2 text-[10px] font-extrabold uppercase tracking-wide text-cyan-300 hover:bg-cyan-500/20"
+          className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-cyan-500/10 px-2.5 py-2 text-[10px] font-extrabold uppercase tracking-wide text-cyan-300 hover:bg-cyan-500/20"
         >
           <MapPin className="h-4 w-4" />
           <span>All locations</span>

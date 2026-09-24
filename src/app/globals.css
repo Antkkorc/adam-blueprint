@@ -159,6 +159,15 @@ html[data-theme="light"] textarea::placeholder {
   opacity: 1;
 }
 
+.homepage-location-picker input {
+  border: 1px solid #ffffff !important;
+}
+
+.homepage-location-picker input::placeholder {
+  color: #ffffff !important;
+  opacity: 1;
+}
+
 html[data-theme="light"] option {
   background-color: #e8f0f5;
   color: #102033;
