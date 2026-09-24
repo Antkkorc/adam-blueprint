@@ -9,6 +9,7 @@ import LocationPicker from "@/components/LocationPicker";
 import { Search, ShieldCheck, Award, MessageSquare } from "lucide-react";
 import type { Property } from "@/types/property";
 import { useAuth } from "@/context/AuthContext";
+import { PUBLIC_PROPERTY_COLUMNS } from "@/lib/supabase/public-columns";
 
 export default function HomePage() {
   const router = useRouter();
@@ -56,7 +57,7 @@ export default function HomePage() {
       try {
         const { data, error } = await supabase
           .from("properties")
-          .select("*")
+          .select(PUBLIC_PROPERTY_COLUMNS)
           .order("id", { ascending: false })
           .limit(6);
 
@@ -115,7 +116,7 @@ export default function HomePage() {
 
         {/* Location search widget */}
         <div className="max-w-3xl mx-auto bg-slate-900/90 border border-slate-800 p-4 rounded-2xl shadow-2xl space-y-4">
-          <div className="flex items-center justify-center gap-6 pb-2">
+          <div className="grid grid-cols-2 gap-2 pb-2 sm:grid-cols-4">
             {(["buy", "rent", "sell", "students"] as const).map((tab) => (
               <button
                 key={tab}
@@ -124,13 +125,13 @@ export default function HomePage() {
                   if (tab === "rent") router.push("/rent");
                   if (tab === "students") router.push("/students");
                 }}
-                className={`glass-icon btn-pop px-6 py-2 rounded-full text-xs font-bold capitalize ${
+                className={`glass-icon btn-pop flex min-h-10 w-full min-w-0 items-center justify-center rounded-full px-2 py-2 text-[11px] font-bold capitalize leading-tight sm:px-3 sm:text-xs ${
                   activeTab === tab
                     ? "glass-icon-primary text-slate-950 shadow-[0_0_15px_rgba(34,211,238,0.4)]"
                     : "text-slate-700 dark:text-slate-300"
                 }`}
               >
-                {tab === "students" ? "Student Housing" : tab}
+                {tab === "students" ? "Student rentals" : tab}
               </button>
             ))}
           </div>

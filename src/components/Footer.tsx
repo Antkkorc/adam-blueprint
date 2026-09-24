@@ -1,3 +1,5 @@
+"use client";
+
 import { BRAND } from "@/lib/brand";
 import Link from "next/link";
 import { MapPin, Phone, Mail } from "lucide-react";

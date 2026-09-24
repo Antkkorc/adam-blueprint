@@ -1,3 +1,5 @@
+"use client";
+
 import { Eye, MapPin, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -17,9 +19,17 @@ export interface TenantRental {
   images: string[];
   user_id?: string;
   status?: string;
+  student_friendly?: boolean;
 }
 
-export default function TenantRentalCard({ rental }: { rental: TenantRental }) {
+export default function TenantRentalCard({
+  rental,
+  isStudentHousing = false,
+}: {
+  rental: TenantRental;
+  isStudentHousing?: boolean;
+}) {
+  const studentListing = isStudentHousing || rental.student_friendly === true;
   const image =
     rental.images?.[0] ||
     "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80";
@@ -47,8 +57,8 @@ export default function TenantRentalCard({ rental }: { rental: TenantRental }) {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         </Link>
-        <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-emerald-400 text-slate-950 text-[10px] font-extrabold uppercase">
-          Community Listing
+        <div className={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-slate-950 text-[10px] font-extrabold uppercase ${studentListing ? "bg-cyan-300" : "bg-emerald-400"}`}>
+          {studentListing ? "Student Housing" : "Community Listing"}
         </div>
       </div>
 
@@ -74,7 +84,7 @@ export default function TenantRentalCard({ rental }: { rental: TenantRental }) {
             </p>
           </div>
           <p className="text-[10px] text-slate-500">
-            Listed by {rental.tenant_name || "Owner"}
+            Listed by {rental.tenant_name || "Property owner"}
           </p>
         </div>
 
@@ -84,7 +94,7 @@ export default function TenantRentalCard({ rental }: { rental: TenantRental }) {
 
         <Link
           href={`/rental/${rental.id}`}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-cyan-500/40 py-2 text-xs font-bold text-cyan-300 transition-colors hover:bg-cyan-500/10 hover:text-cyan-200"
+          className="glass-icon btn-pop flex w-full items-center justify-center gap-2 rounded-xl border border-cyan-500/40 py-2 text-xs font-bold text-cyan-300"
         >
           <Eye className="h-3.5 w-3.5" />
           Details

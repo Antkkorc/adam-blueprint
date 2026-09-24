@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import PropertyCard from "@/components/PropertyCard";
 import Link from "next/link";
 import { getLocationSearch } from "@/lib/filters";
+import { PUBLIC_PROPERTY_COLUMNS } from "@/lib/supabase/public-columns";
 
 export const revalidate = 0;
 
@@ -45,7 +46,7 @@ export default async function BuyPage({ searchParams }: BuyPageProps) {
 
   const supabase = await createClient();
 
-  let query = supabase.from("properties").select("*");
+  let query = supabase.from("properties").select(PUBLIC_PROPERTY_COLUMNS);
 
   query = query.eq("intent", "buy").in("status", ["active", "Available"]);
   if (location) {

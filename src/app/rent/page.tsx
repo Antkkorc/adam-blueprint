@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import TenantRentalCard, { TenantRental } from "@/components/TenantRentalCard";
 import Link from "next/link";
 import { getLocationSearch } from "@/lib/filters";
+import { PUBLIC_RENTAL_COLUMNS } from "@/lib/supabase/public-columns";
 
 export const revalidate = 0; // Ensures fresh data on every request
 
@@ -24,7 +25,11 @@ export default async function RentPage({ searchParams }: RentPageProps) {
   const minBeds = Math.max(0, Number(params.minBeds) || 0);
   const minBaths = Math.max(0, Number(params.minBaths) || 0);
   const supabase = await createClient();
-  let query = supabase.from("tenant_rentals").select("*").eq("status", "Available");
+  let query = supabase
+    .from("tenant_rentals")
+    .select(PUBLIC_RENTAL_COLUMNS)
+    .eq("status", "Available")
+    .or("student_friendly.eq.false,student_friendly.is.null");
   if (location) query = query.ilike("location", `%${location}%`);
   if (minPrice > 0) query = query.gte("price", minPrice);
   if (maxPrice > 0) query = query.lte("price", maxPrice);
@@ -44,7 +49,7 @@ export default async function RentPage({ searchParams }: RentPageProps) {
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight">Community Rentals</h1>
             <p className="text-slate-400 text-sm mt-1">
-              Browse available rental spaces directly posted by tenants and owners.
+              Browse available rental spaces posted by property owners and landlords.
             </p>
           </div>
 

@@ -119,7 +119,7 @@ export default function Header() {
         </div>
       </header>
       {isMenuOpen && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 transition-opacity" onClick={() => setIsMenuOpen(false)} />
+        <div className="fixed inset-0 z-50" onClick={() => setIsMenuOpen(false)} />
       )}
 
       <aside
@@ -128,7 +128,7 @@ export default function Header() {
           backgroundColor: "#050811", zIndex: 60,
           transform: isMenuOpen ? "translateX(0)" : "translateX(-100%)",
           transition: "transform 300ms cubic-bezier(0.4, 0, 0.2, 1)",
-          boxShadow: "10px 0 25px rgba(0,0,0,0.6)",
+          boxShadow: "none",
         }}
         className="border-r border-slate-800/80 flex flex-col p-6 overflow-hidden"
         aria-label="Main navigation"
@@ -208,7 +208,7 @@ export default function Header() {
                 </button>
               ))}
             </div>
-            <p className="px-3 pt-2 text-[10px] text-slate-500">Neon is the default theme.</p>
+            <p className="px-3 pt-2 text-[10px] text-slate-500">Light is the default theme.</p>
           </div>
 
           {user === null && (
