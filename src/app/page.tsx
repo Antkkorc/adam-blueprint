@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import PropertyCard from "@/components/PropertyCard";
+import TenantRentalCard, { type TenantRental } from "@/components/TenantRentalCard";
 import LocationPicker from "@/components/LocationPicker";
 import { Search, ShieldCheck, Award, MessageSquare } from "lucide-react";
 import type { Property } from "@/types/property";
@@ -14,6 +15,7 @@ import { PUBLIC_PROPERTY_COLUMNS } from "@/lib/supabase/public-columns";
 export default function HomePage() {
   const router = useRouter();
   const [properties, setProperties] = useState<Property[]>([]);
+  const [rentals, setRentals] = useState<TenantRental[]>([]);
   const [loading, setLoading] = useState(true);
   const [location, setLocation] = useState("");
   const [activeTab, setActiveTab] = useState<"buy" | "rent" | "sell" | "students">("buy");
@@ -55,17 +57,25 @@ export default function HomePage() {
   useEffect(() => {
     async function loadFeaturedProperties() {
       try {
-        const { data, error } = await supabase
-          .from("properties")
-          .select(PUBLIC_PROPERTY_COLUMNS)
-          .order("id", { ascending: false })
-          .limit(6);
+        const [{ data: propertyData, error: propertyError }, { data: rentalData, error: rentalError }] =
+          await Promise.all([
+            supabase
+              .from("properties")
+              .select(PUBLIC_PROPERTY_COLUMNS)
+              .order("id", { ascending: false })
+              .limit(6),
+            supabase
+              .from("tenant_rentals")
+              .select("id,created_at,title,description,location,price,bedrooms,bathrooms,tenant_name,contact_number,contact_name,contact_phone,info,images,image_labels,status,student_friendly,latitude,longitude")
+              .eq("status", "Available")
+              .order("created_at", { ascending: false })
+              .limit(6),
+          ]);
 
-        if (error) {
-          console.error("Error fetching properties:", error.message);
-        } else {
-          setProperties(data || []);
-        }
+        if (propertyError) console.error("Error fetching properties:", propertyError.message);
+        else setProperties(propertyData || []);
+        if (rentalError) console.error("Error fetching homepage rentals:", rentalError.message);
+        else setRentals((rentalData as TenantRental[] | null) || []);
       } catch (err) {
         console.error("Unexpected error:", err);
       } finally {
@@ -194,6 +204,28 @@ export default function HomePage() {
           </div>
         )}
       </section>
+
+      {/* Featured Rentals */}
+      {rentals.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 py-12 space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-white">Available Rental Spaces</h2>
+              <p className="text-slate-400 text-xs">
+                Recent accommodation listings from property owners and landlords
+              </p>
+            </div>
+            <Link href="/rent" className="text-xs font-semibold text-cyan-400 hover:underline">
+              View All &rarr;
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {rentals.map((rental) => (
+              <TenantRentalCard key={rental.id} rental={rental} isStudentHousing={rental.student_friendly === true} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Value Props */}
       <section className="max-w-7xl mx-auto px-4 py-16 border-t border-slate-800/60 grid grid-cols-1 md:grid-cols-3 gap-6">
