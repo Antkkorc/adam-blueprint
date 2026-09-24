@@ -37,4 +37,5 @@ export interface Property {
   agent: string;
   agent_phone: string;
   amenities: string[];
+  wifi_type?: "fibre" | "router" | null;
 }

@@ -12,8 +12,6 @@ interface BuyPageProps {
     maxPrice?: string;
     tenure?: string;
     wifi?: string;
-    pool?: string;
-    garage?: string;
     location?: string;
     type?: string;
     minBeds?: string;
@@ -31,8 +29,6 @@ export default async function BuyPage({ searchParams }: BuyPageProps) {
   const maxPrice = params.maxPrice ? Number(params.maxPrice) : Infinity;
   const selectedTenure = params.tenure || "";
   const wifiType = params.wifi || "";
-  const hasPool = params.pool === "true";
-  const hasGarage = params.garage === "true";
   const location = getLocationSearch(params.location || "");
   const propertyType = params.type || "";
   const minBeds = Math.max(0, Number(params.minBeds) || 0);
@@ -58,8 +54,6 @@ export default async function BuyPage({ searchParams }: BuyPageProps) {
   if (selectedTenure) query = query.eq("tenure", selectedTenure);
   if (minPrice > 0) query = query.gte("price", minPrice);
   if (maxPrice < Infinity && maxPrice > 0) query = query.lte("price", maxPrice);
-  if (hasPool) query = query.eq("pool", true);
-  if (hasGarage) query = query.eq("garage", true);
   if (wifiType) query = query.eq("wifi_type", wifiType);
   if (minBeds > 0) query = minBeds >= 6 ? query.gte("beds", 6) : query.eq("beds", minBeds);
   if (minBaths > 0) query = minBaths >= 6 ? query.gte("baths", 6) : query.eq("baths", minBaths);

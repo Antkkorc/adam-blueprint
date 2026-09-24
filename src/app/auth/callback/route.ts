@@ -7,6 +7,7 @@ export async function GET(request: Request) {
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/";
   const authMode = searchParams.get("auth_mode");
+  const redirectPath = next.startsWith("/") && !next.startsWith("//") ? next : "/";
 
   if (code) {
     const supabase = await createClient();
@@ -25,7 +26,7 @@ export async function GET(request: Request) {
       }
 
       // Successful authentication — redirect user to their destination or homepage.
-      const response = NextResponse.redirect(new URL(next, origin));
+      const response = NextResponse.redirect(new URL(redirectPath, origin));
       response.headers.set("Cache-Control", "no-store");
       return response;
     }

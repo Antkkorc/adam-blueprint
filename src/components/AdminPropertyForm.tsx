@@ -53,6 +53,7 @@ export default function AdminPropertyForm() {
   const [suburb, setSuburb] = useState("");
   const [plotNumber, setPlotNumber] = useState("");
   const [tenure, setTenure] = useState("Freehold");
+  const [wifiType, setWifiType] = useState("");
   const [price, setPrice] = useState("");
   const [priceUnit, setPriceUnit] = useState<"total" | "month">("total");
   const [beds, setBeds] = useState("0");
@@ -215,7 +216,7 @@ export default function AdminPropertyForm() {
         outside_features: outsideFeatures || null,
         intent, type, category: type.toLowerCase(),
         location, city, suburb,
-        plot_number: plotNumber || null, tenure,
+        plot_number: plotNumber || null, tenure, wifi_type: wifiType || null,
         price: Number(price), price_unit: intent === "rent" ? "month" : priceUnit,
         beds: Number(beds), baths: Number(baths), parking: Number(parking),
         building_sqm: buildingSqm ? Number(buildingSqm) : null,
@@ -234,6 +235,7 @@ export default function AdminPropertyForm() {
       alert("Property added successfully!");
       setTitle(""); setDescription(""); setOverview(""); setInsideFeatures(""); setOutsideFeatures("");
       setLocation(""); setCity(""); setSuburb(""); setPlotNumber(""); setPrice("");
+      setWifiType("");
       setBuildingSqm(""); setLandSqm(""); setYearBuilt(""); setLatitude(""); setLongitude("");
       setAmenities([]); setPhotos([]); setSketchFiles(null);
       router.refresh();
@@ -296,6 +298,11 @@ export default function AdminPropertyForm() {
         <select value={intent} onChange={(e) => setIntent(e.target.value as "buy" | "rent")} className={inputClass}><option value="buy">For Sale (Buy)</option><option value="rent">For Rent</option></select>
         <select value={type} onChange={(e) => setType(e.target.value)} className={inputClass}>{types.map((item) => <option key={item} value={item}>{item}</option>)}</select>
         <select value={tenure} onChange={(e) => setTenure(e.target.value)} className={inputClass}><option value="Freehold">Freehold</option><option value="Tribal Land">Tribal Land</option><option value="State Land">State Land</option><option value="Lease">Lease</option><option value="Sectional Title">Sectional Title</option></select>
+        <select value={wifiType} onChange={(e) => setWifiType(e.target.value)} className={inputClass} aria-label="WiFi connectivity">
+          <option value="">WiFi connectivity not specified</option>
+          <option value="fibre">Fibre WiFi</option>
+          <option value="router">4G/5G Router WiFi</option>
+        </select>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input type="text" placeholder="Location *" required className={inputClass} value={location} onChange={(e) => setLocation(e.target.value)} />

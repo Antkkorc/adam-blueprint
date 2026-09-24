@@ -28,6 +28,14 @@ export default function AuthPage() {
 
   const formatPhoneForSupabase = (rawPhone: string) => rawPhone.replace(/\D/g, "");
 
+  const getRedirectPath = () => {
+    const requestedPath = new URLSearchParams(window.location.search).get("redirectTo");
+    if (requestedPath && requestedPath.startsWith("/") && !requestedPath.startsWith("//")) {
+      return requestedPath;
+    }
+    return "/";
+  };
+
   const handleTabChange = (newTab: AuthTab) => {
     setError(null);
     setMessage(null);
@@ -45,7 +53,7 @@ export default function AuthPage() {
       setLoading(false);
       if (error) setError(error.message);
       else {
-        router.push("/");
+        router.push(getRedirectPath());
         router.refresh();
       }
     } else {
@@ -53,12 +61,12 @@ export default function AuthPage() {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(getRedirectPath())}` },
       });
       setLoading(false);
       if (error) setError(error.message);
       else if (data.user && data.session) {
-        router.push("/");
+        router.push(getRedirectPath());
         router.refresh();
       } else {
         setMessage("Account created. Supabase requires email confirmation before you are signed in. Confirm the email, then return here and log in to see your account menu and admin features.");
@@ -71,7 +79,9 @@ export default function AuthPage() {
     setLoading(true);
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: `${window.location.origin}/auth/callback?auth_mode=${tab}` },
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?auth_mode=${tab}&next=${encodeURIComponent(getRedirectPath())}`,
+      },
     });
     if (error) setError(error.message);
     if (data.url) window.location.assign(data.url);
@@ -99,7 +109,7 @@ export default function AuthPage() {
     setLoading(false);
     if (error) setError(error.message);
     else {
-      router.push("/");
+      router.push(getRedirectPath());
       router.refresh();
     }
   };
