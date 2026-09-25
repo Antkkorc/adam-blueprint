@@ -9,7 +9,10 @@ import { createClient } from "@/lib/supabase/server";
 import { BRAND } from "@/lib/brand";
 import PropertyPhotoTour from "@/components/PropertyPhotoTour";
 import SavePropertyButton from "@/components/SavePropertyButton";
-import { PUBLIC_PROPERTY_COLUMNS } from "@/lib/supabase/public-columns";
+import {
+  PUBLIC_PROPERTY_COLUMNS,
+  PUBLIC_PROPERTY_COLUMNS_BEFORE_WIFI,
+} from "@/lib/supabase/public-columns";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +32,26 @@ export default async function PropertyDetailPage({ params }: PageProps) {
   const { id } = await params;
   const supabase = await createClient();
 
-  const { data: property } = await supabase.from("properties").select(PUBLIC_PROPERTY_COLUMNS).eq("id", id).single();
+  let result = await supabase
+    .from("properties")
+    .select(PUBLIC_PROPERTY_COLUMNS)
+    .eq("id", id)
+    .maybeSingle();
+
+  if (result.error?.message.includes("properties.wifi_type does not exist")) {
+    result = await supabase
+      .from("properties")
+      .select(PUBLIC_PROPERTY_COLUMNS_BEFORE_WIFI)
+      .eq("id", id)
+      .maybeSingle();
+  }
+
+  if (result.error) {
+    console.error("Error fetching property details:", result.error.message);
+    notFound();
+  }
+
+  const { data: property } = result;
   if (!property) notFound();
 
   const { data: { user } } = await supabase.auth.getUser();
