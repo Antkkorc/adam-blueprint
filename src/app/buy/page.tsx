@@ -2,7 +2,11 @@ import { createClient } from "@/lib/supabase/server";
 import PropertyCard from "@/components/PropertyCard";
 import Link from "next/link";
 import { getLocationSearch } from "@/lib/filters";
-import { PUBLIC_PROPERTY_COLUMNS } from "@/lib/supabase/public-columns";
+import {
+  PUBLIC_PROPERTY_COLUMNS,
+  PUBLIC_PROPERTY_COLUMNS_BEFORE_WIFI,
+} from "@/lib/supabase/public-columns";
+import type { Property } from "@/types/property";
 
 export const revalidate = 0;
 
@@ -42,29 +46,37 @@ export default async function BuyPage({ searchParams }: BuyPageProps) {
 
   const supabase = await createClient();
 
-  let query = supabase.from("properties").select(PUBLIC_PROPERTY_COLUMNS);
-
-  query = query.eq("intent", "buy").in("status", ["active", "Available"]);
-  if (location) {
-    query = query.or(
-      `location.ilike.%${location}%,city.ilike.%${location}%,suburb.ilike.%${location}%`
-    );
+  async function loadProperties(columns: typeof PUBLIC_PROPERTY_COLUMNS | typeof PUBLIC_PROPERTY_COLUMNS_BEFORE_WIFI, includeWifi: boolean) {
+    let query = supabase.from("properties").select(columns);
+    query = query.eq("intent", "buy").in("status", ["active", "Available"]);
+    if (location) {
+      query = query.or(
+        `location.ilike.%${location}%,city.ilike.%${location}%,suburb.ilike.%${location}%`
+      );
+    }
+    if (propertyType && propertyType !== "All Types") query = query.eq("type", propertyType);
+    if (selectedTenure) query = query.eq("tenure", selectedTenure);
+    if (minPrice > 0) query = query.gte("price", minPrice);
+    if (maxPrice < Infinity && maxPrice > 0) query = query.lte("price", maxPrice);
+    if (wifiType && includeWifi) query = query.eq("wifi_type", wifiType);
+    if (minBeds > 0) query = minBeds >= 6 ? query.gte("beds", 6) : query.eq("beds", minBeds);
+    if (minBaths > 0) query = minBaths >= 6 ? query.gte("baths", 6) : query.eq("baths", minBaths);
+    if (minParking > 0) query = query.gte("parking", minParking);
+    if (minBuildingSqm > 0) query = query.gte("building_sqm", minBuildingSqm);
+    if (minLandSqm > 0) query = query.gte("land_sqm", minLandSqm);
+    for (const amenity of selectedAmenities) query = query.contains("amenities", [amenity]);
+    const result = await query;
+    return {
+      data: result.data as Property[] | null,
+      error: result.error,
+    };
   }
-  if (propertyType && propertyType !== "All Types") query = query.eq("type", propertyType);
-  if (selectedTenure) query = query.eq("tenure", selectedTenure);
-  if (minPrice > 0) query = query.gte("price", minPrice);
-  if (maxPrice < Infinity && maxPrice > 0) query = query.lte("price", maxPrice);
-  if (wifiType) query = query.eq("wifi_type", wifiType);
-  if (minBeds > 0) query = minBeds >= 6 ? query.gte("beds", 6) : query.eq("beds", minBeds);
-  if (minBaths > 0) query = minBaths >= 6 ? query.gte("baths", 6) : query.eq("baths", minBaths);
-  if (minParking > 0) query = query.gte("parking", minParking);
-  if (minBuildingSqm > 0) query = query.gte("building_sqm", minBuildingSqm);
-  if (minLandSqm > 0) query = query.gte("land_sqm", minLandSqm);
-  for (const amenity of selectedAmenities) {
-    query = query.contains("amenities", [amenity]);
-  }
 
-  const { data: properties, error } = await query;
+  let result = await loadProperties(PUBLIC_PROPERTY_COLUMNS, true);
+  if (result.error?.message.includes("properties.wifi_type does not exist")) {
+    result = await loadProperties(PUBLIC_PROPERTY_COLUMNS_BEFORE_WIFI, false);
+  }
+  const { data: properties, error } = result;
 
   if (error) {
     console.error("Error fetching filtered properties:", error.message);

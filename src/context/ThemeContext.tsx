@@ -24,8 +24,9 @@ function readSavedTheme(): Theme | null {
   }
 }
 
-const savedTheme = readSavedTheme();
-let themeSnapshot: Theme = savedTheme === "dark" || savedTheme === "light" ? savedTheme : "light";
+// Keep the first server and client render identical; localStorage is applied
+// after hydration through the external-store subscription.
+let themeSnapshot: Theme = "light";
 
 function getThemeSnapshot(): Theme {
   return themeSnapshot;
