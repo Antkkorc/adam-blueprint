@@ -5,15 +5,20 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import PropertyCard from "@/components/PropertyCard";
+import TenantRentalCard, { type TenantRental } from "@/components/TenantRentalCard";
 import LocationPicker from "@/components/LocationPicker";
 import { Search, ShieldCheck, Award, MessageSquare } from "lucide-react";
 import type { Property } from "@/types/property";
 import { useAuth } from "@/context/AuthContext";
-import { PUBLIC_PROPERTY_COLUMNS } from "@/lib/supabase/public-columns";
+import {
+  PUBLIC_PROPERTY_COLUMNS,
+  PUBLIC_PROPERTY_COLUMNS_BEFORE_WIFI,
+} from "@/lib/supabase/public-columns";
 
 export default function HomePage() {
   const router = useRouter();
   const [properties, setProperties] = useState<Property[]>([]);
+  const [rentals, setRentals] = useState<TenantRental[]>([]);
   const [loading, setLoading] = useState(true);
   const [location, setLocation] = useState("");
   const [activeTab, setActiveTab] = useState<"buy" | "rent" | "sell" | "students">("buy");
@@ -55,17 +60,37 @@ export default function HomePage() {
   useEffect(() => {
     async function loadFeaturedProperties() {
       try {
-        const { data, error } = await supabase
+        const initialPropertyResult = await supabase
           .from("properties")
           .select(PUBLIC_PROPERTY_COLUMNS)
           .order("id", { ascending: false })
           .limit(6);
-
-        if (error) {
-          console.error("Error fetching properties:", error.message);
-        } else {
-          setProperties(data || []);
+        let propertyData = initialPropertyResult.data as Property[] | null;
+        let propertyError = initialPropertyResult.error;
+        if (propertyError?.message.includes("properties.wifi_type does not exist")) {
+          const legacyPropertyResult = await supabase
+            .from("properties")
+            .select(PUBLIC_PROPERTY_COLUMNS_BEFORE_WIFI)
+            .order("id", { ascending: false })
+            .limit(6);
+          propertyData = legacyPropertyResult.data as Property[] | null;
+          propertyError = legacyPropertyResult.error;
         }
+
+        const [{ data: rentalData, error: rentalError }] =
+          await Promise.all([
+            supabase
+              .from("tenant_rentals")
+              .select("id,created_at,title,description,location,price,bedrooms,bathrooms,tenant_name,contact_number,contact_name,contact_phone,info,images,image_labels,status,student_friendly,latitude,longitude")
+              .eq("status", "Available")
+              .order("created_at", { ascending: false })
+              .limit(6),
+          ]);
+
+        if (propertyError) console.error("Error fetching properties:", propertyError.message);
+        else setProperties(propertyData || []);
+        if (rentalError) console.error("Error fetching homepage rentals:", rentalError.message);
+        else setRentals((rentalData as TenantRental[] | null) || []);
       } catch (err) {
         console.error("Unexpected error:", err);
       } finally {
@@ -87,7 +112,22 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-[#070b15] text-white">
       {/* Hero Section */}
-      <section className="relative py-20 px-4 max-w-7xl mx-auto text-center space-y-8">
+      <section className="relative py-12 md:py-16 px-4 max-w-7xl mx-auto text-center space-y-6">
+        {/* Standalone location search directly below the header category row */}
+        <div className="max-w-3xl mx-auto rounded-full border border-slate-800 bg-slate-900/90 p-2 shadow-2xl">
+          <div className="flex flex-col gap-2 md:flex-row">
+            <LocationPicker value={location} onChange={setLocation} />
+
+            <button
+              onClick={handleSearch}
+              className="glass-icon glass-icon-primary btn-pop flex items-center justify-center gap-2 rounded-full px-8 py-2.5 text-xs font-bold text-slate-950"
+            >
+              <Search className="w-4 h-4" />
+              {activeTab === "sell" ? "Valuate / Sell" : "Search"}
+            </button>
+          </div>
+        </div>
+
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 text-xs font-semibold">
           <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
           TRUSTED PROPERTY EXPERTS IN BOTSWANA
@@ -113,41 +153,6 @@ export default function HomePage() {
           Premium homes, plots, and commercial spaces in Gaborone, Maun,
           Francistown & beyond. Verified listings by Segolame Adam.
         </p>
-
-        {/* Location search widget */}
-        <div className="max-w-3xl mx-auto bg-slate-900/90 border border-slate-800 p-4 rounded-2xl shadow-2xl space-y-4">
-          <div className="grid grid-cols-2 gap-2 pb-2 sm:grid-cols-4">
-            {(["buy", "rent", "sell", "students"] as const).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => {
-                  setActiveTab(tab);
-                  if (tab === "rent") router.push("/rent");
-                  if (tab === "students") router.push("/students");
-                }}
-                className={`glass-icon btn-pop flex min-h-10 w-full min-w-0 items-center justify-center rounded-full px-2 py-2 text-[11px] font-bold capitalize leading-tight sm:px-3 sm:text-xs ${
-                  activeTab === tab
-                    ? "glass-icon-primary text-slate-950 shadow-[0_0_15px_rgba(34,211,238,0.4)]"
-                    : "text-slate-700 dark:text-slate-300"
-                }`}
-              >
-                {tab === "students" ? "Student rentals" : tab}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex flex-col md:flex-row gap-3">
-            <LocationPicker value={location} onChange={setLocation} />
-
-            <button
-              onClick={handleSearch}
-              className="glass-icon glass-icon-primary btn-pop flex items-center justify-center gap-2 px-8 py-2.5 text-xs font-bold text-slate-950"
-            >
-              <Search className="w-4 h-4" />
-              {activeTab === "sell" ? "Valuate / Sell" : "Search"}
-            </button>
-          </div>
-        </div>
 
         <div className="flex items-center justify-center gap-6 text-xs text-slate-400 font-medium">
           <span className="flex items-center gap-1.5">
@@ -194,6 +199,28 @@ export default function HomePage() {
           </div>
         )}
       </section>
+
+      {/* Featured Rentals */}
+      {rentals.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 py-12 space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-white">Available Rental Spaces</h2>
+              <p className="text-slate-400 text-xs">
+                Recent accommodation listings from property owners and landlords
+              </p>
+            </div>
+            <Link href="/rent" className="text-xs font-semibold text-cyan-400 hover:underline">
+              View All &rarr;
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {rentals.map((rental) => (
+              <TenantRentalCard key={rental.id} rental={rental} isStudentHousing={rental.student_friendly === true} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Value Props */}
       <section className="max-w-7xl mx-auto px-4 py-16 border-t border-slate-800/60 grid grid-cols-1 md:grid-cols-3 gap-6">

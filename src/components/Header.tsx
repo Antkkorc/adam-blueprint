@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { BRAND } from "@/lib/brand";
 import { useTheme, type Theme } from "@/context/ThemeContext";
 import { useAuth } from "@/context/AuthContext";
@@ -21,6 +22,7 @@ export default function Header() {
   const [isAdmin, setIsAdmin] = useState(false);
   const { theme, setTheme } = useTheme();
   const { user, signOut } = useAuth();
+  const pathname = usePathname();
   const [notificationCounts, setNotificationCounts] = useState({
     propertySubmissions: 0,
     rentalSubmissions: 0,
@@ -97,7 +99,29 @@ export default function Header() {
               {BRAND.name}
             </Link>
           </div>
-          <div className="hidden md:block" aria-hidden="true" />
+          <nav className="absolute left-1/2 flex max-w-[44vw] -translate-x-1/2 items-center gap-1 overflow-x-auto rounded-full border border-slate-800 bg-slate-900/90 p-1.5 shadow-xl sm:max-w-[48vw]" aria-label="Property categories">
+            {([
+              ["buy", "Buy", "/buy"],
+              ["rent", "Rent", "/rent"],
+              ["sell", "Sell", "/sell"],
+              ["students", "Student rentals", "/students"],
+            ] as const).map(([key, label, href]) => {
+              const active = pathname === href;
+              return (
+                <Link
+                  key={key}
+                  href={href}
+                  className={`glass-icon btn-pop flex min-h-8 shrink-0 items-center justify-center rounded-full px-3 py-1.5 text-[10px] font-bold capitalize sm:text-xs ${
+                    active
+                      ? "glass-icon-primary text-slate-950 shadow-[0_0_15px_rgba(34,211,238,0.4)]"
+                      : "text-slate-700 dark:text-slate-300"
+                  }`}
+                >
+                  {label}
+                </Link>
+              );
+            })}
+          </nav>
           <div className="flex items-center gap-3">
             <a
               href={`https://wa.me/${whatsappNumber}`}

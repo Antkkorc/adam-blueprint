@@ -30,13 +30,6 @@ export default function RootLayout({
   return (
     // suppressHydrationWarning stops extensions from causing red boxes
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(() => { try { const theme = localStorage.getItem("adam-blueprint-theme"); document.documentElement.dataset.theme = theme === "dark" ? "dark" : "light"; document.documentElement.classList.toggle("dark", theme === "dark"); } catch {} })();`,
-          }}
-        />
-      </head>
       <body className="bg-[#070b15] text-white antialiased" suppressHydrationWarning>
         <ThemeProvider>
           <AuthProvider>

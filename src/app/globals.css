@@ -159,6 +159,30 @@ html[data-theme="light"] textarea::placeholder {
   opacity: 1;
 }
 
+html[data-theme="light"] .homepage-location-picker input {
+  border: 0 !important;
+  background-color: transparent !important;
+  color: #102033 !important;
+}
+
+html[data-theme="light"] .homepage-location-picker input::placeholder {
+  color: #526477 !important;
+  opacity: 1;
+}
+
+html[data-theme="dark"] .homepage-location-picker input,
+.homepage-location-picker input {
+  border: 0 !important;
+  background-color: transparent !important;
+  color: #f8fafc !important;
+}
+
+html[data-theme="dark"] .homepage-location-picker input::placeholder,
+.homepage-location-picker input::placeholder {
+  color: #94a3b8 !important;
+  opacity: 1;
+}
+
 html[data-theme="light"] option {
   background-color: #e8f0f5;
   color: #102033;
