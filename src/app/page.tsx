@@ -13,6 +13,7 @@ import { useAuth } from "@/context/AuthContext";
 import {
   PUBLIC_PROPERTY_COLUMNS,
   PUBLIC_PROPERTY_COLUMNS_BEFORE_WIFI,
+  PUBLIC_PROPERTY_COLUMNS_LEGACY,
 } from "@/lib/supabase/public-columns";
 
 export default function HomePage() {
@@ -67,10 +68,19 @@ export default function HomePage() {
           .limit(6);
         let propertyData = initialPropertyResult.data as Property[] | null;
         let propertyError = initialPropertyResult.error;
-        if (propertyError?.message.includes("properties.wifi_type does not exist")) {
+        if (propertyError?.message.includes("column") && propertyError.message.includes("does not exist")) {
           const legacyPropertyResult = await supabase
             .from("properties")
             .select(PUBLIC_PROPERTY_COLUMNS_BEFORE_WIFI)
+            .order("id", { ascending: false })
+            .limit(6);
+          propertyData = legacyPropertyResult.data as Property[] | null;
+          propertyError = legacyPropertyResult.error;
+        }
+        if (propertyError?.message.includes("column") && propertyError.message.includes("does not exist")) {
+          const legacyPropertyResult = await supabase
+            .from("properties")
+            .select(PUBLIC_PROPERTY_COLUMNS_LEGACY)
             .order("id", { ascending: false })
             .limit(6);
           propertyData = legacyPropertyResult.data as Property[] | null;

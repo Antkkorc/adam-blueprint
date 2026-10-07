@@ -85,8 +85,8 @@ export default function Header() {
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-[#070b15]">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="max-w-7xl mx-auto flex min-h-16 flex-wrap items-center justify-between gap-2 px-4 py-2 md:h-16 md:flex-nowrap md:gap-0 md:py-0">
+          <div className="flex min-w-0 items-center gap-2 md:gap-4">
             <button
               onClick={() => setIsMenuOpen(true)}
               className="glass-icon flex flex-col items-center justify-center rounded-xl px-2.5 py-1 text-slate-300 hover:text-cyan-300 transition-all focus:outline-none"
@@ -95,11 +95,11 @@ export default function Header() {
               <MenuIcon className="w-5 h-5" />
               <span className="text-[8px] font-extrabold tracking-wider uppercase mt-0.5">Menu</span>
             </button>
-            <Link href="/" className="font-extrabold text-xl text-cyan-400 tracking-wider uppercase">
+            <Link href="/" className="truncate font-extrabold text-base text-cyan-400 tracking-wider uppercase sm:text-xl">
               {BRAND.name}
             </Link>
           </div>
-          <nav className="absolute left-1/2 flex max-w-[44vw] -translate-x-1/2 items-center gap-1 overflow-x-auto rounded-full border border-slate-800 bg-slate-900/90 p-1.5 shadow-xl sm:max-w-[48vw]" aria-label="Property categories">
+          <nav className="order-3 flex w-full max-w-none items-center justify-center gap-1 overflow-x-auto rounded-full border border-slate-800 bg-slate-900/90 p-1.5 shadow-xl md:absolute md:left-1/2 md:order-none md:w-auto md:max-w-[44vw] md:-translate-x-1/2" aria-label="Property categories">
             {([
               ["buy", "Buy", "/buy"],
               ["rent", "Rent", "/rent"],
@@ -122,15 +122,15 @@ export default function Header() {
               );
             })}
           </nav>
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-3">
             <a
               href={`https://wa.me/${whatsappNumber}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="glass-icon flex items-center gap-2 rounded-full px-3 py-1.5 text-emerald-300 hover:text-emerald-100 transition-all text-xs font-semibold"
+              className="glass-icon flex items-center gap-2 rounded-full px-2 py-1.5 text-emerald-300 hover:text-emerald-100 transition-all text-xs font-semibold sm:px-3"
             >
               <PhoneCall className="w-4 h-4" />
-              <span>WhatsApp</span>
+              <span className="hidden sm:inline">WhatsApp</span>
             </a>
             <Link
               href={user ? "/saved" : "/login"}

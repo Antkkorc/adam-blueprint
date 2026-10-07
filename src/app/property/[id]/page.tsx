@@ -12,6 +12,7 @@ import SavePropertyButton from "@/components/SavePropertyButton";
 import {
   PUBLIC_PROPERTY_COLUMNS,
   PUBLIC_PROPERTY_COLUMNS_BEFORE_WIFI,
+  PUBLIC_PROPERTY_COLUMNS_LEGACY,
 } from "@/lib/supabase/public-columns";
 
 export const dynamic = "force-dynamic";
@@ -38,10 +39,18 @@ export default async function PropertyDetailPage({ params }: PageProps) {
     .eq("id", id)
     .maybeSingle();
 
-  if (result.error?.message.includes("properties.wifi_type does not exist")) {
+  if (result.error?.message.includes("column") && result.error.message.includes("does not exist")) {
     result = await supabase
       .from("properties")
       .select(PUBLIC_PROPERTY_COLUMNS_BEFORE_WIFI)
+      .eq("id", id)
+      .maybeSingle();
+  }
+
+  if (result.error?.message.includes("column") && result.error.message.includes("does not exist")) {
+    result = await supabase
+      .from("properties")
+      .select(PUBLIC_PROPERTY_COLUMNS_LEGACY)
       .eq("id", id)
       .maybeSingle();
   }
