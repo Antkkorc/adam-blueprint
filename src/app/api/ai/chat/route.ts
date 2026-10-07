@@ -29,7 +29,11 @@ export async function POST(request: Request) {
     }),
   });
   if (!response.ok) {
-    console.error("Gemini request failed:", response.status);
+    const providerError = await response.text();
+    console.error("Gemini request failed:", {
+      status: response.status,
+      body: providerError.slice(0, 1000),
+    });
     return NextResponse.json({ error: "The assistant could not respond right now. Please try again." }, { status: 502 });
   }
   const result = await response.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
