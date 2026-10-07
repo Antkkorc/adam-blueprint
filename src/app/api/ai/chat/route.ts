@@ -65,6 +65,13 @@ export async function POST(request: Request) {
       status: response.status,
       body: providerError.slice(0, 1000),
     });
+    let providerMessage = "";
+    try {
+      const parsed = JSON.parse(providerError) as { error?: { message?: unknown } };
+      providerMessage = typeof parsed.error?.message === "string" ? parsed.error.message : "";
+    } catch {
+      providerMessage = "";
+    }
     const error =
       response.status === 401
         ? "Gemini rejected the API key. Check that the rotated key is valid and enabled for this deployment."
@@ -74,7 +81,9 @@ export async function POST(request: Request) {
             ? "The configured Gemini model is unavailable for this API. Set GEMINI_MODEL to a model enabled for your Google AI project."
             : response.status === 429
               ? "Gemini quota or rate limits were reached. Please try again later."
-              : "The assistant provider returned an error. Please try again.";
+                : response.status === 400
+                  ? `Gemini rejected the request${providerMessage ? `: ${providerMessage.slice(0, 240)}` : ". Check the model request format."}`
+                  : `The assistant provider returned an error (${response.status}). Please try again.`;
     return NextResponse.json({ error }, { status: 502 });
   }
   const result = await response.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
