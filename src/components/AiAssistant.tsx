@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, PointerEvent, useState } from "react";
 import Link from "next/link";
 import { Bot, Maximize2, Minimize2, Send, X } from "lucide-react";
 
@@ -12,6 +12,27 @@ export default function AiAssistant() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([{ role: "assistant", text: "Hi, I’m your AI assistant. How can I help you with the Adam Blueprint website today?" }]);
   const [loading, setLoading] = useState(false);
+  const [size, setSize] = useState({ width: 390, height: 620 });
+
+  function resizeAssistant(event: PointerEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    const startX = event.clientX;
+    const startY = event.clientY;
+    const startWidth = size.width;
+    const startHeight = size.height;
+    const onMove = (moveEvent: globalThis.PointerEvent) => {
+      setSize({
+        width: Math.min(720, Math.max(300, startWidth + moveEvent.clientX - startX)),
+        height: Math.min(820, Math.max(360, startHeight + moveEvent.clientY - startY)),
+      });
+    };
+    const onUp = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  }
 
   async function sendMessage(event: FormEvent) {
     event.preventDefault();
@@ -34,7 +55,7 @@ export default function AiAssistant() {
   return (
     <>
       {!open && <button type="button" onClick={() => setOpen(true)} aria-label="Open Adam Blueprint assistant" className="fixed bottom-5 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-cyan-400 text-slate-950 shadow-xl shadow-cyan-950/40 transition-transform hover:scale-105"><Bot className="h-6 w-6" /></button>}
-      {open && <section className={`ai-assistant fixed z-50 flex flex-col shadow-2xl backdrop-blur-xl ${fullscreen ? "inset-3 rounded-2xl" : "bottom-5 right-5 h-[min(620px,calc(100vh-2rem))] w-[min(390px,calc(100vw-2rem))] rounded-2xl"}`} aria-label="Adam Blueprint assistant">
+      {open && <section style={fullscreen ? undefined : { width: `min(${size.width}px, calc(100vw - 2rem))`, height: `min(${size.height}px, calc(100vh - 2rem))` }} className={`ai-assistant fixed z-50 flex flex-col shadow-2xl backdrop-blur-xl ${fullscreen ? "inset-3 rounded-2xl" : "bottom-5 right-5 rounded-2xl"}`} aria-label="Adam Blueprint assistant">
         <header className="ai-assistant-header flex items-center justify-between p-4">
           <div className="flex items-center gap-2"><Bot className="h-5 w-5 text-cyan-400" /><span className="font-bold">Adam Blueprint assistant</span></div>
           <div className="flex items-center gap-1">
@@ -51,6 +72,7 @@ export default function AiAssistant() {
           <input value={message} onChange={(event) => setMessage(event.target.value)} maxLength={1200} placeholder="Ask about this website..." className="ai-assistant-input min-w-0 flex-1 rounded-xl px-3 py-2 text-sm outline-none" />
           <button type="submit" disabled={loading || !message.trim()} aria-label="Send message" className="rounded-xl bg-cyan-400 px-3 text-slate-950 disabled:opacity-50"><Send className="h-4 w-4" /></button>
         </form>
+        {!fullscreen && <button type="button" aria-label="Resize assistant" title="Drag to resize" onPointerDown={resizeAssistant} className="ai-assistant-resize-handle" />}
       </section>}
     </>
   );

@@ -124,13 +124,13 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative py-12 md:py-16 px-4 max-w-7xl mx-auto text-center space-y-6">
         {/* Standalone location search directly below the header category row */}
-        <div className="max-w-3xl mx-auto rounded-full border border-slate-800 bg-slate-900/90 p-2 shadow-2xl">
-          <div className="flex flex-col gap-2 md:flex-row">
+        <div className="homepage-search-shell max-w-3xl mx-auto rounded-full border border-slate-800 bg-slate-900/90 p-2 shadow-2xl">
+          <div className="flex min-w-0 flex-col gap-2 md:flex-row">
             <LocationPicker value={location} onChange={setLocation} />
 
             <button
               onClick={handleSearch}
-              className="glass-icon glass-icon-primary btn-pop flex items-center justify-center gap-2 rounded-full px-8 py-2.5 text-xs font-bold text-slate-950"
+              className="homepage-search-button glass-icon glass-icon-primary btn-pop flex items-center justify-center gap-2 rounded-full px-8 py-2.5 text-xs font-bold text-slate-950"
             >
               <Search className="w-4 h-4" />
               {activeTab === "sell" ? "Valuate / Sell" : "Search"}
