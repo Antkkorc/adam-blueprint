@@ -6,7 +6,7 @@ export async function GET() {
   const { data, error } = await db.from("reviews").select("id,author_name,rating,comment,created_at").eq("status", "approved").order("created_at", { ascending: false }).limit(12);
   if (error) {
     console.error("Unable to load approved reviews:", error.message);
-    if (error.code === "42P01") return NextResponse.json({ reviews: [] });
+    if (error.code === "42P01" || error.code === "PGRST205") return NextResponse.json({ reviews: [] });
     return NextResponse.json({ error: "Unable to load reviews." }, { status: 500 });
   }
   return NextResponse.json({ reviews: data || [] });
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
   const { error } = await db.from("reviews").insert({ user_id: user.id, author_name: authorName.slice(0, 120), rating, comment, status: "pending" });
   if (error) {
     console.error("Unable to submit review:", error.message);
-    if (error.code === "42P01") return NextResponse.json({ error: "Reviews are temporarily unavailable while this feature is being set up." }, { status: 503 });
+    if (error.code === "42P01" || error.code === "PGRST205") return NextResponse.json({ error: "Reviews are temporarily unavailable while this feature is being set up." }, { status: 503 });
     return NextResponse.json({ error: "Your review could not be submitted." }, { status: 500 });
   }
   return NextResponse.json({ message: "Thanks. Your review is awaiting approval." }, { status: 201 });
