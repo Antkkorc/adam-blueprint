@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { ArrowLeft, Check, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { PUBLIC_PROPERTY_COLUMNS } from "@/lib/supabase/public-columns";
+import {
+  PUBLIC_PROPERTY_COLUMNS,
+  PUBLIC_PROPERTY_COLUMNS_BEFORE_WIFI,
+  PUBLIC_PROPERTY_COLUMNS_LEGACY,
+} from "@/lib/supabase/public-columns";
 import type { Property } from "@/types/property";
 
 interface ComparePageProps {
@@ -19,19 +23,47 @@ function display(value: unknown) {
   return String(value);
 }
 
+function normalizeFeature(value: string) {
+  return value.trim().toLocaleLowerCase();
+}
+
+function formatFeature(value: string) {
+  return value
+    .split(/\s+/)
+    .map((word) => word ? `${word[0].toLocaleUpperCase()}${word.slice(1)}` : word)
+    .join(" ");
+}
+
 export default async function ComparePage({ searchParams }: ComparePageProps) {
   const params = await searchParams;
-  const ids = (params.ids || "").split(",").map(Number).filter((id) => Number.isInteger(id)).slice(0, 3);
+  const ids = [...new Set((params.ids || "").split(",").map(Number).filter((id) => Number.isInteger(id) && id > 0))].slice(0, 3);
   const supabase = await createClient();
-  const { data, error } = ids.length
-    ? await supabase.from("properties").select(PUBLIC_PROPERTY_COLUMNS).in("id", ids)
-    : { data: [], error: null };
-
-  if (error) {
-    console.error("Error loading properties for comparison:", error.message);
+  async function loadProperties(columns: string) {
+    if (!ids.length) return { data: [] as unknown[] | null, error: null };
+    const response = await supabase.from("properties").select(columns).in("id", ids);
+    return { data: response.data as unknown[] | null, error: response.error };
   }
 
-  const properties = ((data || []) as Property[]).sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+  let result = await loadProperties(PUBLIC_PROPERTY_COLUMNS);
+
+  if (result.error?.message.includes("column") && result.error.message.includes("does not exist")) {
+    result = await loadProperties(PUBLIC_PROPERTY_COLUMNS_BEFORE_WIFI);
+  }
+  if (result.error?.message.includes("column") && result.error.message.includes("does not exist")) {
+    result = await loadProperties(PUBLIC_PROPERTY_COLUMNS_LEGACY);
+  }
+  if (result.error) {
+    console.error("Error loading properties for comparison:", result.error.message);
+  }
+
+  const properties = ((result.data || []) as Property[]).sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+  const amenitySets = properties.map((property) => {
+    const amenities = list(property.amenities);
+    if (property.wifi_type) amenities.push(property.wifi_type === "fibre" ? "Fibre WiFi" : "4G/5G Router WiFi");
+    return new Map(amenities.map((amenity) => [normalizeFeature(amenity), formatFeature(amenity)]));
+  });
+  const allFeatures = [...new Set(amenitySets.flatMap((amenities) => [...amenities.keys()]))]
+    .sort((a, b) => a.localeCompare(b));
   const rows: Array<{ label: string; values: (string | number)[] }> = [
     { label: "Price", values: properties.map((property) => `${display(property.price)} BWP${property.price_unit === "month" ? " / month" : ""}`) },
     { label: "Location", values: properties.map((property) => display(property.location || property.city)) },
@@ -43,7 +75,6 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
     { label: "Land size", values: properties.map((property) => property.land_sqm || property.plot_size ? `${property.land_sqm || property.plot_size} m²` : "Not specified") },
     { label: "Tenure", values: properties.map((property) => display(property.tenure)) },
     { label: "WiFi", values: properties.map((property) => display(property.wifi_type)) },
-    { label: "Amenities", values: properties.map((property) => list(property.amenities).join(", ") || "None listed") },
   ];
 
   return (
@@ -91,9 +122,69 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
                     </tr>
                   );
                 })}
+                {allFeatures.length > 0 && (
+                  <tr className="border-b border-slate-800/70 bg-cyan-400/[0.04]">
+                    <th className="p-4 align-top text-xs font-bold text-slate-400">Features</th>
+                    {properties.map((property, index) => (
+                      <td key={`features-${property.id}`} className="p-4 align-top">
+                        <div className="space-y-2">
+                          {allFeatures.map((feature) => (
+                            <div key={`${property.id}-${feature}`} className="flex items-center gap-2 text-xs">
+                              {amenitySets[index].has(feature) ? (
+                                <Check className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                              ) : (
+                                <X className="h-3.5 w-3.5 shrink-0 text-slate-500" />
+                              )}
+                              <span className={amenitySets[index].has(feature) ? "text-cyan-100" : "text-slate-500"}>
+                                {formatFeature(feature)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </td>
+                    ))}
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
+        )}
+        {properties.length >= 2 && allFeatures.length > 0 && (
+          <section className="rounded-2xl border border-slate-800 bg-slate-900 p-5 md:p-6">
+            <h2 className="text-lg font-bold">Feature summary</h2>
+            <p className="mt-1 text-xs text-slate-400">
+              This summary is based on features listed in each property advert. “Not listed” means the advert did not mention it.
+            </p>
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              {properties.map((property, index) => {
+                const hasFeatures = [...amenitySets[index].values()];
+                const otherFeatures = new Set(
+                  amenitySets
+                    .filter((_, otherIndex) => otherIndex !== index)
+                    .flatMap((amenities) => [...amenities.keys()]),
+                );
+                const missingFeatures = [...otherFeatures]
+                  .filter((feature) => !amenitySets[index].has(feature))
+                  .map((feature) => formatFeature(feature));
+
+                return (
+                  <div key={`summary-${property.id}`} className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+                    <h3 className="font-bold text-white">{property.title}</h3>
+                    <div className="mt-3 space-y-2 text-sm">
+                      <p className="flex items-start gap-2 text-emerald-300">
+                        <Check className="mt-0.5 h-4 w-4 shrink-0" />
+                        <span><strong>{property.title} has:</strong> {hasFeatures.length > 0 ? hasFeatures.join(", ") : "No features listed"}</span>
+                      </p>
+                      <p className="flex items-start gap-2 text-slate-400">
+                        <X className="mt-0.5 h-4 w-4 shrink-0" />
+                        <span><strong>{property.title} does not have listed:</strong> {missingFeatures.length > 0 ? missingFeatures.join(", ") : "No features unique to the other selected properties"}</span>
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
         )}
       </div>
     </main>

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import PropertyCard from "@/components/PropertyCard";
 import Link from "next/link";
 import { getLocationSearch } from "@/lib/filters";
+import { AMENITY_OPTIONS, PROPERTY_TYPES } from "@/lib/filters";
 import {
   PUBLIC_PROPERTY_COLUMNS,
   PUBLIC_PROPERTY_COLUMNS_BEFORE_WIFI,
@@ -158,12 +159,9 @@ export default async function BuyPage({ searchParams }: BuyPageProps) {
               className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:ring-1 focus:ring-cyan-500"
             >
               <option value="">All Types</option>
-              <option value="House">House</option>
-              <option value="Apartment">Apartment</option>
-              <option value="Land">Land</option>
-              <option value="Office">Office</option>
-              <option value="Commercial">Commercial</option>
-              <option value="Warehouse">Warehouse</option>
+              {PROPERTY_TYPES.filter((type) => type !== "All Types").map((type) => (
+                <option key={type} value={type}>{type}</option>
+              ))}
             </select>
           </div>
 
@@ -220,7 +218,7 @@ export default async function BuyPage({ searchParams }: BuyPageProps) {
             <fieldset>
               <legend className="mb-2 font-bold text-slate-300">Features</legend>
               <div className="flex flex-wrap gap-x-5 gap-y-2">
-                {["Pet Friendly", "Garden", "Swimming Pool", "Flatlet"].map((feature) => (
+                {AMENITY_OPTIONS.map((feature) => (
                   <label key={feature} className="flex items-center gap-2 text-slate-300 font-semibold cursor-pointer">
                     <input type="checkbox" name="amenity" value={feature} defaultChecked={selectedAmenities.includes(feature)}
                       className="rounded border-slate-800 bg-slate-950 text-cyan-500" />
