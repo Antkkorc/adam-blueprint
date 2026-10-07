@@ -1,4 +1,5 @@
 export type PropertyIntent = "buy" | "rent";
+export type PromotionTier = "standard" | "featured" | "premium";
 
 export interface Property {
   id: number;
@@ -12,6 +13,7 @@ export interface Property {
   status: string;
   verified: boolean;
   featured: boolean;
+  promotion_tier?: PromotionTier | null;
   price: number;
   price_unit: "total" | "month";
   location: string;

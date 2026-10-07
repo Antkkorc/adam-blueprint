@@ -5,6 +5,7 @@ import { getLocationSearch } from "@/lib/filters";
 import {
   PUBLIC_PROPERTY_COLUMNS,
   PUBLIC_PROPERTY_COLUMNS_BEFORE_WIFI,
+  PUBLIC_PROPERTY_COLUMNS_LEGACY,
 } from "@/lib/supabase/public-columns";
 import type { Property } from "@/types/property";
 
@@ -46,7 +47,10 @@ export default async function BuyPage({ searchParams }: BuyPageProps) {
 
   const supabase = await createClient();
 
-  async function loadProperties(columns: typeof PUBLIC_PROPERTY_COLUMNS | typeof PUBLIC_PROPERTY_COLUMNS_BEFORE_WIFI, includeWifi: boolean) {
+  async function loadProperties(
+    columns: string,
+    includeWifi: boolean
+  ) {
     let query = supabase.from("properties").select(columns);
     query = query.eq("intent", "buy").in("status", ["active", "Available"]);
     if (location) {
@@ -73,8 +77,11 @@ export default async function BuyPage({ searchParams }: BuyPageProps) {
   }
 
   let result = await loadProperties(PUBLIC_PROPERTY_COLUMNS, true);
-  if (result.error?.message.includes("properties.wifi_type does not exist")) {
+  if (result.error?.message.includes("column") && result.error.message.includes("does not exist")) {
     result = await loadProperties(PUBLIC_PROPERTY_COLUMNS_BEFORE_WIFI, false);
+  }
+  if (result.error?.message.includes("column") && result.error.message.includes("does not exist")) {
+    result = await loadProperties(PUBLIC_PROPERTY_COLUMNS_LEGACY, false);
   }
   const { data: properties, error } = result;
 
