@@ -154,8 +154,8 @@ export default function AiAssistant() {
         <div className="flex-1 space-y-3 overflow-y-auto p-4">
           {messages.map((item, index) => <div key={`${item.role}-${index}`} className={`ai-assistant-message max-w-[90%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${item.role === "user" ? "ai-assistant-user ml-auto" : "ai-assistant-bot"}`}>
             <div>{item.text}</div>
-            {item.searchLink && <Link href={item.searchLink} className="ai-assistant-result-link mt-2 inline-flex">View all matching properties</Link>}
-            {item.links && item.links.length > 0 && <div className="mt-2 space-y-1">{item.links.map((link) => <Link key={link.href} href={link.href} className="ai-assistant-result-link block">{link.label}</Link>)}</div>}
+            {item.searchLink && <a href={item.searchLink} target="_blank" rel="noopener noreferrer" className="ai-assistant-result-link mt-2 inline-flex">View all matching properties</a>}
+            {item.links && item.links.length > 0 && <div className="mt-2 space-y-1">{item.links.map((link) => <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer" className="ai-assistant-result-link block">{link.label}</a>)}</div>}
           </div>)}
           {loading && <div className="ai-assistant-muted text-xs">Thinking...</div>}
         </div>
