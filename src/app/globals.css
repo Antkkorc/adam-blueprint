@@ -238,10 +238,11 @@ html[data-theme="light"] option {
   background: rgb(7 11 21 / 0.94);
   color: #cbd5e1;
   box-shadow: 0 4px 14px rgb(2 6 23 / 0.28);
-  transition: border-color 150ms ease, color 150ms ease, background-color 150ms ease;
+  transition: border-color 150ms ease, color 150ms ease, background-color 150ms ease, transform 150ms ease;
 }
 
 .category-carousel-arrow:hover {
+  transform: translateY(-50%) scale(1.04);
   border-color: #22d3ee;
   background: #0e7490;
   color: white;

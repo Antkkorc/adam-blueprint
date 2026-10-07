@@ -37,6 +37,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [selectedPropertyType, setSelectedPropertyType] = useState("All Types");
   const [categoryTrack, setCategoryTrack] = useState<HTMLDivElement | null>(null);
+  const [categoryScrollState, setCategoryScrollState] = useState({ hasScrolled: false, canScrollRight: false });
   const [location, setLocation] = useState("");
   const [activeTab, setActiveTab] = useState<"buy" | "rent" | "sell" | "students">("buy");
   const { user, loading: authLoading } = useAuth();
@@ -145,6 +146,24 @@ export default function HomePage() {
     loadFeaturedProperties();
   }, [selectedPropertyType]);
 
+  useEffect(() => {
+    if (!categoryTrack) return;
+    const updateCategoryScrollState = () => {
+      const maxScrollLeft = categoryTrack.scrollWidth - categoryTrack.clientWidth;
+      setCategoryScrollState({
+        hasScrolled: categoryTrack.scrollLeft > 2,
+        canScrollRight: maxScrollLeft - categoryTrack.scrollLeft > 2,
+      });
+    };
+    updateCategoryScrollState();
+    categoryTrack.addEventListener("scroll", updateCategoryScrollState, { passive: true });
+    window.addEventListener("resize", updateCategoryScrollState);
+    return () => {
+      categoryTrack.removeEventListener("scroll", updateCategoryScrollState);
+      window.removeEventListener("resize", updateCategoryScrollState);
+    };
+  }, [categoryTrack]);
+
   const handleSearch = () => {
     if (activeTab === "sell") {
       router.push("/sell");
@@ -224,9 +243,11 @@ export default function HomePage() {
             <p className="mt-1 text-sm text-slate-400">Find homes, land, farms, and commercial property in one place.</p>
           </div>
           <div className="category-carousel" role="group" aria-label="Property categories">
-            <button type="button" onClick={() => scrollCategories("left")} className="category-carousel-arrow left-0" aria-label="Scroll categories left">
-              <ChevronLeft className="h-4 w-4" />
-            </button>
+            {categoryScrollState.hasScrolled && (
+              <button type="button" onClick={() => scrollCategories("left")} className="category-carousel-arrow left-0" aria-label="Scroll categories left">
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+            )}
             <div ref={setCategoryTrack} className="category-carousel-track flex gap-2 overflow-x-auto px-9 py-1" role="tablist" aria-label="Property categories">
             {PROPERTY_CATEGORIES.map((category) => {
               const active = selectedPropertyType === category.value;
@@ -248,9 +269,11 @@ export default function HomePage() {
               );
             })}
             </div>
-            <button type="button" onClick={() => scrollCategories("right")} className="category-carousel-arrow right-0" aria-label="Scroll categories right">
-              <ChevronRight className="h-4 w-4" />
-            </button>
+            {categoryScrollState.canScrollRight && (
+              <button type="button" onClick={() => scrollCategories("right")} className="category-carousel-arrow right-0" aria-label="Scroll categories right">
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </div>
         <div className="flex items-center justify-between">
