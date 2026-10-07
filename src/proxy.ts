@@ -17,7 +17,7 @@ const distributedLimiter =
       })
     : null;
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/api/")) {
     const key = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
     if (distributedLimiter) {
