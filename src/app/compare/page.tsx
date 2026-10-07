@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { ArrowLeft, Check, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { PUBLIC_PROPERTY_COLUMNS } from "@/lib/supabase/public-columns";
+import {
+  PUBLIC_PROPERTY_COLUMNS,
+  PUBLIC_PROPERTY_COLUMNS_BEFORE_WIFI,
+  PUBLIC_PROPERTY_COLUMNS_LEGACY,
+} from "@/lib/supabase/public-columns";
 import type { Property } from "@/types/property";
 
 interface ComparePageProps {
@@ -21,17 +25,27 @@ function display(value: unknown) {
 
 export default async function ComparePage({ searchParams }: ComparePageProps) {
   const params = await searchParams;
-  const ids = (params.ids || "").split(",").map(Number).filter((id) => Number.isInteger(id)).slice(0, 3);
+  const ids = [...new Set((params.ids || "").split(",").map(Number).filter((id) => Number.isInteger(id) && id > 0))].slice(0, 3);
   const supabase = await createClient();
-  const { data, error } = ids.length
-    ? await supabase.from("properties").select(PUBLIC_PROPERTY_COLUMNS).in("id", ids)
-    : { data: [], error: null };
-
-  if (error) {
-    console.error("Error loading properties for comparison:", error.message);
+  async function loadProperties(columns: string) {
+    if (!ids.length) return { data: [] as unknown[] | null, error: null };
+    const response = await supabase.from("properties").select(columns).in("id", ids);
+    return { data: response.data as unknown[] | null, error: response.error };
   }
 
-  const properties = ((data || []) as Property[]).sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+  let result = await loadProperties(PUBLIC_PROPERTY_COLUMNS);
+
+  if (result.error?.message.includes("column") && result.error.message.includes("does not exist")) {
+    result = await loadProperties(PUBLIC_PROPERTY_COLUMNS_BEFORE_WIFI);
+  }
+  if (result.error?.message.includes("column") && result.error.message.includes("does not exist")) {
+    result = await loadProperties(PUBLIC_PROPERTY_COLUMNS_LEGACY);
+  }
+  if (result.error) {
+    console.error("Error loading properties for comparison:", result.error.message);
+  }
+
+  const properties = ((result.data || []) as Property[]).sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
   const rows: Array<{ label: string; values: (string | number)[] }> = [
     { label: "Price", values: properties.map((property) => `${display(property.price)} BWP${property.price_unit === "month" ? " / month" : ""}`) },
     { label: "Location", values: properties.map((property) => display(property.location || property.city)) },

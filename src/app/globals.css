@@ -188,6 +188,98 @@ html[data-theme="light"] option {
   color: #102033;
 }
 
+.ai-assistant {
+  background: rgb(7 11 21 / 0.98);
+  border: 1px solid rgb(34 211 238 / 0.35);
+  color: #f8fafc;
+}
+
+.ai-assistant-header,
+.ai-assistant-form {
+  border-color: rgb(148 163 184 / 0.22);
+}
+
+.ai-assistant-header {
+  border-bottom: 1px solid rgb(148 163 184 / 0.22);
+}
+
+.ai-assistant-form {
+  border-top: 1px solid rgb(148 163 184 / 0.22);
+}
+
+.ai-assistant-icon-button {
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  color: #94a3b8;
+}
+
+.ai-assistant-icon-button:hover {
+  background: rgb(148 163 184 / 0.14);
+  color: #f8fafc;
+}
+
+.ai-assistant-bot {
+  background: #172033;
+  color: #f1f5f9;
+}
+
+.ai-assistant-user {
+  background: #22d3ee;
+  color: #082f49;
+}
+
+.ai-assistant-input {
+  border: 1px solid #475569;
+  background: #172033;
+  color: #f8fafc;
+}
+
+.ai-assistant-input::placeholder,
+.ai-assistant-muted {
+  color: #94a3b8;
+}
+
+html[data-theme="light"] .ai-assistant {
+  background: rgb(255 255 255 / 0.98);
+  border-color: #9bc4d3;
+  color: #102033;
+}
+
+html[data-theme="light"] .ai-assistant-header,
+html[data-theme="light"] .ai-assistant-form {
+  border-color: #d7e2eb;
+}
+
+html[data-theme="light"] .ai-assistant-icon-button {
+  color: #526477;
+}
+
+html[data-theme="light"] .ai-assistant-icon-button:hover {
+  background: #eef4f8;
+  color: #102033;
+}
+
+html[data-theme="light"] .ai-assistant-bot {
+  background: #eef4f8;
+  color: #102033;
+}
+
+html[data-theme="light"] .ai-assistant-user {
+  background: #0891b2;
+  color: #ffffff;
+}
+
+html[data-theme="light"] .ai-assistant-input {
+  border-color: #9ab4c2;
+  background: #f4f8fb;
+  color: #102033;
+}
+
+html[data-theme="light"] .ai-assistant-input::placeholder,
+html[data-theme="light"] .ai-assistant-muted {
+  color: #526477;
+}
+
 .glass {
   background: rgba(15, 23, 42, 0.55);
   backdrop-filter: blur(14px);
