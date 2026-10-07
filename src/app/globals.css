@@ -456,6 +456,12 @@ html[data-theme="light"] .compare-summary-present {
 .compare-table td {
   overflow-wrap: anywhere;
   vertical-align: top;
+  border-bottom: 1px solid rgb(148 163 184 / 0.22);
+}
+
+.compare-table tbody tr:last-child th,
+.compare-table tbody tr:last-child td {
+  border-bottom: 0;
 }
 
 .compare-tray {
@@ -480,6 +486,11 @@ html[data-theme="light"] .compare-tray-clear {
 html[data-theme="light"] .compare-tray-clear:hover {
   background: #eef4f8;
   color: #102033 !important;
+}
+
+html[data-theme="light"] .compare-table th,
+html[data-theme="light"] .compare-table td {
+  border-bottom-color: #d7e2eb;
 }
 
 @media (max-width: 640px) {
