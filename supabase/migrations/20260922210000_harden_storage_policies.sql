@@ -4,6 +4,7 @@
 -- the storage owner role and is not needed when creating these policies.
 
 drop policy if exists "Public property submission uploads" on storage.objects;
+drop policy if exists "Authenticated users can upload property submissions" on storage.objects;
 create policy "Authenticated users can upload property submissions"
   on storage.objects for insert
   to authenticated
@@ -13,12 +14,14 @@ create policy "Authenticated users can upload property submissions"
   );
 
 drop policy if exists "Public property submission files" on storage.objects;
+drop policy if exists "Property submission files remain readable" on storage.objects;
 create policy "Property submission files remain readable"
   on storage.objects for select
   to anon, authenticated
   using (bucket_id = 'property-submissions');
 
 drop policy if exists "Authenticated users can upload rental photos" on storage.objects;
+drop policy if exists "Users can upload rental photos to their own folder" on storage.objects;
 create policy "Users can upload rental photos to their own folder"
   on storage.objects for insert
   to authenticated
@@ -29,6 +32,7 @@ create policy "Users can upload rental photos to their own folder"
   );
 
 drop policy if exists "Users can delete their rental photos" on storage.objects;
+drop policy if exists "Users can delete their own rental photos" on storage.objects;
 create policy "Users can delete their own rental photos"
   on storage.objects for delete
   to authenticated

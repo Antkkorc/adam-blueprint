@@ -78,7 +78,7 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
   ];
 
   return (
-    <main className="min-h-screen bg-slate-950 px-4 py-8 text-white md:px-10">
+    <main className="compare-page min-h-screen bg-slate-950 px-4 py-8 text-white md:px-10">
       <div className="mx-auto max-w-6xl space-y-6">
         <Link href="/buy" className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-cyan-300">
           <ArrowLeft className="h-4 w-4" /> Back to properties
@@ -94,7 +94,7 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
             <Link href="/buy" className="mt-4 inline-block rounded-xl bg-cyan-400 px-4 py-2 text-sm font-bold text-slate-950">Choose properties</Link>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900">
+          <div className="compare-table-wrap overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900">
             <table className="w-full min-w-[680px] border-collapse text-left text-sm">
               <thead>
                 <tr className="border-b border-slate-800">
@@ -115,7 +115,7 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
                     <tr key={row.label} className={`border-b border-slate-800/70 ${differs ? "bg-cyan-400/[0.04]" : ""}`}>
                       <th className="p-4 align-top text-xs font-bold text-slate-400">{row.label}</th>
                       {row.values.map((value, index) => (
-                        <td key={`${row.label}-${properties[index].id}`} className={`p-4 align-top ${differs ? "text-cyan-100" : "text-slate-300"}`}>
+                        <td key={`${row.label}-${properties[index].id}`} className={`compare-value p-4 align-top ${differs ? "compare-value-different" : ""}`}>
                           {value === "Not specified" || value === "None listed" ? <span className="inline-flex items-center gap-1 text-slate-500"><X className="h-3.5 w-3.5" />{value}</span> : <span className="inline-flex items-center gap-1"><Check className="h-3.5 w-3.5 text-emerald-400" />{value}</span>}
                         </td>
                       ))}
@@ -135,7 +135,7 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
                               ) : (
                                 <X className="h-3.5 w-3.5 shrink-0 text-slate-500" />
                               )}
-                              <span className={amenitySets[index].has(feature) ? "text-cyan-100" : "text-slate-500"}>
+                              <span className={`compare-feature-label ${amenitySets[index].has(feature) ? "compare-feature-present" : "compare-feature-missing"}`}>
                                 {formatFeature(feature)}
                               </span>
                             </div>
@@ -150,7 +150,7 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
           </div>
         )}
         {properties.length >= 2 && allFeatures.length > 0 && (
-          <section className="rounded-2xl border border-slate-800 bg-slate-900 p-5 md:p-6">
+          <section className="compare-summary rounded-2xl border border-slate-800 bg-slate-900 p-5 md:p-6">
             <h2 className="text-lg font-bold">Feature summary</h2>
             <p className="mt-1 text-xs text-slate-400">
               This summary is based on features listed in each property advert. “Not listed” means the advert did not mention it.
@@ -168,14 +168,14 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
                   .map((feature) => formatFeature(feature));
 
                 return (
-                  <div key={`summary-${property.id}`} className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
-                    <h3 className="font-bold text-white">{property.title}</h3>
+                  <div key={`summary-${property.id}`} className="compare-summary-card rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+                    <h3 className="compare-summary-title font-bold">{property.title}</h3>
                     <div className="mt-3 space-y-2 text-sm">
-                      <p className="flex items-start gap-2 text-emerald-300">
+                      <p className="compare-summary-present flex items-start gap-2">
                         <Check className="mt-0.5 h-4 w-4 shrink-0" />
                         <span><strong>{property.title} has:</strong> {hasFeatures.length > 0 ? hasFeatures.join(", ") : "No features listed"}</span>
                       </p>
-                      <p className="flex items-start gap-2 text-slate-400">
+                      <p className="compare-summary-missing flex items-start gap-2">
                         <X className="mt-0.5 h-4 w-4 shrink-0" />
                         <span><strong>{property.title} does not have listed:</strong> {missingFeatures.length > 0 ? missingFeatures.join(", ") : "No features unique to the other selected properties"}</span>
                       </p>
