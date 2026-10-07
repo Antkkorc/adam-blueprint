@@ -32,6 +32,8 @@ function toStringArray(value: unknown): string[] {
 
 export default function PropertyCard({ property, initialSaved = false }: Props) {
   const { isSelected, toggle, selectedIds } = useCompare();
+  const compareSelection = { kind: "property" as const, id: String(property.id) };
+  const selected = isSelected(compareSelection);
   const images = toStringArray(property.images);
   const amenities = toStringArray(property.amenities);
 
@@ -154,13 +156,13 @@ export default function PropertyCard({ property, initialSaved = false }: Props) 
         <div className="flex items-center gap-2 pt-1">
           <button
             type="button"
-            onClick={() => toggle(property)}
-            disabled={!isSelected(property.id) && selectedIds.length >= 3}
-            className={`inline-flex items-center justify-center gap-1 rounded-xl border px-3 py-2 text-[11px] font-bold transition-colors ${isSelected(property.id) ? "border-cyan-400 bg-cyan-400/15 text-cyan-300" : "border-slate-800 bg-slate-950 text-slate-300 hover:border-cyan-400 hover:text-cyan-300"} disabled:cursor-not-allowed disabled:opacity-50`}
-            title={selectedIds.length >= 3 && !isSelected(property.id) ? "Compare up to three properties" : undefined}
+            onClick={() => toggle(compareSelection)}
+            disabled={!selected && selectedIds.length >= 3}
+            className={`inline-flex items-center justify-center gap-1 rounded-xl border px-3 py-2 text-[11px] font-bold transition-colors ${selected ? "border-cyan-400 bg-cyan-400/15 text-cyan-300" : "border-slate-800 bg-slate-950 text-slate-300 hover:border-cyan-400 hover:text-cyan-300"} disabled:cursor-not-allowed disabled:opacity-50`}
+            title={selectedIds.length >= 3 && !selected ? "Compare up to three properties" : undefined}
           >
             <GitCompare className="h-3.5 w-3.5" />
-            {isSelected(property.id) ? "Selected" : "Compare"}
+            {selected ? "Selected" : "Compare"}
           </button>
           <a
             href={`https://wa.me/${whatsappPhone}?text=${whatsappMessage}`}
