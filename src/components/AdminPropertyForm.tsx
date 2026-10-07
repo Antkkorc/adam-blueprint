@@ -66,7 +66,7 @@ export default function AdminPropertyForm() {
   const [longitude, setLongitude] = useState("");
   const [agentName, setAgentName] = useState(BRAND.owner);
   const [agentPhone, setAgentPhone] = useState(BRAND.phone);
-  const [featured, setFeatured] = useState(false);
+  const [promotionTier, setPromotionTier] = useState<"standard" | "featured" | "premium">("standard");
   const [verified, setVerified] = useState(true); // FIXED TYPO HERE
   const [titleDeed, setTitleDeed] = useState(false);
   const [amenities, setAmenities] = useState<string[]>([]);
@@ -225,7 +225,7 @@ export default function AdminPropertyForm() {
         year_built: yearBuilt ? Number(yearBuilt) : null,
         latitude: latitude ? Number(latitude) : null,
         longitude: longitude ? Number(longitude) : null,
-        featured, verified, title_deed: titleDeed,
+        featured: promotionTier !== "standard", promotion_tier: promotionTier, verified, title_deed: titleDeed,
         amenities, images: imageUrls, image_labels: imageLabels, sketch_plan: sketchUrls,
         status: "Available",
         agent: agentName || BRAND.owner,
@@ -350,8 +350,15 @@ export default function AdminPropertyForm() {
       <textarea placeholder="INSIDE features" rows={3} className={inputClass} value={insideFeatures} onChange={(e) => setInsideFeatures(e.target.value)} />
       <textarea placeholder="OUTSIDE features" rows={3} className={inputClass} value={outsideFeatures} onChange={(e) => setOutsideFeatures(e.target.value)} />
       <div className="flex flex-wrap gap-2">{AMENITY_OPTIONS.map((amenity) => <button key={amenity} type="button" onClick={() => toggleAmenity(amenity)} className={`text-xs px-3 py-2 rounded-xl border ${amenities.includes(amenity) ? "bg-cyan-500/20 border-cyan-400 text-cyan-300" : "bg-slate-950 border-slate-800 text-slate-400"}`}>{amenity}</button>)}</div>
-      <div className="flex flex-wrap gap-4 text-sm">
-        <label className="flex items-center gap-2"><input type="checkbox" checked={featured} onChange={(e) => setFeatured(e.target.checked)} /> Featured</label>
+      <div className="flex flex-wrap items-center gap-4 text-sm">
+        <label className="flex items-center gap-2 text-slate-300">
+          Listing visibility
+          <select value={promotionTier} onChange={(e) => setPromotionTier(e.target.value as "standard" | "featured" | "premium")} className="bg-slate-800 rounded-lg px-2 py-1.5 text-white">
+            <option value="standard">Standard</option>
+            <option value="featured">Featured</option>
+            <option value="premium">Premium</option>
+          </select>
+        </label>
         <label className="flex items-center gap-2"><input type="checkbox" checked={verified} onChange={(e) => setVerified(e.target.checked)} /> Verified</label>
         <label className="flex items-center gap-2"><input type="checkbox" checked={titleDeed} onChange={(e) => setTitleDeed(e.target.checked)} /> Title Deed</label>
       </div>

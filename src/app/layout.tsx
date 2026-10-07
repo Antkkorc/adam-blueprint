@@ -4,6 +4,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { AuthProvider } from "@/context/AuthContext";
+import { CompareProvider } from "@/context/CompareContext";
+import CompareTray from "@/components/CompareTray";
+import AiAssistant from "@/components/AiAssistant";
 import ScrollToTop from "@/components/ScrollToTop";
 import "./globals.css";
 
@@ -33,12 +36,16 @@ export default function RootLayout({
       <body className="bg-[#070b15] text-white antialiased" suppressHydrationWarning>
         <ThemeProvider>
           <AuthProvider>
-            <Suspense fallback={null}>
-              <ScrollToTop />
-            </Suspense>
-            <Header />
-            <div className="min-h-screen">{children}</div>
-            <Footer />
+            <CompareProvider>
+              <Suspense fallback={null}>
+                <ScrollToTop />
+              </Suspense>
+              <Header />
+              <div className="min-h-screen">{children}</div>
+              <Footer />
+              <CompareTray />
+              <AiAssistant />
+            </CompareProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

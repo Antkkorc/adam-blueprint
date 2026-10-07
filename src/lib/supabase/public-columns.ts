@@ -1,9 +1,9 @@
 // Keep public reads explicit so new private columns are not exposed accidentally.
 export const PUBLIC_PROPERTY_COLUMNS =
-  "id,created_at,title,description,overview,type,category,intent,status,verified,featured,price,price_unit,location,city,suburb,plot_number,tenure,title_deed,beds,baths,parking,plot_size,building_sqm,land_sqm,year_built,images,image_labels,sketch_plan,latitude,longitude,inside_features,outside_features,agent,agent_phone,amenities,wifi_type,house_plan_url" as const;
+  "id,created_at,title,description,overview,type,category,intent,status,verified,featured,promotion_tier,price,price_unit,location,city,suburb,plot_number,tenure,title_deed,beds,baths,parking,plot_size,building_sqm,land_sqm,year_built,images,image_labels,sketch_plan,latitude,longitude,inside_features,outside_features,agent,agent_phone,amenities,wifi_type,house_plan_url" as const;
 
 export const PUBLIC_PROPERTY_COLUMNS_BEFORE_WIFI =
-  "id,created_at,title,description,overview,type,category,intent,status,verified,featured,price,price_unit,location,city,suburb,plot_number,tenure,title_deed,beds,baths,parking,plot_size,building_sqm,land_sqm,year_built,images,image_labels,sketch_plan,latitude,longitude,inside_features,outside_features,agent,agent_phone,amenities,house_plan_url" as const;
+  "id,created_at,title,description,overview,type,category,intent,status,verified,featured,promotion_tier,price,price_unit,location,city,suburb,plot_number,tenure,title_deed,beds,baths,parking,plot_size,building_sqm,land_sqm,year_built,images,image_labels,sketch_plan,latitude,longitude,inside_features,outside_features,agent,agent_phone,amenities,house_plan_url" as const;
 
 export const PUBLIC_PROPERTY_COLUMNS_LEGACY =
   "id,created_at,title,description,overview,type,category,intent,status,verified,featured,price,price_unit,location,city,suburb,plot_number,tenure,title_deed,beds,baths,parking,plot_size,building_sqm,land_sqm,year_built,images,image_labels,sketch_plan,latitude,longitude,inside_features,outside_features,agent,agent_phone,amenities" as const;

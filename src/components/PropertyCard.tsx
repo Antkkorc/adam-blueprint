@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { MapPin, Bed, Bath, Car, MessageCircle, Ruler } from "lucide-react";
+import { MapPin, Bed, Bath, Car, MessageCircle, Ruler, GitCompare } from "lucide-react";
 import { BRAND } from "@/lib/brand";
 import SavePropertyButton from "@/components/SavePropertyButton";
 import type { Property } from "@/types/property";
+import { useCompare } from "@/context/CompareContext";
 
 interface Props {
   property: Property;
@@ -30,6 +31,7 @@ function toStringArray(value: unknown): string[] {
 }
 
 export default function PropertyCard({ property, initialSaved = false }: Props) {
+  const { isSelected, toggle, selectedIds } = useCompare();
   const images = toStringArray(property.images);
   const amenities = toStringArray(property.amenities);
 
@@ -70,9 +72,9 @@ export default function PropertyCard({ property, initialSaved = false }: Props) 
 
         <SavePropertyButton propertyId={property.id} initialSaved={initialSaved} />
 
-        {property.featured && (
-          <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-cyan-400 text-slate-950 text-[10px] font-extrabold uppercase">
-            Featured
+        {(property.promotion_tier && property.promotion_tier !== "standard" || property.featured) && (
+          <div className={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-slate-950 text-[10px] font-extrabold uppercase ${property.promotion_tier === "premium" ? "bg-amber-300" : "bg-cyan-400"}`}>
+            {property.promotion_tier === "premium" ? "Premium" : "Featured"}
           </div>
         )}
       </div>
@@ -150,6 +152,16 @@ export default function PropertyCard({ property, initialSaved = false }: Props) 
         )}
 
         <div className="flex items-center gap-2 pt-1">
+          <button
+            type="button"
+            onClick={() => toggle(property)}
+            disabled={!isSelected(property.id) && selectedIds.length >= 3}
+            className={`inline-flex items-center justify-center gap-1 rounded-xl border px-3 py-2 text-[11px] font-bold transition-colors ${isSelected(property.id) ? "border-cyan-400 bg-cyan-400/15 text-cyan-300" : "border-slate-800 bg-slate-950 text-slate-300 hover:border-cyan-400 hover:text-cyan-300"} disabled:cursor-not-allowed disabled:opacity-50`}
+            title={selectedIds.length >= 3 && !isSelected(property.id) ? "Compare up to three properties" : undefined}
+          >
+            <GitCompare className="h-3.5 w-3.5" />
+            {isSelected(property.id) ? "Selected" : "Compare"}
+          </button>
           <a
             href={`https://wa.me/${whatsappPhone}?text=${whatsappMessage}`}
             target="_blank"

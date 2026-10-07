@@ -48,10 +48,7 @@ export default async function BuyPage({ searchParams }: BuyPageProps) {
   const supabase = await createClient();
 
   async function loadProperties(
-    columns:
-      | typeof PUBLIC_PROPERTY_COLUMNS
-      | typeof PUBLIC_PROPERTY_COLUMNS_BEFORE_WIFI
-      | typeof PUBLIC_PROPERTY_COLUMNS_LEGACY,
+    columns: string,
     includeWifi: boolean
   ) {
     let query = supabase.from("properties").select(columns);
