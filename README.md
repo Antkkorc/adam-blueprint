@@ -22,13 +22,19 @@ ADMIN_EMAIL=...
 SUPABASE_SERVICE_ROLE_KEY=...
 UPSTASH_REDIS_REST_URL=...
 UPSTASH_REDIS_REST_TOKEN=...
+GEMINI_API_KEY=...
 ```
 
-`ADMIN_EMAIL` is required for admin routes to work. Admin access fails closed if it is missing or does not match the authenticated user's email.
-Alternatively, set `ADMIN_USER_ID` to the authenticated Supabase user's UUID. Find it in Supabase under Authentication > Users. Do not use the secret API key in this file or in browser code.
-`SUPABASE_SERVICE_ROLE_KEY` is required for the server-only rental review workflow. It bypasses RLS only after `requireAdmin()` has authenticated the administrator and must never be exposed to the browser.
+**Supabase keys**
+- `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Required for all Supabase client and server operations.
+- `SUPABASE_SERVICE_ROLE_KEY`: Required for the server-only rental review workflow. It bypasses RLS only after `requireAdmin()` has authenticated the administrator and must never be exposed to the browser.
 
-`UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` enable the shared production API rate limiter. Add both to Vercel's Production environment so limits are shared across serverless instances. If they are unavailable, the middleware uses a per-instance fallback limiter and logs the degraded protection state.
+**Admin access**
+- `ADMIN_EMAIL`: Required for admin routes to work. Admin access fails closed if it is missing or does not match the authenticated user's email. Alternatively, set `ADMIN_USER_ID` to the authenticated Supabase user's UUID. Find it in Supabase under Authentication > Users.
+
+**Production features**
+- `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`: Enable the shared production API rate limiter. Add both to Vercel's Production environment so limits are shared across serverless instances. If they are unavailable, the middleware uses a per-instance fallback limiter and logs the degraded protection state.
+- `GEMINI_API_KEY`: Enables the AI assistant floating widget. It is a server-only variable that the `/api/ai/chat` route uses to communicate with Google's Gemini 2.5 Flash model. Never expose this key in browser code or client bundles. Obtain a free key from [Google AI Studio](https://aistudio.google.com). If it is not set, the assistant widget displays a "not configured" message.
 
 ## Supabase requirements
 
@@ -70,5 +76,36 @@ npm run build
 - `/sell` - valuation and listing enquiry
 - `/contact` - general contact form
 - `/saved` - authenticated saved properties
+- `/compare` - side-by-side property comparison (select up to 3 properties from any listing page)
 - `/admin` - admin-only property management
 - `/admin/listings` - admin-only listing status and deletion management
+
+## Key features
+
+**Listing visibility tiers**
+When publishing a property, administrators can assign a **promotion tier**: Standard, Featured, or Premium.
+- **Standard**: Regular visibility
+- **Featured**: Cyan badge on property cards, higher ranking in search
+- **Premium**: Amber badge on property cards, highest search ranking and homepage prominence
+
+Tiers are stored in the `promotion_tier` column and map to the existing `featured` boolean for backward compatibility.
+
+**Property comparison**
+Users can select up to 3 properties from the homepage, `/buy`, or saved listings using the blue "Compare" button on each card. A floating tray appears at the bottom showing the count and a "Compare" link.
+
+The `/compare` page displays a side-by-side table of core attributes:
+- Price, location, type, bedrooms, bathrooms, parking
+- Building and land sizes, tenure, WiFi connectivity, amenities
+- Rows with differing values are highlighted in cyan to help users spot key differences
+- Missing or unspecified attributes show a red X for clarity
+
+**AI assistant (floating widget)**
+A cyan bot icon appears in the bottom-right corner of every page. Click it to open an interactive chat window with fullscreen toggle.
+The assistant:
+- Helps users understand the Botswana real-estate market
+- Offers guidance on comparing homes and finding property
+- Operates over up to 8 prior messages for conversational context
+- Validates input to prevent abuse (max 1200 chars per message)
+- Returns a clear error if `GEMINI_API_KEY` is not configured
+
+The server-only `/api/ai/chat` route ensures the API key never appears in client bundles or logs.
