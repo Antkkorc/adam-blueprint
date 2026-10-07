@@ -188,6 +188,96 @@ html[data-theme="light"] option {
   color: #102033;
 }
 
+.category-carousel {
+  position: relative;
+  isolation: isolate;
+}
+
+.category-carousel-track {
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+  overscroll-behavior-inline: contain;
+  mask-image: linear-gradient(to right, transparent 0, black 2.5rem, black calc(100% - 2.5rem), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0, black 2.5rem, black calc(100% - 2.5rem), transparent 100%);
+}
+
+.category-carousel-track::-webkit-scrollbar {
+  display: none;
+}
+
+.category-carousel-chip {
+  border-color: #334155;
+  background: rgb(15 23 42 / 0.88);
+  color: #cbd5e1;
+}
+
+.category-carousel-chip:hover {
+  border-color: #22d3ee;
+  color: #67e8f9;
+}
+
+.category-carousel-chip-active {
+  border-color: #22d3ee;
+  background: #22d3ee;
+  color: #082f49;
+  box-shadow: 0 0 18px rgb(34 211 238 / 0.24);
+}
+
+.category-carousel-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: flex;
+  height: 2rem;
+  width: 2rem;
+  transform: translateY(-50%);
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #334155;
+  border-radius: 9999px;
+  background: rgb(7 11 21 / 0.94);
+  color: #cbd5e1;
+  box-shadow: 0 4px 14px rgb(2 6 23 / 0.28);
+  transition: border-color 150ms ease, color 150ms ease, background-color 150ms ease;
+}
+
+.category-carousel-arrow:hover {
+  border-color: #22d3ee;
+  background: #0e7490;
+  color: white;
+}
+
+html[data-theme="light"] .category-carousel-chip {
+  border-color: #b8ccd9;
+  background: #e7f0f5;
+  color: #29445b;
+}
+
+html[data-theme="light"] .category-carousel-chip:hover {
+  border-color: #0891b2;
+  background: #d8f3f8;
+  color: #075985;
+}
+
+html[data-theme="light"] .category-carousel-chip-active {
+  border-color: #0891b2;
+  background: #06b6d4;
+  color: #083344;
+}
+
+html[data-theme="light"] .category-carousel-arrow {
+  border-color: #b8ccd9;
+  background: rgb(255 255 255 / 0.96);
+  color: #29445b;
+  box-shadow: 0 4px 14px rgb(30 64 85 / 0.16);
+}
+
+html[data-theme="light"] .category-carousel-arrow:hover {
+  border-color: #0891b2;
+  background: #d8f3f8;
+  color: #075985;
+}
+
 .ai-assistant {
   background: rgb(7 11 21 / 0.98);
   border: 1px solid rgb(34 211 238 / 0.35);

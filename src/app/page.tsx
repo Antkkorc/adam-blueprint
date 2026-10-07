@@ -7,7 +7,7 @@ import { supabase } from "@/lib/supabase/client";
 import PropertyCard from "@/components/PropertyCard";
 import TenantRentalCard, { type TenantRental } from "@/components/TenantRentalCard";
 import LocationPicker from "@/components/LocationPicker";
-import { Search, ShieldCheck, Award, MessageSquare } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, ShieldCheck, Award, MessageSquare } from "lucide-react";
 import type { Property } from "@/types/property";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -16,12 +16,27 @@ import {
   PUBLIC_PROPERTY_COLUMNS_LEGACY,
 } from "@/lib/supabase/public-columns";
 
+const PROPERTY_CATEGORIES = [
+  { label: "All listings", value: "All Types" },
+  { label: "Houses", value: "House" },
+  { label: "Apartments", value: "Apartment" },
+  { label: "Townhouses", value: "Townhouse" },
+  { label: "Farms", value: "Farm" },
+  { label: "Agricultural land", value: "Agricultural Land" },
+  { label: "Residential plots", value: "Residential Plot" },
+  { label: "Land & plots", value: "Land" },
+  { label: "Commercial property", value: "Commercial" },
+  { label: "Offices", value: "Office" },
+  { label: "Warehouses", value: "Warehouse" },
+] as const;
+
 export default function HomePage() {
   const router = useRouter();
   const [properties, setProperties] = useState<Property[]>([]);
   const [rentals, setRentals] = useState<TenantRental[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPropertyType, setSelectedPropertyType] = useState("All Types");
+  const [categoryTrack, setCategoryTrack] = useState<HTMLDivElement | null>(null);
   const [location, setLocation] = useState("");
   const [activeTab, setActiveTab] = useState<"buy" | "rent" | "sell" | "students">("buy");
   const { user, loading: authLoading } = useAuth();
@@ -139,6 +154,10 @@ export default function HomePage() {
     router.push(`/${activeTab}${q}`);
   };
 
+  const scrollCategories = (direction: "left" | "right") => {
+    categoryTrack?.scrollBy({ left: direction === "left" ? -260 : 260, behavior: "smooth" });
+  };
+
   return (
     <main className="min-h-screen bg-[#070b15] text-white">
       {/* Hero Section */}
@@ -204,20 +223,12 @@ export default function HomePage() {
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-400">Browse by category</p>
             <p className="mt-1 text-sm text-slate-400">Find homes, land, farms, and commercial property in one place.</p>
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-2" role="tablist" aria-label="Property categories">
-            {[
-              { label: "All listings", value: "All Types" },
-              { label: "Houses", value: "House" },
-              { label: "Apartments", value: "Apartment" },
-              { label: "Townhouses", value: "Townhouse" },
-              { label: "Farms", value: "Farm" },
-              { label: "Agricultural land", value: "Agricultural Land" },
-              { label: "Residential plots", value: "Residential Plot" },
-              { label: "Land & plots", value: "Land" },
-              { label: "Commercial property", value: "Commercial" },
-              { label: "Offices", value: "Office" },
-              { label: "Warehouses", value: "Warehouse" },
-            ].map((category) => {
+          <div className="category-carousel" role="group" aria-label="Property categories">
+            <button type="button" onClick={() => scrollCategories("left")} className="category-carousel-arrow left-0" aria-label="Scroll categories left">
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <div ref={setCategoryTrack} className="category-carousel-track flex gap-2 overflow-x-auto px-9 py-1" role="tablist" aria-label="Property categories">
+            {PROPERTY_CATEGORIES.map((category) => {
               const active = selectedPropertyType === category.value;
               return (
                 <button
@@ -226,16 +237,20 @@ export default function HomePage() {
                   role="tab"
                   aria-selected={active}
                   onClick={() => setSelectedPropertyType(category.value)}
-                  className={`shrink-0 rounded-full border px-4 py-2 text-xs font-bold transition-colors ${
+                  className={`category-carousel-chip shrink-0 rounded-full border px-4 py-2 text-xs font-bold transition-colors ${
                     active
-                      ? "border-cyan-400 bg-cyan-400 text-slate-950"
-                      : "border-slate-700 bg-slate-900/80 text-slate-300 hover:border-cyan-400/60 hover:text-cyan-300"
+                      ? "category-carousel-chip-active"
+                      : ""
                   }`}
                 >
                   {category.label}
                 </button>
               );
             })}
+            </div>
+            <button type="button" onClick={() => scrollCategories("right")} className="category-carousel-arrow right-0" aria-label="Scroll categories right">
+              <ChevronRight className="h-4 w-4" />
+            </button>
           </div>
         </div>
         <div className="flex items-center justify-between">
