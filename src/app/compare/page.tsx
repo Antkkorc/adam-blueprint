@@ -160,8 +160,8 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
             <Link href="/buy" className="mt-4 inline-block rounded-xl bg-cyan-400 px-4 py-2 text-sm font-bold text-slate-950">Choose properties</Link>
           </div>
         ) : (
-          <div className="compare-table-wrap overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900">
-            <table className="w-full min-w-[680px] border-collapse text-left text-sm">
+          <div className="compare-table-wrap rounded-2xl border border-slate-800 bg-slate-900">
+            <table className="compare-table w-full table-fixed border-collapse text-left text-sm">
               <thead>
                 <tr className="border-b border-slate-800">
                   <th className="w-40 p-4 text-xs uppercase tracking-wider text-slate-500">Feature</th>
