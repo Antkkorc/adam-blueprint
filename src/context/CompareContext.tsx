@@ -3,10 +3,15 @@
 import { createContext, useContext, useSyncExternalStore } from "react";
 import type { Property } from "@/types/property";
 
+export type CompareSelection = {
+  kind: "property" | "rental";
+  id: string;
+};
+
 interface CompareContextValue {
-  selectedIds: number[];
-  isSelected: (id: number) => boolean;
-  toggle: (property: Property) => void;
+  selectedIds: CompareSelection[];
+  isSelected: (selection: CompareSelection) => boolean;
+  toggle: (selection: CompareSelection | Property) => void;
   clear: () => void;
 }
 
@@ -22,20 +27,23 @@ export function CompareProvider({ children }: { children: React.ReactNode }) {
     () => [],
   );
 
-  const updateIds = (ids: number[]) => {
+  const updateIds = (ids: CompareSelection[]) => {
     window.localStorage.setItem("adam-blueprint-compare", JSON.stringify(ids));
     window.dispatchEvent(new Event("adam-blueprint-compare-change"));
   };
 
   const value: CompareContextValue = {
     selectedIds,
-    isSelected: (id) => selectedIds.includes(id),
-    toggle: (property: Property) => {
+    isSelected: (selection) => selectedIds.some((item) => item.kind === selection.kind && item.id === selection.id),
+    toggle: (selection) => {
+      const comparable: CompareSelection = "kind" in selection
+        ? selection
+        : { kind: "property", id: String(selection.id) };
       const current = readIds();
-      if (current.includes(property.id)) {
-        updateIds(current.filter((id) => id !== property.id));
+      if (current.some((item) => item.kind === comparable.kind && item.id === comparable.id)) {
+        updateIds(current.filter((item) => item.kind !== comparable.kind || item.id !== comparable.id));
       } else if (current.length < 3) {
-        updateIds([...current, property.id]);
+        updateIds([...current, comparable]);
       }
     },
     clear: () => updateIds([]),
@@ -44,7 +52,7 @@ export function CompareProvider({ children }: { children: React.ReactNode }) {
   return <CompareContext.Provider value={value}>{children}</CompareContext.Provider>;
 }
 
-function readIds(): number[] {
+function readIds(): CompareSelection[] {
   if (typeof window === "undefined") return [];
   const raw = window.localStorage.getItem("adam-blueprint-compare") || "[]";
   if (raw === cachedRaw) return cachedIds;
@@ -52,7 +60,16 @@ function readIds(): number[] {
     const parsed = JSON.parse(raw) as unknown;
     cachedRaw = raw;
     cachedIds = Array.isArray(parsed)
-      ? [...new Set(parsed.filter((id): id is number => Number.isInteger(id) && id > 0))].slice(0, 3)
+      ? parsed.map((item): CompareSelection | null => {
+        if (typeof item === "number" && Number.isInteger(item) && item > 0) {
+          return { kind: "property", id: String(item) };
+        }
+        if (!item || typeof item !== "object" || !("kind" in item) || !("id" in item)) return null;
+        const kind = item.kind === "property" || item.kind === "rental" ? item.kind : null;
+        return kind && typeof item.id === "string" && item.id ? { kind, id: item.id } : null;
+      }).filter((item): item is CompareSelection => item !== null)
+        .filter((item, index, all) => all.findIndex((candidate) => candidate.kind === item.kind && candidate.id === item.id) === index)
+        .slice(0, 3)
       : [];
     return cachedIds;
   } catch {
@@ -63,7 +80,7 @@ function readIds(): number[] {
 }
 
 let cachedRaw = "";
-let cachedIds: number[] = [];
+let cachedIds: CompareSelection[] = [];
 
 export function useCompare() {
   const context = useContext(CompareContext);

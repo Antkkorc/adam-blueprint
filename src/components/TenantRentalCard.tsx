@@ -1,8 +1,9 @@
 "use client";
 
-import { Eye, MapPin, MessageCircle } from "lucide-react";
+import { Eye, GitCompare, MapPin, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useCompare } from "@/context/CompareContext";
 
 export interface TenantRental {
   id: string;
@@ -29,6 +30,9 @@ export default function TenantRentalCard({
   rental: TenantRental;
   isStudentHousing?: boolean;
 }) {
+  const { isSelected, toggle, selectedIds } = useCompare();
+  const compareSelection = { kind: "rental" as const, id: String(rental.id) };
+  const selected = isSelected(compareSelection);
   const studentListing = isStudentHousing || rental.student_friendly === true;
   const image =
     rental.images?.[0] ||
@@ -99,6 +103,17 @@ export default function TenantRentalCard({
           <Eye className="h-3.5 w-3.5" />
           Details
         </Link>
+
+        <button
+          type="button"
+          onClick={() => toggle(compareSelection)}
+          disabled={!selected && selectedIds.length >= 3}
+          className={`inline-flex w-full items-center justify-center gap-2 rounded-xl border py-2 text-xs font-bold transition-colors ${selected ? "border-cyan-400 bg-cyan-400/15 text-cyan-300" : "border-slate-800 bg-slate-950 text-slate-300 hover:border-cyan-400 hover:text-cyan-300"} disabled:cursor-not-allowed disabled:opacity-50`}
+          title={selectedIds.length >= 3 && !selected ? "Compare up to three listings" : undefined}
+        >
+          <GitCompare className="h-3.5 w-3.5" />
+          {selected ? "Selected for comparison" : "Compare listing"}
+        </button>
 
         {phone && (
           <a

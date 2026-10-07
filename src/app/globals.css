@@ -188,6 +188,97 @@ html[data-theme="light"] option {
   color: #102033;
 }
 
+.category-carousel {
+  position: relative;
+  isolation: isolate;
+}
+
+.category-carousel-track {
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+  overscroll-behavior-inline: contain;
+  mask-image: linear-gradient(to right, transparent 0, black 2.5rem, black calc(100% - 2.5rem), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0, black 2.5rem, black calc(100% - 2.5rem), transparent 100%);
+}
+
+.category-carousel-track::-webkit-scrollbar {
+  display: none;
+}
+
+.category-carousel-chip {
+  border-color: #334155;
+  background: rgb(15 23 42 / 0.88);
+  color: #cbd5e1;
+}
+
+.category-carousel-chip:hover {
+  border-color: #22d3ee;
+  color: #67e8f9;
+}
+
+.category-carousel-chip-active {
+  border-color: #22d3ee;
+  background: #22d3ee;
+  color: #082f49;
+  box-shadow: 0 0 18px rgb(34 211 238 / 0.24);
+}
+
+.category-carousel-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: flex;
+  height: 2rem;
+  width: 2rem;
+  transform: translateY(-50%);
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #334155;
+  border-radius: 9999px;
+  background: rgb(7 11 21 / 0.94);
+  color: #cbd5e1;
+  box-shadow: 0 4px 14px rgb(2 6 23 / 0.28);
+  transition: border-color 150ms ease, color 150ms ease, background-color 150ms ease, transform 150ms ease;
+}
+
+.category-carousel-arrow:hover {
+  transform: translateY(-50%) scale(1.04);
+  border-color: #22d3ee;
+  background: #0e7490;
+  color: white;
+}
+
+html[data-theme="light"] .category-carousel-chip {
+  border-color: #b8ccd9;
+  background: #e7f0f5;
+  color: #29445b;
+}
+
+html[data-theme="light"] .category-carousel-chip:hover {
+  border-color: #0891b2;
+  background: #d8f3f8;
+  color: #075985;
+}
+
+html[data-theme="light"] .category-carousel-chip-active {
+  border-color: #0891b2;
+  background: #06b6d4;
+  color: #083344;
+}
+
+html[data-theme="light"] .category-carousel-arrow {
+  border-color: #b8ccd9;
+  background: rgb(255 255 255 / 0.96);
+  color: #29445b;
+  box-shadow: 0 4px 14px rgb(30 64 85 / 0.16);
+}
+
+html[data-theme="light"] .category-carousel-arrow:hover {
+  border-color: #0891b2;
+  background: #d8f3f8;
+  color: #075985;
+}
+
 .ai-assistant {
   background: rgb(7 11 21 / 0.98);
   border: 1px solid rgb(34 211 238 / 0.35);
@@ -280,6 +371,16 @@ html[data-theme="light"] .ai-assistant-muted {
   color: #526477;
 }
 
+.ai-assistant-result-link {
+  color: #67e8f9;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+html[data-theme="light"] .ai-assistant-result-link {
+  color: #0369a1;
+}
+
 .compare-value {
   color: #cbd5e1;
 }
@@ -351,21 +452,158 @@ html[data-theme="light"] .compare-summary-present {
   color: #047857 !important;
 }
 
+.compare-table th,
+.compare-table td {
+  overflow-wrap: anywhere;
+  vertical-align: top;
+  border-bottom: 1px solid rgb(148 163 184 / 0.42);
+}
+
+.compare-table tbody tr:last-child th,
+.compare-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.compare-tray {
+  color: #f8fafc;
+}
+
+.compare-tray-clear:hover {
+  color: #ffffff;
+}
+
+html[data-theme="light"] .compare-tray {
+  background: rgb(255 255 255 / 0.98) !important;
+  border-color: #9bc4d3 !important;
+  color: #102033 !important;
+  box-shadow: 0 18px 45px rgb(30 64 85 / 0.2);
+}
+
+html[data-theme="light"] .compare-tray-clear {
+  color: #526477 !important;
+}
+
+html[data-theme="light"] .compare-tray-clear:hover {
+  background: #eef4f8;
+  color: #102033 !important;
+}
+
+html[data-theme="light"] .reviews-card,
+html[data-theme="light"] .reviews-section article {
+  background-color: #ffffff !important;
+  border-color: #c7d6e0 !important;
+}
+
+html[data-theme="light"] .reviews-section h2,
+html[data-theme="light"] .reviews-section h3 {
+  color: #102033 !important;
+}
+
+html[data-theme="light"] .reviews-section article p {
+  color: #29445b !important;
+}
+
+html[data-theme="light"] .reviews-input {
+  background-color: #f4f8fb !important;
+  border-color: #b8ccd9 !important;
+  color: #102033 !important;
+}
+
+html[data-theme="light"] .compare-table th,
+html[data-theme="light"] .compare-table td {
+  border-bottom-color: #9fb8c8;
+}
+
+@media (max-width: 640px) {
+  .compare-page {
+    padding: 1rem 0.65rem 6rem !important;
+  }
+
+  .compare-table-wrap {
+    border-radius: 1rem;
+  }
+
+  .compare-table {
+    font-size: 0.65rem;
+  }
+
+  .compare-table th,
+  .compare-table td {
+    padding: 0.55rem 0.35rem !important;
+  }
+
+  .compare-table th:first-child {
+    width: 22%;
+  }
+
+  .compare-table th:not(:first-child),
+  .compare-table td:not(:first-child) {
+    width: 26%;
+  }
+
+  .compare-table .compare-value,
+  .compare-table .compare-value span,
+  .compare-table .compare-feature-label {
+    line-height: 1.25;
+  }
+
+  .compare-table svg {
+    height: 0.7rem;
+    width: 0.7rem;
+  }
+
+  .compare-tray {
+    gap: 0.5rem;
+    padding: 0.55rem;
+  }
+
+  .compare-tray .inline-flex {
+    padding: 0.5rem 0.65rem;
+  }
+}
+
 .ai-assistant-resize-handle {
   position: absolute;
-  right: 0.35rem;
-  bottom: 0.35rem;
-  width: 1.1rem;
-  height: 1.1rem;
-  cursor: nwse-resize;
-  border-bottom: 2px solid #22d3ee;
-  border-right: 2px solid #22d3ee;
-  border-radius: 0 0 0.35rem 0;
+  z-index: 2;
+  display: block;
+  border: 0;
+  background: transparent;
   touch-action: none;
 }
 
+.ai-assistant-resize-n,
+.ai-assistant-resize-s {
+  left: 0.75rem;
+  width: calc(100% - 1.5rem);
+  height: 0.6rem;
+  cursor: ns-resize;
+}
+
+.ai-assistant-resize-n { top: -0.3rem; }
+.ai-assistant-resize-s { bottom: -0.3rem; }
+.ai-assistant-resize-e,
+.ai-assistant-resize-w {
+  top: 0.75rem;
+  width: 0.6rem;
+  height: calc(100% - 1.5rem);
+  cursor: ew-resize;
+}
+.ai-assistant-resize-e { right: -0.3rem; }
+.ai-assistant-resize-w { left: -0.3rem; }
+.ai-assistant-resize-ne,
+.ai-assistant-resize-se,
+.ai-assistant-resize-sw,
+.ai-assistant-resize-nw {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+.ai-assistant-resize-ne { top: -0.2rem; right: -0.2rem; cursor: nesw-resize; }
+.ai-assistant-resize-se { right: -0.2rem; bottom: -0.2rem; cursor: nwse-resize; }
+.ai-assistant-resize-sw { left: -0.2rem; bottom: -0.2rem; cursor: nesw-resize; }
+.ai-assistant-resize-nw { left: -0.2rem; top: -0.2rem; cursor: nwse-resize; }
+
 .ai-assistant-resize-handle:hover {
-  border-color: #67e8f9;
+  background: rgb(34 211 238 / 0.15);
 }
 
 @media (max-width: 767px) {
