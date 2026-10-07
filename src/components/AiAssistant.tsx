@@ -13,9 +13,11 @@ export default function AiAssistant() {
   const [messages, setMessages] = useState<Message[]>([{ role: "assistant", text: "Hi, I’m your AI assistant. How can I help you with the Adam Blueprint website today?" }]);
   const [loading, setLoading] = useState(false);
   const [size, setSize] = useState({ width: 390, height: 620 });
+  const [panelPosition, setPanelPosition] = useState<{ left: number; top: number } | null>(null);
   const [launcherPosition, setLauncherPosition] = useState<{ left: number; top: number } | null>(null);
   const launcherDrag = useRef<{ pointerId: number; startX: number; startY: number; left: number; top: number; moved: boolean } | null>(null);
   const launcherWasDragged = useRef(false);
+  const panelDrag = useRef<{ pointerId: number; startX: number; startY: number; left: number; top: number } | null>(null);
 
   useEffect(() => {
     const stored = window.localStorage.getItem("adam-blueprint-assistant-position");
@@ -89,16 +91,49 @@ export default function AiAssistant() {
     setOpen(true);
   }
 
-  function resizeAssistant(event: PointerEvent<HTMLButtonElement>) {
+  function startPanelDrag(event: PointerEvent<HTMLElement>) {
+    if (fullscreen || (event.target as HTMLElement).closest("button")) return;
+    const rect = event.currentTarget.parentElement?.getBoundingClientRect();
+    if (!rect) return;
+    panelDrag.current = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, left: rect.left, top: rect.top };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function movePanel(event: PointerEvent<HTMLElement>) {
+    const drag = panelDrag.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    setPanelPosition({
+      left: Math.max(8, Math.min(window.innerWidth - 308, drag.left + event.clientX - drag.startX)),
+      top: Math.max(8, Math.min(window.innerHeight - 368, drag.top + event.clientY - drag.startY)),
+    });
+  }
+
+  function endPanelDrag(event: PointerEvent<HTMLElement>) {
+    if (panelDrag.current?.pointerId === event.pointerId) panelDrag.current = null;
+  }
+
+  function resizeAssistant(event: PointerEvent<HTMLButtonElement>, direction: string) {
     event.preventDefault();
+    if (fullscreen) return;
+    const rect = event.currentTarget.parentElement?.getBoundingClientRect();
+    if (!rect) return;
     const startX = event.clientX;
     const startY = event.clientY;
-    const startWidth = size.width;
-    const startHeight = size.height;
+    const startWidth = rect.width;
+    const startHeight = rect.height;
+    const startLeft = rect.left;
+    const startTop = rect.top;
     const onMove = (moveEvent: globalThis.PointerEvent) => {
-      setSize({
-        width: Math.min(720, Math.max(300, startWidth + moveEvent.clientX - startX)),
-        height: Math.min(820, Math.max(360, startHeight + moveEvent.clientY - startY)),
+      const dx = moveEvent.clientX - startX;
+      const dy = moveEvent.clientY - startY;
+      const fromWest = direction.includes("w");
+      const fromNorth = direction.includes("n");
+      const width = Math.min(720, Math.max(300, startWidth + (fromWest ? -dx : direction.includes("e") ? dx : 0)));
+      const height = Math.min(820, Math.max(360, startHeight + (fromNorth ? -dy : direction.includes("s") ? dy : 0)));
+      setSize({ width, height });
+      setPanelPosition({
+        left: Math.max(8, Math.min(window.innerWidth - width - 8, fromWest ? startLeft + (startWidth - width) : startLeft)),
+        top: Math.max(8, Math.min(window.innerHeight - height - 8, fromNorth ? startTop + (startHeight - height) : startTop)),
       });
     };
     const onUp = () => {
@@ -143,8 +178,8 @@ export default function AiAssistant() {
       >
         <Bot className="h-6 w-6" />
       </button>}
-      {open && <section style={fullscreen ? undefined : { width: `min(${size.width}px, calc(100vw - 2rem))`, height: `min(${size.height}px, calc(100vh - 2rem))` }} className={`ai-assistant fixed z-50 flex flex-col shadow-2xl backdrop-blur-xl ${fullscreen ? "inset-3 rounded-2xl" : "bottom-5 right-5 rounded-2xl"}`} aria-label="Adam Blueprint assistant">
-        <header className="ai-assistant-header flex items-center justify-between p-4">
+      {open && <section style={fullscreen ? undefined : { width: `min(${size.width}px, calc(100vw - 2rem))`, height: `min(${size.height}px, calc(100vh - 2rem))`, ...(panelPosition ? { left: panelPosition.left, top: panelPosition.top } : {}) }} className={`ai-assistant fixed z-50 flex flex-col shadow-2xl backdrop-blur-xl ${fullscreen ? "inset-3 rounded-2xl" : panelPosition ? "rounded-2xl" : "bottom-5 right-5 rounded-2xl"}`} aria-label="Adam Blueprint assistant">
+        <header onPointerDown={startPanelDrag} onPointerMove={movePanel} onPointerUp={endPanelDrag} onPointerCancel={endPanelDrag} className="ai-assistant-header flex cursor-move items-center justify-between p-4">
           <div className="flex items-center gap-2"><Bot className="h-5 w-5 text-cyan-400" /><span className="font-bold">Adam Blueprint assistant</span></div>
           <div className="flex items-center gap-1">
             <button type="button" onClick={() => setFullscreen((value) => !value)} aria-label={fullscreen ? "Exit fullscreen" : "Open fullscreen"} className="ai-assistant-icon-button">{fullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}</button>
@@ -164,7 +199,16 @@ export default function AiAssistant() {
           <input value={message} onChange={(event) => setMessage(event.target.value)} maxLength={1200} placeholder="Ask about this website..." className="ai-assistant-input min-w-0 flex-1 rounded-xl px-3 py-2 text-sm outline-none" />
           <button type="submit" disabled={loading || !message.trim()} aria-label="Send message" className="rounded-xl bg-cyan-400 px-3 text-slate-950 disabled:opacity-50"><Send className="h-4 w-4" /></button>
         </form>
-        {!fullscreen && <button type="button" aria-label="Resize assistant" title="Drag to resize" onPointerDown={resizeAssistant} className="ai-assistant-resize-handle" />}
+        {!fullscreen && <>
+          <button type="button" aria-label="Resize assistant from the top" title="Drag to resize" onPointerDown={(event) => resizeAssistant(event, "n")} className="ai-assistant-resize-handle ai-assistant-resize-n" />
+          <button type="button" aria-label="Resize assistant from the right" title="Drag to resize" onPointerDown={(event) => resizeAssistant(event, "e")} className="ai-assistant-resize-handle ai-assistant-resize-e" />
+          <button type="button" aria-label="Resize assistant from the bottom" title="Drag to resize" onPointerDown={(event) => resizeAssistant(event, "s")} className="ai-assistant-resize-handle ai-assistant-resize-s" />
+          <button type="button" aria-label="Resize assistant from the left" title="Drag to resize" onPointerDown={(event) => resizeAssistant(event, "w")} className="ai-assistant-resize-handle ai-assistant-resize-w" />
+          <button type="button" aria-label="Resize assistant from the top right corner" title="Drag to resize" onPointerDown={(event) => resizeAssistant(event, "ne")} className="ai-assistant-resize-handle ai-assistant-resize-ne" />
+          <button type="button" aria-label="Resize assistant from the bottom right corner" title="Drag to resize" onPointerDown={(event) => resizeAssistant(event, "se")} className="ai-assistant-resize-handle ai-assistant-resize-se" />
+          <button type="button" aria-label="Resize assistant from the bottom left corner" title="Drag to resize" onPointerDown={(event) => resizeAssistant(event, "sw")} className="ai-assistant-resize-handle ai-assistant-resize-sw" />
+          <button type="button" aria-label="Resize assistant from the top left corner" title="Drag to resize" onPointerDown={(event) => resizeAssistant(event, "nw")} className="ai-assistant-resize-handle ai-assistant-resize-nw" />
+        </>}
       </section>}
     </>
   );
