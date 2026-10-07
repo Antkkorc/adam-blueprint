@@ -4,7 +4,7 @@ import { FormEvent, PointerEvent, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Bot, Maximize2, Minimize2, Send, X } from "lucide-react";
 
-interface Message { role: "user" | "assistant"; text: string }
+interface Message { role: "user" | "assistant"; text: string; links?: Array<{ label: string; href: string }>; searchLink?: string }
 
 export default function AiAssistant() {
   const [open, setOpen] = useState(false);
@@ -118,8 +118,8 @@ export default function AiAssistant() {
     setLoading(true);
     try {
       const response = await fetch("/api/ai/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: text, history: messages }) });
-      const result = await response.json() as { text?: string; error?: string };
-      setMessages((current) => [...current, { role: "assistant", text: result.text || result.error || "I could not respond right now." }]);
+      const result = await response.json() as { text?: string; error?: string; links?: Array<{ label: string; href: string }>; searchLink?: string };
+      setMessages((current) => [...current, { role: "assistant", text: result.text || result.error || "I could not respond right now.", links: result.links, searchLink: result.searchLink }]);
     } catch {
       setMessages((current) => [...current, { role: "assistant", text: "I could not connect right now. Please try again." }]);
     } finally {
@@ -152,7 +152,11 @@ export default function AiAssistant() {
           </div>
         </header>
         <div className="flex-1 space-y-3 overflow-y-auto p-4">
-          {messages.map((item, index) => <div key={`${item.role}-${index}`} className={`ai-assistant-message max-w-[90%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${item.role === "user" ? "ai-assistant-user ml-auto" : "ai-assistant-bot"}`}>{item.text}</div>)}
+          {messages.map((item, index) => <div key={`${item.role}-${index}`} className={`ai-assistant-message max-w-[90%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${item.role === "user" ? "ai-assistant-user ml-auto" : "ai-assistant-bot"}`}>
+            <div>{item.text}</div>
+            {item.searchLink && <Link href={item.searchLink} className="ai-assistant-result-link mt-2 inline-flex">View all matching properties</Link>}
+            {item.links && item.links.length > 0 && <div className="mt-2 space-y-1">{item.links.map((link) => <Link key={link.href} href={link.href} className="ai-assistant-result-link block">{link.label}</Link>)}</div>}
+          </div>)}
           {loading && <div className="ai-assistant-muted text-xs">Thinking...</div>}
         </div>
         <div className="px-4 pb-2"><Link href="/contact" className="text-xs font-semibold text-cyan-500 hover:underline">Need a person? Talk to an agent</Link></div>

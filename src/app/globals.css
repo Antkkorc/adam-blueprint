@@ -280,6 +280,16 @@ html[data-theme="light"] .ai-assistant-muted {
   color: #526477;
 }
 
+.ai-assistant-result-link {
+  color: #67e8f9;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+html[data-theme="light"] .ai-assistant-result-link {
+  color: #0369a1;
+}
+
 .compare-value {
   color: #cbd5e1;
 }
