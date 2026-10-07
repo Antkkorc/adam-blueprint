@@ -488,6 +488,27 @@ html[data-theme="light"] .compare-tray-clear:hover {
   color: #102033 !important;
 }
 
+html[data-theme="light"] .reviews-card,
+html[data-theme="light"] .reviews-section article {
+  background-color: #ffffff !important;
+  border-color: #c7d6e0 !important;
+}
+
+html[data-theme="light"] .reviews-section h2,
+html[data-theme="light"] .reviews-section h3 {
+  color: #102033 !important;
+}
+
+html[data-theme="light"] .reviews-section article p {
+  color: #29445b !important;
+}
+
+html[data-theme="light"] .reviews-input {
+  background-color: #f4f8fb !important;
+  border-color: #b8ccd9 !important;
+  color: #102033 !important;
+}
+
 html[data-theme="light"] .compare-table th,
 html[data-theme="light"] .compare-table td {
   border-bottom-color: #d7e2eb;

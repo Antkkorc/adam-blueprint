@@ -38,6 +38,11 @@ export default async function AdminPage() {
             <h2 className="font-bold text-lg">Manage Listings</h2>
             <p className="text-slate-400 text-xs mt-2">Update availability or remove official properties and published rentals.</p>
           </Link>
+          <Link href="/admin/reviews" className="bg-slate-900 border border-slate-800 hover:border-cyan-500/50 rounded-2xl p-6 transition-all group">
+            <ClipboardCheck className="w-8 h-8 text-cyan-400 mb-3 group-hover:scale-110 transition-transform" />
+            <h2 className="font-bold text-lg">Moderate Reviews</h2>
+            <p className="text-slate-400 text-xs mt-2">Approve or reject public user reviews before publishing.</p>
+          </Link>
           <Link href="/admin/add-property" className="bg-slate-900 border border-slate-800 hover:border-cyan-500/50 rounded-2xl p-6 transition-all group">
             <PlusCircle className="w-8 h-8 text-cyan-400 mb-3 group-hover:scale-110 transition-transform" />
             <h2 className="font-bold text-lg">Add Official Property</h2>

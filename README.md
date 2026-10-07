@@ -111,3 +111,6 @@ The assistant:
 - Returns a clear error if `GEMINI_API_KEY` is not configured
 
 The server-only `/api/ai/chat` route ensures the API key never appears in client bundles or logs.
+
+**Reviews**
+Reviews accept 1–5 stars and written feedback from signed-in users. New reviews remain pending until an administrator approves them at `/admin/reviews`; only approved reviews are shown publicly. Apply `supabase/migrations/20261007220000_add_reviews.sql` to each Supabase environment before enabling review submissions.

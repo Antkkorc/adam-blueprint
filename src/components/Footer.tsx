@@ -24,6 +24,7 @@ export default function Footer() {
               <li><Link href="/rent" className="hover:text-cyan-400 transition-colors">Rent Property</Link></li>
               <li><Link href="/sell" className="hover:text-cyan-400 transition-colors">Sell / Valuation</Link></li>
               <li><Link href="/about" className="hover:text-cyan-400 transition-colors">About</Link></li>
+              <li><Link href="/#reviews" className="hover:text-cyan-400 transition-colors">Leave a review</Link></li>
             </ul>
           </div>
           <div>

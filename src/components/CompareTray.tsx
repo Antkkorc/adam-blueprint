@@ -20,9 +20,9 @@ export default function CompareTray() {
         <button type="button" onClick={clear} aria-label="Clear comparison" className="compare-tray-clear rounded-lg p-2 text-slate-400 hover:bg-white/10 hover:text-white">
           <X className="h-4 w-4" />
         </button>
-        <Link href={`/compare?ids=${selectedIds.map((item) => `${item.kind === "property" ? "p" : "r"}:${encodeURIComponent(item.id)}`).join(",")}`} className="inline-flex items-center gap-1 rounded-xl bg-cyan-400 px-3 py-2 text-xs font-extrabold text-slate-950 hover:bg-cyan-300">
-          Compare <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
+        {selectedIds.length >= 2
+          ? <Link href={`/compare?ids=${selectedIds.map((item) => `${item.kind === "property" ? "p" : "r"}:${encodeURIComponent(item.id)}`).join(",")}`} className="inline-flex items-center gap-1 rounded-xl bg-cyan-400 px-3 py-2 text-xs font-extrabold text-slate-950 hover:bg-cyan-300">Compare <ArrowRight className="h-3.5 w-3.5" /></Link>
+          : <span className="compare-tray-hint text-xs text-slate-400">Select one more listing to compare</span>}
       </div>
     </div>
   );
