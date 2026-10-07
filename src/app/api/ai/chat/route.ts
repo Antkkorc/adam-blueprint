@@ -30,9 +30,34 @@ export async function POST(request: Request) {
     headers,
     body: requestBody,
   });
-  let response = await requestModel(process.env.GEMINI_MODEL || "gemini-2.0-flash");
-  if (response.status === 404 && process.env.GEMINI_MODEL) {
-    response = await requestModel("gemini-2.0-flash");
+
+  const preferredModels = [
+    process.env.GEMINI_MODEL,
+    "gemini-2.0-flash",
+    "gemini-1.5-flash",
+    "gemini-2.5-flash",
+  ].filter((model): model is string => Boolean(model));
+  const initialModel: string = preferredModels[0] ?? "gemini-2.0-flash";
+  let response = await requestModel(initialModel);
+
+  if (response.status === 404) {
+    const modelsResponse = await fetch("https://generativelanguage.googleapis.com/v1beta/models", {
+      headers: { "x-goog-api-key": process.env.GEMINI_API_KEY },
+    });
+    if (modelsResponse.ok) {
+      const modelsResult = await modelsResponse.json() as {
+        models?: Array<{ name?: string; supportedGenerationMethods?: string[] }>;
+      };
+      const availableModels = (modelsResult.models || [])
+        .filter((model) => model.supportedGenerationMethods?.includes("generateContent"))
+        .map((model) => model.name?.replace(/^models\//, ""))
+        .filter((model): model is string => typeof model === "string" && /flash/i.test(model));
+      const modelsToTry: string[] = [...new Set([...availableModels, ...preferredModels])];
+      for (const model of modelsToTry) {
+        response = await requestModel(model);
+        if (response.status !== 404) break;
+      }
+    }
   }
   if (!response.ok) {
     const providerError = await response.text();
