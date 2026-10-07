@@ -164,6 +164,15 @@ export default function HomePage() {
     };
   }, [categoryTrack]);
 
+  useEffect(() => {
+    const resetHomepageCategory = () => {
+      setSelectedPropertyType("All Types");
+      categoryTrack?.scrollTo({ left: 0, behavior: "smooth" });
+    };
+    window.addEventListener("adam-blueprint-home-navigation", resetHomepageCategory);
+    return () => window.removeEventListener("adam-blueprint-home-navigation", resetHomepageCategory);
+  }, [categoryTrack]);
+
   const handleSearch = () => {
     if (activeTab === "sell") {
       router.push("/sell");
