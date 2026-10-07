@@ -34,7 +34,17 @@ export async function POST(request: Request) {
       status: response.status,
       body: providerError.slice(0, 1000),
     });
-    return NextResponse.json({ error: "The assistant could not respond right now. Please try again." }, { status: 502 });
+    const error =
+      response.status === 401
+        ? "Gemini rejected the API key. Check that the rotated key is valid and enabled for this deployment."
+        : response.status === 403
+          ? "Gemini denied access. Check the Gemini API access, project restrictions, and key permissions."
+          : response.status === 404
+            ? "The configured Gemini model is unavailable for this API. The deployment needs a supported model configuration."
+            : response.status === 429
+              ? "Gemini quota or rate limits were reached. Please try again later."
+              : "The assistant provider returned an error. Please try again.";
+    return NextResponse.json({ error }, { status: 502 });
   }
   const result = await response.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
   const text = result.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("").trim();
