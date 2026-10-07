@@ -31,15 +31,18 @@ export async function POST(request: Request) {
     let query = supabase
       .from("properties")
       .select("id,title,price,price_unit,location,city,type,intent,status")
-      .eq("intent", "buy")
-      .in("status", ["active", "Available"])
+      .in("intent", ["buy", "Buy"])
+      .in("status", ["active", "Active", "available", "Available"])
       .order("price", { ascending: true })
-      .limit(6);
+      .limit(100);
     if (propertySearch.maxPrice) query = query.lte("price", propertySearch.maxPrice);
-    if (propertySearch.type) query = query.ilike("type", propertySearch.type);
     const { data, error } = await query;
     if (error) console.error("Assistant property search failed:", error.message);
-    const properties = data || [];
+    const normalize = (value: unknown) => String(value || "").trim().toLocaleLowerCase().replace(/[\s_-]+/g, "");
+    const requestedType = normalize(propertySearch.type);
+    const properties = (data || [])
+      .filter((property) => !requestedType || normalize(property.type) === requestedType)
+      .slice(0, 6);
     propertyLinks = properties.map((property) => ({
       label: `${property.title} — BWP ${Number(property.price || 0).toLocaleString("en-BW")}`,
       href: `/property/${property.id}`,

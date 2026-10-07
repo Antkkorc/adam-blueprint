@@ -292,7 +292,7 @@ export default function HomePage() {
       </section>
 
       {/* Featured Rentals */}
-      {rentals.length > 0 && (
+      {selectedPropertyType === "All Types" && rentals.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 py-12 space-y-6">
           <div className="flex items-center justify-between">
             <div>
