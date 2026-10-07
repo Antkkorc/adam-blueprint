@@ -51,7 +51,11 @@ export async function POST(request: Request) {
       const availableModels = (modelsResult.models || [])
         .filter((model) => model.supportedGenerationMethods?.includes("generateContent"))
         .map((model) => model.name?.replace(/^models\//, ""))
-        .filter((model): model is string => typeof model === "string" && /flash/i.test(model));
+        .filter((model): model is string => (
+          typeof model === "string" &&
+          /flash/i.test(model) &&
+          !/(tts|audio|image|embedding|robotics|computer-use)/i.test(model)
+        ));
       const modelsToTry: string[] = [...new Set([...availableModels, ...preferredModels])];
       for (const model of modelsToTry) {
         response = await requestModel(model);
