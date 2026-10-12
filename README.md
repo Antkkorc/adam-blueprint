@@ -34,7 +34,7 @@ GEMINI_API_KEY=...
 
 **Production features**
 - `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`: Enable the shared production API rate limiter. Add both to Vercel's Production environment so limits are shared across serverless instances. If they are unavailable, the middleware uses a per-instance fallback limiter and logs the degraded protection state.
-- `GEMINI_API_KEY`: Enables the AI assistant floating widget. It is a server-only variable that the `/api/ai/chat` route uses to communicate with Google's Gemini 2.5 Flash model. Never expose this key in browser code or client bundles. Obtain a free key from [Google AI Studio](https://aistudio.google.com). If it is not set, the assistant widget displays a "not configured" message.
+- `GEMINI_API_KEY`: Enables the AI assistant floating widget. It is a server-only variable that the `/api/ai/chat` route uses to communicate with Google's Gemini API. Never expose this key in browser code or client bundles. Add the secret to both Vercel **Preview** and **Production** environments, then redeploy each environment after changing it. Obtain a free key from [Google AI Studio](https://aistudio.google.com). If it is not set, the assistant widget displays a "not configured" message.
 
 ## Supabase requirements
 
@@ -104,8 +104,13 @@ A cyan bot icon appears in the bottom-right corner of every page. Click it to op
 The assistant:
 - Helps users understand the Botswana real-estate market
 - Offers guidance on comparing homes and finding property
+- Turns supported property requests into filtered `/buy` links that open in a new tab, so users see only matching listings
+- Provides separate links to live matching properties when available
 - Operates over up to 8 prior messages for conversational context
 - Validates input to prevent abuse (max 1200 chars per message)
 - Returns a clear error if `GEMINI_API_KEY` is not configured
 
 The server-only `/api/ai/chat` route ensures the API key never appears in client bundles or logs.
+
+**Reviews**
+Reviews accept 1–5 stars and written feedback from signed-in users. New reviews remain pending until an administrator approves them at `/admin/reviews`; only approved reviews are shown publicly. Apply `supabase/migrations/20261007220000_add_reviews.sql` to each Supabase environment before enabling review submissions.

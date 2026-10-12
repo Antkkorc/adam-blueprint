@@ -81,6 +81,10 @@ export default function Header() {
   }, [isAdmin]);
 
   const whatsappNumber = BRAND.whatsapp || BRAND.phone?.replace(/[^0-9]/g, "") || "26774551429";
+  const handleHomeNavigation = () => {
+    window.dispatchEvent(new Event("adam-blueprint-home-navigation"));
+    setIsMenuOpen(false);
+  };
 
   return (
     <>
@@ -95,7 +99,7 @@ export default function Header() {
               <MenuIcon className="w-5 h-5" />
               <span className="text-[8px] font-extrabold tracking-wider uppercase mt-0.5">Menu</span>
             </button>
-            <Link href="/" className="truncate font-extrabold text-base text-cyan-400 tracking-wider uppercase sm:text-xl">
+            <Link href="/" onClick={handleHomeNavigation} className="truncate font-extrabold text-base text-cyan-400 tracking-wider uppercase sm:text-xl">
               {BRAND.name}
             </Link>
           </div>
@@ -158,7 +162,7 @@ export default function Header() {
         aria-label="Main navigation"
       >
         <div className="flex items-center justify-between pb-6 mb-2 border-b border-slate-800/80">
-          <Link href="/" onClick={() => setIsMenuOpen(false)} className="font-extrabold text-2xl text-cyan-400 tracking-wider">
+          <Link href="/" onClick={handleHomeNavigation} className="font-extrabold text-2xl text-cyan-400 tracking-wider">
             {BRAND.name}
           </Link>
           <button onClick={() => setIsMenuOpen(false)} className="glass-icon flex items-center justify-center rounded-full p-2 text-cyan-300 hover:text-white transition-colors" aria-label="Close menu">
@@ -167,7 +171,7 @@ export default function Header() {
         </div>
 
         <nav className="grow overflow-y-auto space-y-2 py-4">
-          <Link href="/" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-4 px-3 py-2.5 rounded-xl text-slate-100 hover:text-cyan-400 hover:bg-slate-900/60 transition-all text-base font-semibold">
+          <Link href="/" onClick={handleHomeNavigation} className="flex items-center gap-4 px-3 py-2.5 rounded-xl text-slate-100 hover:text-cyan-400 hover:bg-slate-900/60 transition-all text-base font-semibold">
             <Home className="w-5 h-5 text-cyan-400 shrink-0" /> Home
           </Link>
           <Link href="/buy" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-4 px-3 py-2.5 rounded-xl text-slate-100 hover:text-cyan-400 hover:bg-slate-900/60 transition-all text-base font-semibold">

@@ -8,6 +8,7 @@ import { CompareProvider } from "@/context/CompareContext";
 import CompareTray from "@/components/CompareTray";
 import AiAssistant from "@/components/AiAssistant";
 import ScrollToTop from "@/components/ScrollToTop";
+import ReviewsSection from "@/components/ReviewsSection";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -42,6 +43,7 @@ export default function RootLayout({
               </Suspense>
               <Header />
               <div className="min-h-screen">{children}</div>
+              <ReviewsSection />
               <Footer />
               <CompareTray />
               <AiAssistant />
