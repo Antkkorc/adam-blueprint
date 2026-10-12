@@ -58,10 +58,11 @@ export default function TenantRentalForm({ adminMode = false }: { adminMode?: bo
 
   const addPhotos = (list: FileList | null) => {
     if (!list) return;
+    const files = Array.from(list);
     setPhotos((current) => [
       ...current,
-      ...Array.from(list).map((file, index) => ({
-        id: `${Date.now()}-${index}-${file.name}`,
+      ...files.map((file) => ({
+        id: `${file.name}-${file.lastModified}-${crypto.randomUUID()}`,
         file,
         preview: URL.createObjectURL(file),
         category: PHOTO_CATEGORIES[0],
@@ -367,7 +368,7 @@ export default function TenantRentalForm({ adminMode = false }: { adminMode?: bo
         <label className="glass-icon btn-pop flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-cyan-500/40 bg-slate-950 py-5 hover:border-cyan-400">
           <Upload className="h-6 w-6 text-cyan-400" />
           <span className="text-sm font-bold text-cyan-300">Click to add photos</span>
-          <input type="file" multiple accept="image/*" className="hidden" onChange={(e) => { addPhotos(e.target.files); e.target.value = ""; }} />
+          <input type="file" multiple accept="image/*" className="hidden" onChange={(e) => { addPhotos(e.target.files); e.currentTarget.value = ""; }} />
         </label>
         {photos.length > 0 && (
           <div className="grid grid-cols-2 gap-3">

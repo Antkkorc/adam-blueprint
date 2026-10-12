@@ -1,10 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { BRAND } from "@/lib/brand";
 import { Phone, Mail, MapPin, Loader2, CheckCircle2, Upload } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { MAX_IMAGE_SIZE } from "@/lib/uploads";
+
+interface PropertyPhoto {
+  id: string;
+  file: File;
+  preview: string;
+}
 
 export default function SellPage() {
   const [name, setName] = useState("");
@@ -17,24 +24,44 @@ export default function SellPage() {
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
   const [mapMessage, setMapMessage] = useState("");
-  const [photos, setPhotos] = useState<File[]>([]);
+  const [photos, setPhotos] = useState<PropertyPhoto[]>([]);
   const [plan, setPlan] = useState<File | null>(null);
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
+  const addPhotos = (list: FileList | null) => {
+    if (!list) return;
+    setPhotos((current) => [
+      ...current,
+      ...Array.from(list).map((file) => ({
+        id: `${file.name}-${file.lastModified}-${crypto.randomUUID()}`,
+        file,
+        preview: URL.createObjectURL(file),
+      })),
+    ]);
+  };
+
+  const removePhoto = (id: string) => {
+    setPhotos((current) => {
+      const photo = current.find((item) => item.id === id);
+      if (photo) URL.revokeObjectURL(photo.preview);
+      return current.filter((item) => item.id !== id);
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const allFiles = [...photos, ...(plan ? [plan] : [])];
+    const allFiles = [...photos.map((photo) => photo.file), ...(plan ? [plan] : [])];
     if (allFiles.some((file) => file.size > MAX_IMAGE_SIZE)) {
       setLoading(false);
       setError("Each uploaded file must be 10 MB or smaller.");
       return;
     }
-    if (photos.some((file) => !file.type.startsWith("image/")) || (plan && plan.type !== "application/pdf" && !plan.type.startsWith("image/"))) {
+    if (photos.some((photo) => !photo.file.type.startsWith("image/")) || (plan && plan.type !== "application/pdf" && !plan.type.startsWith("image/"))) {
       setLoading(false);
       setError("Please upload images for photos and an image or PDF for the floor plan.");
       return;
@@ -45,7 +72,8 @@ export default function SellPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user && allFiles.length) throw new Error("Please sign in before uploading property documents.");
       const folder = `${user?.id || "guest"}/${Date.now()}`;
-      for (const [index, file] of photos.entries()) {
+      for (const [index, photo] of photos.entries()) {
+        const file = photo.file;
         const path = `${folder}/${index}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
         const { error } = await supabase.storage.from("property-submissions").upload(path, file);
         if (error) throw error;
@@ -76,6 +104,7 @@ export default function SellPage() {
 
     setSubmitted(true);
     setName(""); setPhone(""); setEmail(""); setDescription("");
+    photos.forEach((photo) => URL.revokeObjectURL(photo.preview));
     setTitle(""); setLocation(""); setPrice(""); setPhotos([]); setPlan(null);
     setLatitude(""); setLongitude(""); setMapMessage("");
   };
@@ -221,9 +250,9 @@ export default function SellPage() {
               <Upload className="h-7 w-7 text-cyan-400" />
               <span className="font-bold text-cyan-300">Click to upload property photos</span>
               <span>Up to 10 images</span>
-              <input type="file" accept="image/*" multiple onChange={(e) => setPhotos(Array.from(e.target.files || []).slice(0, 10))} className="sr-only" />
+              <input type="file" accept="image/*" multiple onChange={(e) => { addPhotos(e.currentTarget.files); e.currentTarget.value = ""; }} className="sr-only" />
             </label>
-            {photos.length > 0 && <div className="flex gap-2 overflow-auto">{photos.map((file) => <img key={file.name} src={URL.createObjectURL(file)} alt={file.name} className="h-16 w-16 rounded object-cover" />)}</div>}
+            {photos.length > 0 && <div className="flex gap-2 overflow-auto">{photos.map((photo) => <div key={photo.id} className="relative shrink-0"><Image src={photo.preview} alt={photo.file.name} width={64} height={64} unoptimized className="h-16 w-16 rounded object-cover" /><button type="button" onClick={() => removePhoto(photo.id)} aria-label={`Remove ${photo.file.name}`} className="absolute -right-1 -top-1 rounded-full bg-red-500 p-1 text-white"><span aria-hidden="true">×</span></button></div>)}</div>}
             <label className="glass-icon btn-pop flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-cyan-500/40 bg-slate-950 px-4 py-5 text-center text-xs text-slate-400">
               <Upload className="h-7 w-7 text-cyan-400" />
               <span className="font-bold text-cyan-300">Click to upload house or floor plan</span>

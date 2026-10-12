@@ -85,8 +85,8 @@ export default function AdminPropertyForm() {
 
   const addPhotos = (list: FileList | null) => {
     if (!list) return;
-    const next: PhotoItem[] = Array.from(list).map((file, i) => ({
-      id: `${Date.now()}-${i}-${file.name}`,
+    const next: PhotoItem[] = Array.from(list).map((file) => ({
+      id: `${file.name}-${file.lastModified}-${crypto.randomUUID()}`,
       file,
       preview: URL.createObjectURL(file),
       label: PHOTO_CATEGORIES[0],
@@ -104,7 +104,11 @@ export default function AdminPropertyForm() {
   };
 
   const removePhoto = (id: string) => {
-    setPhotos((prev) => prev.filter((p) => p.id !== id));
+    setPhotos((prev) => {
+      const photo = prev.find((item) => item.id === id);
+      if (photo) URL.revokeObjectURL(photo.preview);
+      return prev.filter((p) => p.id !== id);
+    });
   };
 
   const findCoordinates = async () => {
@@ -268,7 +272,7 @@ export default function AdminPropertyForm() {
           <Upload className="w-6 h-6 text-cyan-400" />
           <span className="text-sm font-bold text-cyan-300">Click to add photos</span>
           <span className="text-[10px] text-slate-500 text-center px-4">Kitchen, bathroom, garage... select them all at once, then choose a category</span>
-          <input type="file" multiple accept="image/*" className="hidden" onChange={(e) => { addPhotos(e.target.files); e.target.value = ""; }} />
+          <input type="file" multiple accept="image/*" className="hidden" onChange={(e) => { addPhotos(e.target.files); e.currentTarget.value = ""; }} />
         </label>
         {photos.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
