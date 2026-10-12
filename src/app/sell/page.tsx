@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import { BRAND } from "@/lib/brand";
 import { Phone, Mail, MapPin, Loader2, CheckCircle2, Upload } from "lucide-react";
@@ -30,6 +30,7 @@ export default function SellPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   const addPhotos = (list: FileList | null) => {
     if (!list) return;
@@ -49,6 +50,14 @@ export default function SellPage() {
       if (photo) URL.revokeObjectURL(photo.preview);
       return current.filter((item) => item.id !== id);
     });
+  };
+
+  const handlePhotoSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      addPhotos(event.target.files);
+    } finally {
+      event.target.value = "";
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -246,12 +255,12 @@ export default function SellPage() {
               placeholder="Tell us about your property (location, features, desired price)..."
               className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-emerald-500"
             />
-            <label className="glass-icon btn-pop flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-cyan-500/40 bg-slate-950 px-4 py-5 text-center text-xs text-slate-400">
+            <button type="button" onClick={() => photoInputRef.current?.click()} className="glass-icon btn-pop flex w-full cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-cyan-500/40 bg-slate-950 px-4 py-5 text-center text-xs text-slate-400">
               <Upload className="h-7 w-7 text-cyan-400" />
               <span className="font-bold text-cyan-300">Click to upload property photos</span>
               <span>Up to 10 images</span>
-              <input type="file" accept="image/*" multiple onChange={(e) => { addPhotos(e.currentTarget.files); e.currentTarget.value = ""; }} className="sr-only" />
-            </label>
+            </button>
+            <input ref={photoInputRef} type="file" accept="image/*" multiple onChange={handlePhotoSelection} className="sr-only" />
             {photos.length > 0 && <div className="flex gap-2 overflow-auto">{photos.map((photo) => <div key={photo.id} className="relative shrink-0"><Image src={photo.preview} alt={photo.file.name} width={64} height={64} unoptimized className="h-16 w-16 rounded object-cover" /><button type="button" onClick={() => removePhoto(photo.id)} aria-label={`Remove ${photo.file.name}`} className="absolute -right-1 -top-1 rounded-full bg-red-500 p-1 text-white"><span aria-hidden="true">×</span></button></div>)}</div>}
             <label className="glass-icon btn-pop flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-cyan-500/40 bg-slate-950 px-4 py-5 text-center text-xs text-slate-400">
               <Upload className="h-7 w-7 text-cyan-400" />
