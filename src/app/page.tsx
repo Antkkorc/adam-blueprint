@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase/client";
 import PropertyCard from "@/components/PropertyCard";
 import TenantRentalCard, { type TenantRental } from "@/components/TenantRentalCard";
 import LocationPicker from "@/components/LocationPicker";
+import ReviewsSection from "@/components/ReviewsSection";
 import { ChevronLeft, ChevronRight, Search, ShieldCheck, Award, MessageSquare } from "lucide-react";
 import type { Property } from "@/types/property";
 import { useAuth } from "@/context/AuthContext";
@@ -369,6 +370,8 @@ export default function HomePage() {
           </p>
         </div>
       </section>
+
+      <ReviewsSection />
     </main>
   );
 }
