@@ -135,7 +135,7 @@ export default async function RentalDetailPage({ params }: PageProps) {
                   <MessageCircle className="h-5 w-5" /> Contact via WhatsApp
                 </a>
               )}
-              <a href={`tel:${rental.contact_number || BRAND.phone}`} className="flex items-center justify-center gap-2 rounded-xl border border-cyan-500/40 py-3 font-bold text-cyan-400 hover:bg-cyan-500/10">
+              <a href={`tel:${rental.contact_number || BRAND.agents[0].phone}`} className="flex items-center justify-center gap-2 rounded-xl border border-cyan-500/40 py-3 font-bold text-cyan-400 hover:bg-cyan-500/10">
                 <Phone className="h-5 w-5" /> Call about this rental
               </a>
             </div>

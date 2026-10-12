@@ -52,7 +52,7 @@ export default function PropertyCard({ property, initialSaved = false }: Props) 
   const buildingSqm = property.building_sqm;
   const landSqm = property.land_sqm ?? property.plot_size;
 
-  const whatsappPhone = (agentPhone || BRAND.phone).replace(/\D/g, "");
+  const whatsappPhone = (agentPhone || BRAND.agents[0].phone).replace(/\D/g, "");
   const whatsappMessage = encodeURIComponent(
     `Hello ${BRAND.name}, I am interested in "${property.title}" in ${
       property.location || property.city || "Botswana"

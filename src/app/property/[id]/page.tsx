@@ -78,7 +78,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
   const price = new Intl.NumberFormat("en-BW", { style: "currency", currency: "BWP", maximumFractionDigits: 0 }).format(Number(property.price || 0));
 
   const agentName = property.agent || BRAND.owner;
-  const agentPhone = property.agent_phone || BRAND.phone;
+  const agentPhone = property.agent_phone || BRAND.agents[0].phone;
   const whatsappPhone = agentPhone.replace(/\D/g, "");
   const whatsappMessage = encodeURIComponent(`Hello ${BRAND.name}, I am interested in "${property.title}" in ${property.location || property.city || "Botswana"} (Plot ${property.plot_number || "N/A"}).`);
 

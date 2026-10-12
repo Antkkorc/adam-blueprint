@@ -65,7 +65,7 @@ export default function AdminPropertyForm() {
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
   const [agentName, setAgentName] = useState(BRAND.owner);
-  const [agentPhone, setAgentPhone] = useState(BRAND.phone);
+  const [agentPhone, setAgentPhone] = useState(BRAND.agents[0].phone);
   const [promotionTier, setPromotionTier] = useState<"standard" | "featured" | "premium">("standard");
   const [verified, setVerified] = useState(true); // FIXED TYPO HERE
   const [titleDeed, setTitleDeed] = useState(false);
@@ -229,7 +229,7 @@ export default function AdminPropertyForm() {
         amenities, images: imageUrls, image_labels: imageLabels, sketch_plan: sketchUrls,
         status: "Available",
         agent: agentName || BRAND.owner,
-        agent_phone: agentPhone || BRAND.phone,
+        agent_phone: agentPhone || BRAND.agents[0].phone,
       }]);
       if (insertError) throw insertError;
       alert("Property added successfully!");

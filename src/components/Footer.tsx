@@ -30,7 +30,7 @@ export default function Footer() {
           <div>
             <h4 className="font-bold text-white uppercase text-[11px] tracking-wider mb-3">Contact</h4>
             <ul className="space-y-2">
-              <li className="flex items-center gap-1.5"><Phone className="w-3 h-3 text-cyan-400" />{BRAND.phone}</li>
+              {BRAND.agents.map((agent) => <li key={agent.whatsapp} className="flex items-center gap-1.5"><Phone className="w-3 h-3 text-cyan-400" />{agent.label}: {agent.phone}</li>)}
               <li className="flex items-center gap-1.5"><Mail className="w-3 h-3 text-cyan-400" />{BRAND.email}</li>
             </ul>
           </div>

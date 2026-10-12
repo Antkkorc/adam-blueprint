@@ -109,7 +109,7 @@ export default function SellPage() {
         <div className="space-y-4 mb-8">
           <div className="flex items-center gap-3 text-slate-300 text-sm">
             <Phone className="w-4 h-4 text-emerald-500" />
-            {BRAND.phone}
+            {BRAND.agents.map((agent) => <span key={agent.whatsapp} className="block">{agent.label}: {agent.phone}</span>)}
           </div>
           <div className="flex items-center gap-3 text-slate-300 text-sm">
             <Mail className="w-4 h-4 text-emerald-500" />

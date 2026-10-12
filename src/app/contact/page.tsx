@@ -59,7 +59,7 @@ export default function ContactPage() {
               <Phone className="w-5 h-5 text-emerald-500 mt-0.5" />
               <div>
                 <p className="text-white text-sm font-medium">Phone</p>
-                <p className="text-slate-400 text-sm">{BRAND.phone}</p>
+                {BRAND.agents.map((agent) => <p key={agent.whatsapp} className="text-slate-400 text-sm">{agent.label}: {agent.phone}</p>)}
               </div>
             </div>
             <div className="flex items-start gap-3">

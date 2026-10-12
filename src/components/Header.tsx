@@ -80,7 +80,6 @@ export default function Header() {
     };
   }, [isAdmin]);
 
-  const whatsappNumber = BRAND.whatsapp || BRAND.phone?.replace(/[^0-9]/g, "") || "26774551429";
   const handleHomeNavigation = () => {
     window.dispatchEvent(new Event("adam-blueprint-home-navigation"));
     setIsMenuOpen(false);
@@ -127,15 +126,19 @@ export default function Header() {
             })}
           </nav>
           <div className="flex shrink-0 items-center gap-1 sm:gap-3">
-            <a
-              href={`https://wa.me/${whatsappNumber}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="glass-icon flex items-center gap-2 rounded-full px-2 py-1.5 text-emerald-300 hover:text-emerald-100 transition-all text-xs font-semibold sm:px-3"
-            >
-              <PhoneCall className="w-4 h-4" />
-              <span className="hidden sm:inline">WhatsApp</span>
-            </a>
+            {BRAND.agents.map((agent) => (
+              <a
+                key={agent.whatsapp}
+                href={`https://wa.me/${agent.whatsapp}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Chat with ${agent.label} on WhatsApp`}
+                className="glass-icon flex items-center gap-2 rounded-full px-2 py-1.5 text-emerald-300 hover:text-emerald-100 transition-all text-xs font-semibold sm:px-3"
+              >
+                <PhoneCall className="w-4 h-4" />
+                <span className="hidden sm:inline">{agent.label}</span>
+              </a>
+            ))}
             <Link
               href={user ? "/saved" : "/login"}
               className="glass-icon flex items-center justify-center rounded-full p-2 text-cyan-300 hover:text-white transition-all"
