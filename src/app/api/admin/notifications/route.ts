@@ -12,13 +12,15 @@ export async function GET() {
       { count: propertySubmissions, error: propertyError },
       { count: rentalSubmissions, error: rentalError },
       { count: unreadEnquiries, error: enquiryError },
+      { count: pendingReviews, error: reviewError },
     ] = await Promise.all([
       db.from("property_submissions").select("id", { count: "exact", head: true }).eq("status", "pending"),
       db.from("rental_submissions").select("id", { count: "exact", head: true }).eq("status", "pending"),
       db.from("enquiries").select("id", { count: "exact", head: true }).is("read_at", null),
+      db.from("reviews").select("id", { count: "exact", head: true }).eq("status", "pending"),
     ]);
 
-    const error = propertyError || rentalError || enquiryError;
+    const error = propertyError || rentalError || enquiryError || reviewError;
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
@@ -27,9 +29,10 @@ export async function GET() {
       propertySubmissions: propertySubmissions || 0,
       rentalSubmissions: rentalSubmissions || 0,
       unreadEnquiries: unreadEnquiries || 0,
+      pendingReviews: pendingReviews || 0,
     };
 
-    return NextResponse.json({ ...counts, total: counts.propertySubmissions + counts.rentalSubmissions + counts.unreadEnquiries });
+    return NextResponse.json({ ...counts, total: counts.propertySubmissions + counts.rentalSubmissions + counts.unreadEnquiries + counts.pendingReviews });
   } catch {
     return NextResponse.json({ error: "Unable to load admin notifications." }, { status: 401 });
   }

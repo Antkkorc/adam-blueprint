@@ -27,6 +27,7 @@ export default function Header() {
     propertySubmissions: 0,
     rentalSubmissions: 0,
     unreadEnquiries: 0,
+    pendingReviews: 0,
     total: 0,
   });
 

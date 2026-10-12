@@ -12,10 +12,12 @@ export default async function AdminPage() {
     { count: propertySubmissions },
     { count: rentalSubmissions },
     { count: unreadEnquiries },
+    { count: pendingReviews },
   ] = await Promise.all([
     db.from("property_submissions").select("id", { count: "exact", head: true }).eq("status", "pending"),
     db.from("rental_submissions").select("id", { count: "exact", head: true }).eq("status", "pending"),
     db.from("enquiries").select("id", { count: "exact", head: true }).is("read_at", null),
+    db.from("reviews").select("id", { count: "exact", head: true }).eq("status", "pending"),
   ]);
 
   return (
@@ -38,7 +40,8 @@ export default async function AdminPage() {
             <h2 className="font-bold text-lg">Manage Listings</h2>
             <p className="text-slate-400 text-xs mt-2">Update availability or remove official properties and published rentals.</p>
           </Link>
-          <Link href="/admin/reviews" className="bg-slate-900 border border-slate-800 hover:border-cyan-500/50 rounded-2xl p-6 transition-all group">
+          <Link href="/admin/reviews" className="relative bg-slate-900 border border-slate-800 hover:border-cyan-500/50 rounded-2xl p-6 transition-all group">
+            <DashboardBadge count={pendingReviews || 0} />
             <ClipboardCheck className="w-8 h-8 text-cyan-400 mb-3 group-hover:scale-110 transition-transform" />
             <h2 className="font-bold text-lg">Moderate Reviews</h2>
             <p className="text-slate-400 text-xs mt-2">Approve or reject public user reviews before publishing.</p>
