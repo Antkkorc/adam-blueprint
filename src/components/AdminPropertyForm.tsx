@@ -372,7 +372,7 @@ export default function AdminPropertyForm() {
       </div>
       <label className="glass-icon btn-pop flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-cyan-500/40 bg-slate-950 px-4 py-5 text-center">
         <Upload className="h-6 w-6 text-cyan-400" />
-        <span className="text-sm font-bold text-cyan-300">Click to add house or floor plans</span>
+        <span className="text-sm font-bold text-cyan-300">Click to add house plans</span>
         <span className="text-xs text-slate-500">Optional image files</span>
         <input type="file" multiple accept="image/*" onChange={(e) => setSketchFiles(e.target.files)} className="sr-only" />
       </label>

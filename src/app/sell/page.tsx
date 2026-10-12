@@ -53,11 +53,9 @@ export default function SellPage() {
   };
 
   const handlePhotoSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
-    try {
-      addPhotos(event.target.files);
-    } finally {
-      event.target.value = "";
-    }
+    const files = event.currentTarget.files;
+    addPhotos(files);
+    event.currentTarget.value = "";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -72,7 +70,7 @@ export default function SellPage() {
     }
     if (photos.some((photo) => !photo.file.type.startsWith("image/")) || (plan && plan.type !== "application/pdf" && !plan.type.startsWith("image/"))) {
       setLoading(false);
-      setError("Please upload images for photos and an image or PDF for the floor plan.");
+      setError("Please upload images for photos and an image or PDF for the house plan.");
       return;
     }
 
@@ -255,7 +253,7 @@ export default function SellPage() {
               placeholder="Tell us about your property (location, features, desired price)..."
               className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-emerald-500"
             />
-            <button type="button" onClick={() => photoInputRef.current?.click()} className="glass-icon btn-pop flex w-full cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-cyan-500/40 bg-slate-950 px-4 py-5 text-center text-xs text-slate-400">
+            <button type="button" onClick={() => { if (photoInputRef.current) { photoInputRef.current.value = ""; photoInputRef.current.click(); } }} className="glass-icon btn-pop flex w-full cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-cyan-500/40 bg-slate-950 px-4 py-5 text-center text-xs text-slate-400">
               <Upload className="h-7 w-7 text-cyan-400" />
               <span className="font-bold text-cyan-300">Click to upload property photos</span>
               <span>Up to 10 images</span>
@@ -264,7 +262,7 @@ export default function SellPage() {
             {photos.length > 0 && <div className="flex gap-2 overflow-auto">{photos.map((photo) => <div key={photo.id} className="relative shrink-0"><Image src={photo.preview} alt={photo.file.name} width={64} height={64} unoptimized className="h-16 w-16 rounded object-cover" /><button type="button" onClick={() => removePhoto(photo.id)} aria-label={`Remove ${photo.file.name}`} className="absolute -right-1 -top-1 rounded-full bg-red-500 p-1 text-white"><span aria-hidden="true">×</span></button></div>)}</div>}
             <label className="glass-icon btn-pop flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-cyan-500/40 bg-slate-950 px-4 py-5 text-center text-xs text-slate-400">
               <Upload className="h-7 w-7 text-cyan-400" />
-              <span className="font-bold text-cyan-300">Click to upload house or floor plan</span>
+              <span className="font-bold text-cyan-300">Click to upload a house plan</span>
               <span>Optional image or PDF</span>
               <input type="file" accept="image/*,.pdf" onChange={(e) => setPlan(e.target.files?.[0] || null)} className="sr-only" />
             </label>

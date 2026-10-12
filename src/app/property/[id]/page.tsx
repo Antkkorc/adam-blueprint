@@ -160,7 +160,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
             {property.house_plan_url && (
               <section className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
                 <h2 className="text-lg font-bold flex items-center gap-2"><DraftingCompass className="w-5 h-5 text-cyan-400" /> House plan</h2>
-                <a href={property.house_plan_url} target="_blank" rel="noreferrer" className="mt-3 inline-block text-sm text-cyan-400 hover:underline">View or download floor plan</a>
+                <a href={property.house_plan_url} target="_blank" rel="noreferrer" className="mt-3 inline-block text-sm text-cyan-400 hover:underline">View or download house plan</a>
               </section>
             )}
 
