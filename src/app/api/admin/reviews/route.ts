@@ -19,3 +19,15 @@ export async function PATCH(request: Request) {
   if (error) return NextResponse.json({ error: "Unable to update review." }, { status: 500 });
   return NextResponse.json({ ok: true, reviewer: admin.email });
 }
+
+export async function DELETE(request: Request) {
+  await requireAdmin();
+  const body = await request.json() as { id?: unknown };
+  if (!Number.isInteger(body.id)) {
+    return NextResponse.json({ error: "Invalid review id." }, { status: 400 });
+  }
+
+  const { error } = await createAdminClient().from("reviews").delete().eq("id", body.id);
+  if (error) return NextResponse.json({ error: "Unable to delete review." }, { status: 500 });
+  return NextResponse.json({ ok: true });
+}
