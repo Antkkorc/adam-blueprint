@@ -32,19 +32,27 @@ export async function PATCH(request: Request) {
 export async function DELETE(request: Request) {
   const admin = await requireAdmin();
   try {
-    const body = (await request.json()) as { listingType?: "property" | "rental"; id?: string };
-    if (typeof body.id !== "string" || body.id.length > 100 || !body.listingType || !["property", "rental"].includes(body.listingType)) {
+    const body = (await request.json()) as {
+      listingType?: string;
+      listing_type?: string;
+      id?: string | number;
+      listingId?: string | number;
+      listing_id?: string | number;
+    };
+    const listingType = (body.listingType || body.listing_type || "").trim().toLowerCase();
+    const listingId = String(body.id ?? body.listingId ?? body.listing_id ?? "").trim();
+    if (!listingId || listingId.length > 100 || !["property", "rental"].includes(listingType)) {
       return NextResponse.json({ error: "Listing type and id are required." }, { status: 400 });
     }
     const db = createAdminClient();
-    const table = body.listingType === "property" ? "properties" : "tenant_rentals";
-    const { data: listing, error: fetchError } = await db.from(table).select("*").eq("id", body.id).single();
+    const table = listingType === "property" ? "properties" : "tenant_rentals";
+    const { data: listing, error: fetchError } = await db.from(table).select("*").eq("id", listingId).single();
     if (fetchError || !listing) {
       return NextResponse.json({ error: fetchError?.message || "Listing not found." }, { status: 404 });
     }
     const { error: archiveError } = await db.from("listing_archives").insert({
-      listing_type: body.listingType,
-      listing_id: body.id,
+      listing_type: listingType,
+      listing_id: listingId,
       title: listing.title || "Untitled listing",
       location: listing.location || null,
       status: listing.status || null,
@@ -52,7 +60,7 @@ export async function DELETE(request: Request) {
       deleted_by: admin.id,
     });
     if (archiveError) return NextResponse.json({ error: archiveError.message }, { status: 400 });
-    const { error } = await db.from(table).delete().eq("id", body.id);
+    const { error } = await db.from(table).delete().eq("id", listingId);
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
     const urls = [
       ...(Array.isArray(listing.images) ? listing.images : []),
