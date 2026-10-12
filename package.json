@@ -1,6 +1,7 @@
 {
   "name": "adam-blueprint",
   "version": "0.1.0",
+  "description": "A Botswana-focused real-estate platform for property discovery, rentals, enquiries, and listing management.",
   "private": true,
   "scripts": {
     "dev": "next dev",
